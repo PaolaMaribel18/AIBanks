@@ -13,6 +13,13 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/thesportsdb/, ''),
         timeout: 5000,
       },
+      // Proxy FIFA API to avoid CORS
+      '/api/fifa': {
+        target: 'https://api.fifa.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/fifa/, '/api'),
+        timeout: 5000,
+      },
     },
   },
 })

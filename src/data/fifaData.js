@@ -153,7 +153,7 @@ export const ECUADOR_SCHEDULE = [
     venue: 'Lincoln Financial Field',
     city: 'Philadelphia',
     group: 'E',
-    fifaUrl: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre',
+    fifaUrl: 'https://www.fifa.com/es/match-centre/match/17/285023/289273/400021488',
   },
   {
     id: 'ecu-2',
@@ -164,7 +164,7 @@ export const ECUADOR_SCHEDULE = [
     venue: 'Arrowhead Stadium',
     city: 'Kansas City',
     group: 'E',
-    fifaUrl: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre',
+    fifaUrl: 'https://www.fifa.com/es/match-centre/match/17/285023/289273/400021488',
   },
   {
     id: 'ecu-3',
@@ -175,7 +175,7 @@ export const ECUADOR_SCHEDULE = [
     venue: 'MetLife Stadium',
     city: 'East Rutherford, NJ',
     group: 'E',
-    fifaUrl: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre',
+    fifaUrl: 'https://www.fifa.com/es/match-centre/match/17/285023/289273/400021488',
   },
 ];
 
@@ -257,12 +257,12 @@ export const CONMEBOL_EXTRA_TEAMS = {
 
 // ─── FIFA Links ─────────────────────────────────────────────────
 export const FIFA_LINKS = {
-  worldCup: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026',
-  matchCentre: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre',
-  scores: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures',
-  standings: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings',
-  conmebol: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualifiers/conmebol/standings',
-  ecuador: 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/teams/ecuador',
+  worldCup: 'https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026',
+  matchCentre: 'https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures?country=EC&wtw-filter=ALL',
+  scores: 'https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures',
+  standings: 'https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/standings',
+  conmebol: 'https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/qualifiers/conmebol/standings',
+  ecuador: 'https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/teams/ecuador',
 };
 
 // ─── Helper ─────────────────────────────────────────────────────

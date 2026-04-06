@@ -7,7 +7,8 @@ import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import RippleButton from '../../components/RippleButton/RippleButton';
 import FifaLive from '../../components/FifaLive/FifaLive';
-import { UPCOMING_MATCHES, USER_PROFILE } from '../../data/mockData';
+import { USER_PROFILE } from '../../data/mockData';
+import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import styles from './Home.module.css';
 
 // Staggered children animation
@@ -23,7 +24,9 @@ const staggerItem = {
 export default function Home() {
   const navigate = useNavigate();
   const [showBalance, setShowBalance] = useState(true);
-  const hotMatches = UPCOMING_MATCHES.filter((m) => m.hot).slice(0, 2);
+  
+  const { matches, loading } = useWorldCupMatches();
+  const hotMatches = matches.filter((m) => m.hot).slice(0, 2);
 
   const quickActions = [
     { icon: Target, label: 'Predecir', color: '#ffd700', bg: 'rgba(255,215,0,0.12)', path: '/predictions' },
@@ -264,9 +267,17 @@ export default function Home() {
           </motion.button>
         </div>
         <div className={styles.matchList}>
-          {hotMatches.map((match, i) => (
-            <MatchCard key={match.id} match={match} delay={0.1 * i} />
-          ))}
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
+              Cargando partidos... ⚽
+            </div>
+          ) : hotMatches.length > 0 ? (
+            hotMatches.map((match, i) => (
+              <MatchCard key={match.id} match={match} delay={0.1 * i} />
+            ))
+          ) : (
+            <div style={{ padding: '1rem', color: '#888' }}>No hay partidos destacados por ahora.</div>
+          )}
         </div>
       </section>
 

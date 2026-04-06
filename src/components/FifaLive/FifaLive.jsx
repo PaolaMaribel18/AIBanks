@@ -1,7 +1,11 @@
-import { motion } from 'framer-motion';
-import { ArrowSquareOut, SoccerBall, MapPin, Clock, Trophy } from '@phosphor-icons/react';
-import { useFifaData, useCountdown } from '../../hooks/useFifaData';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowSquareOut, SoccerBall, MapPin, Trophy, Clock } from '@phosphor-icons/react';
+import { useCountdown } from '../../hooks/useFifaData'; 
+import { useGroupStandings } from '../../hooks/useGroupStandings';
+import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import { TOURNAMENT_INFO, FIFA_LINKS } from '../../data/fifaData';
+import { getFlagByFifaCode } from '../../utils/countryFlags';
 import styles from './FifaLive.module.css';
 
 // ─── Animation variants ────────────────────────────────────────
@@ -16,6 +20,7 @@ const stagger = {
 
 // ─── Helpers ────────────────────────────────────────────────────
 function formatMatchDate(iso) {
+  if (!iso) return '';
   const d = new Date(iso);
   return d.toLocaleDateString('es-EC', {
     weekday: 'short',
@@ -24,6 +29,7 @@ function formatMatchDate(iso) {
   });
 }
 function formatMatchTime(iso) {
+  if (!iso) return '';
   const d = new Date(iso);
   return d.toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' });
 }
@@ -40,7 +46,7 @@ function Countdown() {
 
   return (
     <motion.div className={styles.countdown} variants={fadeUp}>
-      <div className={styles.countdownLabel}>⚽ FIFA World Cup 2026™</div>
+      <div className={styles.countdownLabel}>⚽ {TOURNAMENT_INFO.name}</div>
       <div className={styles.countdownTitle}>
         {isPast
           ? '¡El Mundial ha comenzado!'
@@ -51,52 +57,28 @@ function Countdown() {
       ) : (
         <div className={styles.countdownGrid}>
           <div className={styles.countdownUnit}>
-            <motion.span
-              className={styles.countdownNum}
-              key={days}
-              initial={{ y: -8, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400 }}
-            >
+            <motion.span className={styles.countdownNum} key={days} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(days).padStart(2, '0')}
             </motion.span>
             <span className={styles.countdownUnitLabel}>Días</span>
           </div>
           <span className={styles.countdownSep}>:</span>
           <div className={styles.countdownUnit}>
-            <motion.span
-              className={styles.countdownNum}
-              key={hours}
-              initial={{ y: -8, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400 }}
-            >
+            <motion.span className={styles.countdownNum} key={hours} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(hours).padStart(2, '0')}
             </motion.span>
             <span className={styles.countdownUnitLabel}>Horas</span>
           </div>
           <span className={styles.countdownSep}>:</span>
           <div className={styles.countdownUnit}>
-            <motion.span
-              className={styles.countdownNum}
-              key={minutes}
-              initial={{ y: -8, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400 }}
-            >
+            <motion.span className={styles.countdownNum} key={minutes} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(minutes).padStart(2, '0')}
             </motion.span>
             <span className={styles.countdownUnitLabel}>Min</span>
           </div>
           <span className={styles.countdownSep}>:</span>
           <div className={styles.countdownUnit}>
-            <motion.span
-              className={styles.countdownNum}
-              key={seconds}
-              initial={{ y: -8, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400 }}
-            >
+            <motion.span className={styles.countdownNum} key={seconds} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(seconds).padStart(2, '0')}
             </motion.span>
             <span className={styles.countdownUnitLabel}>Seg</span>
@@ -113,110 +95,140 @@ function Countdown() {
   );
 }
 
-// ─── Ecuador Group Card ─────────────────────────────────────────
-function EcuadorGroup({ groups, getTeam }) {
-  const group = groups.E;
-  const teams = group.teams.map((code) => getTeam(code));
-
+// ─── Ecuador Schedule ───────────────────────────────────────────
+function EcuadorSchedule({ matches }) {
+  if (!matches || matches.length === 0) return null;
+  
   return (
-    <motion.div className={styles.groupCard} variants={fadeUp}>
-      <div className={styles.groupHeader}>
-        <div className={styles.groupBadge}>
-          <SoccerBall size={14} weight="bold" color="var(--gold-primary)" />
-          <span className={styles.groupLetter}>GRUPO E</span>
-        </div>
-        <span className={styles.ecuadorTag}>🇪🇨 ECUADOR</span>
+    <motion.div variants={fadeUp} initial="hidden" animate="show">
+      <div className={styles.scheduleTitle}>
+        <Clock size={16} weight="bold" color="var(--gold-primary)" />
+        <span>Calendario Ecuador 🇪🇨</span>
       </div>
-      <motion.div className={styles.groupTeams} variants={stagger} initial="hidden" animate="show">
-        {teams.map((team) => (
-          <motion.div
-            key={team.code}
-            className={`${styles.groupTeam} ${team.code === 'ECU' ? styles.isEcuador : ''}`}
+      <motion.div className={styles.matchList} variants={stagger} initial="hidden" animate="show">
+        {matches.map((match) => (
+          <motion.a
+            key={match.id}
+            className={styles.matchItem}
+            href={match.matchLink}
+            target="_blank"
+            rel="noopener noreferrer"
             variants={fadeUp}
             whileTap={{ scale: 0.98 }}
           >
-            <span className={styles.teamFlag}>{team.flag}</span>
-            <div className={styles.teamInfo}>
-              <div className={styles.teamName}>{team.name}</div>
-              <div className={styles.teamConf}>{team.conf}</div>
+            <div className={styles.matchMeta}>
+              <span className={styles.matchDate}>
+                {formatMatchDate(match.date)} · {formatMatchTime(match.date)}
+              </span>
             </div>
-          </motion.div>
+            <div className={styles.matchTeams}>
+              <div className={styles.matchTeam}>
+                <span className={styles.matchTeamFlag}>{match.home.flag}</span>
+                <span className={styles.matchTeamName}>{match.home.name}</span>
+              </div>
+              <span className={styles.matchVs}>VS</span>
+              <div className={styles.matchTeam}>
+                <span className={styles.matchTeamFlag}>{match.away.flag}</span>
+                <span className={styles.matchTeamName}>{match.away.name}</span>
+              </div>
+            </div>
+            <div className={styles.matchVenue}>
+              <MapPin size={11} weight="bold" />
+              <span>{match.stadium}</span>
+            </div>
+          </motion.a>
         ))}
       </motion.div>
     </motion.div>
   );
 }
 
-// ─── Ecuador Schedule ───────────────────────────────────────────
-function EcuadorSchedule({ schedule, getTeam }) {
+// ─── Featured Matches ───────────────────────────────────────────
+function FeaturedMatches({ matches }) {
+  if (!matches || matches.length === 0) return null;
   return (
-    <motion.div variants={fadeUp}>
+    <motion.div variants={fadeUp} initial="hidden" animate="show">
       <div className={styles.scheduleTitle}>
-        <Clock size={16} weight="bold" color="var(--gold-primary)" />
-        <span>Calendario Ecuador 🇪🇨</span>
+        <span>🔥</span>
+        <span>Partidos Destacados</span>
       </div>
-      <motion.div className={styles.matchList} variants={stagger} initial="hidden" animate="show">
-        {schedule.map((match) => {
-          const home = getTeam(match.home);
-          const away = getTeam(match.away);
-          return (
-            <motion.a
-              key={match.id}
-              className={styles.matchItem}
-              href={match.fifaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              variants={fadeUp}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className={styles.matchMeta}>
-                <span className={styles.matchDate}>
-                  {formatMatchDate(match.date)} · {formatMatchTime(match.date)}
-                </span>
-                <span className={styles.matchday}>Jornada {match.matchday}</span>
-              </div>
-              <div className={styles.matchTeams}>
-                <div className={styles.matchTeam}>
-                  <span className={styles.matchTeamFlag}>{home.flag}</span>
-                  <span className={styles.matchTeamName}>{home.name}</span>
-                </div>
-                <span className={styles.matchVs}>VS</span>
-                <div className={styles.matchTeam}>
-                  <span className={styles.matchTeamFlag}>{away.flag}</span>
-                  <span className={styles.matchTeamName}>{away.name}</span>
-                </div>
-              </div>
-              <div className={styles.matchVenue}>
-                <MapPin size={11} weight="bold" />
-                <span>
-                  {match.venue} · {match.city}
-                </span>
-              </div>
-            </motion.a>
-          );
-        })}
-      </motion.div>
+      <div className={styles.featuredScroll}>
+        {matches.map((match, i) => (
+          <motion.a
+            key={match.id}
+            className={styles.featuredCard}
+            href={match.matchLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 * i }}
+            whileTap={{ scale: 0.96 }}
+            whileHover={{ y: -3 }}
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            <div className={styles.featuredTeams}>
+              <span className={styles.featuredFlag}>{match.home.flag}</span>
+              <span className={styles.featuredVs}>VS</span>
+              <span className={styles.featuredFlag}>{match.away.flag}</span>
+            </div>
+            <div className={styles.featuredDate}>{formatMatchDate(match.date)}</div>
+            <div className={styles.featuredVenue}>
+              📍 {match.stadium}
+            </div>
+          </motion.a>
+        ))}
+      </div>
     </motion.div>
   );
 }
 
-// ─── CONMEBOL Standings ─────────────────────────────────────────
-function ConmebolStandings({ standings, getTeam }) {
-  const top7 = standings.slice(0, 7);
+// ─── Group Standings (Replaces Conmebol) ────────────────────────
+function GroupStandings({ standingsByGroup }) {
+  const groupsToSelect = Object.keys(standingsByGroup).sort();
+  const [activeGroup, setActiveGroup] = useState('E'); // Ecuador por defecto
+  
+  if (groupsToSelect.length === 0) return null;
+  
+  // Si no está el E, mostramos el primero por fallback
+  const validActiveGroup = groupsToSelect.includes(activeGroup) ? activeGroup : groupsToSelect[0];
+  const rows = standingsByGroup[validActiveGroup];
 
   return (
-    <motion.div className={styles.standingsCard} variants={fadeUp}>
+    <motion.div className={styles.standingsCard} variants={fadeUp} initial="hidden" animate="show">
       <div className={styles.standingsHeader}>
         <div className={styles.standingsTitle}>
           <Trophy size={14} weight="bold" style={{ marginRight: 6, verticalAlign: 'middle' }} />
-          CONMEBOL Clasificatorias
+          Tabla de Grupos
         </div>
-        <span className={styles.standingsBadge}>FINAL</span>
       </div>
+      
+      {/* Group Tabs */}
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '4px' }}>
+        {groupsToSelect.map(g => (
+          <button
+            key={g}
+            onClick={() => setActiveGroup(g)}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '20px',
+              border: 'none',
+              background: validActiveGroup === g ? 'var(--gold-primary)' : 'rgba(255,255,255,0.05)',
+              color: validActiveGroup === g ? '#000' : '#fff',
+              cursor: 'pointer',
+              fontWeight: validActiveGroup === g ? 'bold' : 'normal',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Grupo {g}
+          </button>
+        ))}
+      </div>
+
       <table className={styles.standingsTable}>
         <thead>
           <tr>
-            <th>#</th>
+            <th>Pos</th>
             <th>Selección</th>
             <th>PJ</th>
             <th>PG</th>
@@ -227,109 +239,40 @@ function ConmebolStandings({ standings, getTeam }) {
           </tr>
         </thead>
         <tbody>
-          {top7.map((row) => {
-            const team = getTeam(row.code);
-            const rowClass =
-              row.status === 'qualified'
-                ? styles.rowQualified
-                : row.status === 'playoff'
-                ? styles.rowPlayoff
-                : styles.rowEliminated;
-            return (
+          <AnimatePresence mode="popLayout">
+            {rows.map((row) => (
               <motion.tr
-                key={row.code}
-                className={`${rowClass} ${row.code === 'ECU' ? styles.rowEcuador : ''}`}
+                key={row.team.code}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: row.pos * 0.04 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className={row.team.code === 'ECU' ? styles.rowEcuador : ''}
               >
-                <td>
-                  <span
-                    className={styles.statusDot}
-                    style={{
-                      background:
-                        row.status === 'qualified'
-                          ? 'var(--accent-green)'
-                          : row.status === 'playoff'
-                          ? 'var(--gold-primary)'
-                          : 'transparent',
-                    }}
-                  />
-                  {row.pos}
-                </td>
+                <td>{row.position}</td>
                 <td>
                   <div className={styles.standingsTeamCell}>
-                    <span className={styles.standingsFlag}>{team.flag}</span>
-                    <span className={styles.standingsTeamName}>{team.name}</span>
+                    <span className={styles.standingsFlag}>{getFlagByFifaCode(row.team.code)}</span>
+                    <span className={styles.standingsTeamName}>{row.team.name}</span>
                   </div>
                 </td>
-                <td>{row.pj}</td>
-                <td>{row.pg}</td>
-                <td>{row.pe}</td>
-                <td>{row.pp}</td>
-                <td>{row.dg}</td>
-                <td className={styles.standingsPts}>{row.pts}</td>
+                <td>{row.played}</td>
+                <td>{row.won}</td>
+                <td>{row.drawn}</td>
+                <td>{row.lost}</td>
+                <td>{row.goalDifference}</td>
+                <td className={styles.standingsPts}>{row.points}</td>
               </motion.tr>
-            );
-          })}
+            ))}
+          </AnimatePresence>
         </tbody>
       </table>
+      
       <div className={styles.sourceInfo}>
         <span>Fuente:</span>
-        <a
-          href={FIFA_LINKS.conmebol}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.sourceLink}
-        >
+        <a href={FIFA_LINKS.standings} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
           FIFA.com
         </a>
-        <span>· Final marzo 2026</span>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─── Featured Matches ───────────────────────────────────────────
-function FeaturedMatches({ matches, getTeam }) {
-  return (
-    <motion.div variants={fadeUp}>
-      <div className={styles.scheduleTitle}>
-        <span>🔥</span>
-        <span>Partidos Destacados</span>
-      </div>
-      <div className={styles.featuredScroll}>
-        {matches.map((match, i) => {
-          const home = getTeam(match.home);
-          const away = getTeam(match.away);
-          return (
-            <motion.div
-              key={match.id}
-              className={styles.featuredCard}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 * i }}
-              whileTap={{ scale: 0.96 }}
-              whileHover={{ y: -3 }}
-            >
-              {match.tag && (
-                <div className={styles.featuredTag}>
-                  <span>⚡</span>
-                  <span>{match.tag}</span>
-                </div>
-              )}
-              <div className={styles.featuredTeams}>
-                <span className={styles.featuredFlag}>{home.flag}</span>
-                <span className={styles.featuredVs}>VS</span>
-                <span className={styles.featuredFlag}>{away.flag}</span>
-              </div>
-              <div className={styles.featuredDate}>{formatMatchDate(match.date)}</div>
-              <div className={styles.featuredVenue}>
-                📍 {match.venue}, {match.city}
-              </div>
-            </motion.div>
-          );
-        })}
       </div>
     </motion.div>
   );
@@ -339,17 +282,16 @@ function FeaturedMatches({ matches, getTeam }) {
 // Main Component
 // ═══════════════════════════════════════════════════════════════
 export default function FifaLive() {
-  const {
-    ecuadorSchedule,
-    featuredMatches,
-    conmebolStandings,
-    groups,
-    source,
-    lastUpdated,
-    isLoading,
-    getTeam: getTeamFn,
-  } = useFifaData();
-
+  const { matches, loading: matchesLoading, error: matchesError } = useWorldCupMatches();
+  const { standingsByGroup, lastUpdated, error: standingError } = useGroupStandings();
+  
+  // Filtrar ecuador y destacados
+  const ecuadorMatches = matches.filter(m => m.home.code === 'ECU' || m.away.code === 'ECU');
+  const featured = matches.filter(m => m.hot).slice(0, 5); // 5 max para scroll
+  
+  const loading = matchesLoading || (!matchesError && !standingError && Object.keys(standingsByGroup).length === 0);
+  const error = matchesError || standingError;
+  
   return (
     <motion.section
       className={styles.fifaSection}
@@ -362,34 +304,49 @@ export default function FifaLive() {
       <div className={styles.sectionHead}>
         <div className={styles.headLeft}>
           <h3 className={styles.fifaTitle}>FIFA World Cup 2026</h3>
-          <div className={styles.liveBadge}>
+          <div className={styles.liveBadge} title="Sincronizado silenciosamente cada 60s">
             <span className={styles.liveDot} />
-            <span>{source === 'live' ? 'LIVE' : 'FIFA'}</span>
+            <span>EN VIVO</span>
           </div>
         </div>
         <span className={styles.updatedAt}>
-          {isLoading ? '⟳ Actualizando...' : timeAgo(lastUpdated)}
+          {timeAgo(lastUpdated)}
         </span>
       </div>
 
       {/* Countdown */}
       <Countdown />
 
-      {/* Ecuador Group */}
-      <EcuadorGroup groups={groups} getTeam={getTeamFn} />
+      {error ? (
+        <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255,0,0,0.1)', color: '#ff6b6b', borderRadius: '12px', marginTop: '20px' }}>
+          <strong>Error de Conexión FIFA API</strong>
+          <p>{error}</p>
+          <small>Revisa que el script de Vite esté corriendo y recarga la página.</small>
+        </div>
+      ) : loading ? (
+        <div style={{ padding: '3rem', textAlign: 'center', color: '#888' }}>
+          Conectando con servidores de la FIFA...
+        </div>
+      ) : (
+        <>
+          {/* Ecuador Schedule */}
+          {ecuadorMatches.length > 0 && (
+            <EcuadorSchedule matches={ecuadorMatches} />
+          )}
 
-      {/* Ecuador Schedule */}
-      <EcuadorSchedule schedule={ecuadorSchedule} getTeam={getTeamFn} />
+          {/* Featured Matches */}
+          {featured.length > 0 && (
+            <FeaturedMatches matches={featured} />
+          )}
 
-      {/* Featured Matches */}
-      <FeaturedMatches matches={featuredMatches} getTeam={getTeamFn} />
+          <div className={styles.divider} />
 
-      <div className={styles.divider} />
+          {/* New WC Group Standings */}
+          <GroupStandings standingsByGroup={standingsByGroup} />
+        </>
+      )}
 
-      {/* CONMEBOL Standings */}
-      <ConmebolStandings standings={conmebolStandings} getTeam={getTeamFn} />
-
-      {/* FIFA Link */}
+      {/* FIFA Link general */}
       <motion.a
         href={FIFA_LINKS.matchCentre}
         target="_blank"
@@ -404,18 +361,6 @@ export default function FifaLive() {
         <ArrowSquareOut size={14} weight="bold" />
       </motion.a>
 
-      <div className={styles.sourceInfo} style={{ marginTop: 12, marginBottom: 4 }}>
-        <span>Datos de</span>
-        <a
-          href="https://www.fifa.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.sourceLink}
-        >
-          FIFA.com
-        </a>
-        <span>· Actualización cada 60s</span>
-      </div>
     </motion.section>
   );
 }

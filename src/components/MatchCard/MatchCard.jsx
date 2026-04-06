@@ -55,6 +55,14 @@ export default function MatchCard({ match, delay = 0, onPredict }) {
           <span>{dateStr}</span>
           <span className={styles.dot}>•</span>
           <span>{timeStr}</span>
+          {match.matchLink && (
+            <>
+              <span className={styles.dot}>•</span>
+              <a href={match.matchLink} target="_blank" rel="noopener noreferrer" style={{ color: '#00ff88', textDecoration: 'none', fontWeight: 'bold' }}>
+                🔗 FIFA
+              </a>
+            </>
+          )}
         </div>
       </div>
 
@@ -102,13 +110,13 @@ export default function MatchCard({ match, delay = 0, onPredict }) {
 
       <div className={styles.stadium}>📍 {match.stadium}</div>
 
-      {/* Odds / Prediction Buttons */}
+      {/* Prediction Buttons (sin cuotas) */}
       <div className={styles.odds}>
         {[
-          { key: 'home', label: match.home.code, odd: match.odds.home },
-          { key: 'draw', label: 'Empate', odd: match.odds.draw },
-          { key: 'away', label: match.away.code, odd: match.odds.away },
-        ].map(({ key, label, odd }) => (
+          { key: 'home', label: match.home.code },
+          { key: 'draw', label: 'Empate' },
+          { key: 'away', label: match.away.code },
+        ].map(({ key, label }) => (
           <motion.button
             key={key}
             className={`${styles.oddBtn} ${selected === key ? styles.oddSelected : ''} ${confirmed && selected === key ? styles.oddConfirmed : ''}`}
@@ -124,8 +132,7 @@ export default function MatchCard({ match, delay = 0, onPredict }) {
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <span className={styles.oddLabel}>{label}</span>
-            <span className={styles.oddValue}>{odd.toFixed(2)}</span>
+            <span className={styles.oddLabel} style={{ width: '100%', textAlign: 'center' }}>{label}</span>
           </motion.button>
         ))}
       </div>

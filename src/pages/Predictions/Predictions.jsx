@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MatchCard from '../../components/MatchCard/MatchCard';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
-import { UPCOMING_MATCHES } from '../../data/mockData';
+import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import styles from './Predictions.module.css';
-
-const GROUPS = ['Todos', 'A', 'B', 'C', 'D'];
 
 const staggerContainer = {
   hidden: {},
@@ -17,13 +15,17 @@ const staggerItem = {
 };
 
 export default function Predictions() {
+  const { matches, loading, error } = useWorldCupMatches();
   const [activeGroup, setActiveGroup] = useState('Todos');
   const [predictions, setPredictions] = useState({});
 
+  // Calcular grupos disponibles dinámicamente a partir de los partidos
+  const dynamicGroups = ['Todos', ...new Set(matches.map(m => m.group).filter(Boolean))].sort();
+
   const filtered =
     activeGroup === 'Todos'
-      ? UPCOMING_MATCHES
-      : UPCOMING_MATCHES.filter((m) => m.group === activeGroup);
+      ? matches
+      : matches.filter((m) => m.group === activeGroup);
 
   const handlePredict = (matchId, choice) => {
     setPredictions((prev) => ({ ...prev, [matchId]: choice }));
@@ -44,7 +46,7 @@ export default function Predictions() {
 
       {/* Group Filter Tabs with animated indicator */}
       <div className={styles.filters}>
-        {GROUPS.map((g) => (
+        {dynamicGroups.map((g) => (
           <motion.button
             key={g}
             className={`${styles.filterBtn} ${activeGroup === g ? styles.filterActive : ''}`}
@@ -52,7 +54,7 @@ export default function Predictions() {
             whileTap={{ scale: 0.93 }}
             style={{ position: 'relative' }}
           >
-            {g === 'Todos' ? '🌎 Todos' : `Grupo ${g}`}
+            {g === 'Todos' ? '🌎 Todos' : (g.length === 1 ? `Grupo ${g}` : g)}
             {activeGroup === g && (
               <motion.div
                 className={styles.filterIndicator}
@@ -64,7 +66,20 @@ export default function Predictions() {
         ))}
       </div>
 
-      {/* Stats Bar with animated values */}
+      {loading && (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
+          Cargando partidos de la FIFA... ⚽
+        </div>
+      )}
+      {error && (
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#ff4444' }}>
+          Error al cargar: {error}
+        </div>
+      )}
+
+      {!loading && !error && (
+        <>
+          {/* Stats Bar with animated values */}
       <motion.div
         className={styles.statsBar}
         initial={{ opacity: 0, scale: 0.97 }}
@@ -113,7 +128,9 @@ export default function Predictions() {
             </motion.div>
           ))}
         </motion.div>
-      </AnimatePresence>
+          </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }
