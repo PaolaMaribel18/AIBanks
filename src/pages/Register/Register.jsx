@@ -8,7 +8,7 @@ import styles from './Register.module.css';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, clearError } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,7 +23,8 @@ export default function Register() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    setError(null); // Limpiar error al cambiar
+    setError(null);
+    clearError();
   };
 
   const handleSubmit = async (e) => {
@@ -36,8 +37,17 @@ export default function Register() {
         throw new Error('Las contraseñas no coinciden');
       }
 
-      await register(formData.email, formData.password, formData.name);
-      // Navigation will be handled by AppContent
+      const result = await register(formData.email, formData.password, formData.name);
+
+      if (result.requiresEmailConfirmation) {
+        navigate('/login', {
+          replace: true,
+          state: {
+            message: 'Revisa tu correo y confirma tu cuenta antes de iniciar sesión.',
+          },
+        });
+      }
+      // Navigation will be handled by AppContent when a session exists
     } catch (err) {
       setError(err.message || 'Error al registrarse');
     } finally {
@@ -140,8 +150,10 @@ export default function Register() {
           <button
             type="button"
             className={styles.link}
-            onClick={() => navigate('/login')}
-            
+            onClick={() => {
+              clearError();
+              navigate('/login');
+            }}
           >
             Inicia Sesión
           </button>

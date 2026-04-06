@@ -3,6 +3,35 @@ import { supabase } from '../services/supabaseClient';
 
 const AuthContext = createContext();
 
+const translateAuthError = (errorCode, errorDescription) => {
+  const decodedDescription = errorDescription
+    ? decodeURIComponent(errorDescription.replace(/\+/g, ' '))
+    : '';
+
+  if (errorCode === 'otp_expired' || /invalid or has expired/i.test(decodedDescription)) {
+    return 'El enlace del correo es inválido o ya expiró. Solicita uno nuevo para continuar.';
+  }
+
+  if (errorCode === 'access_denied') {
+    return 'No se pudo completar la validación del correo. Intenta nuevamente.';
+  }
+
+  return decodedDescription || 'Ocurrió un problema al autenticar tu cuenta.';
+};
+
+const syncUserFromSession = (session, setUser) => {
+  if (session?.user) {
+    setUser({
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.user_metadata?.name || session.user.email.split('@')[0],
+    });
+    return;
+  }
+
+  setUser(null);
+};
+
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -13,25 +42,50 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Monitor authentication state
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-          });
-        } else {
-          setUser(null);
-        }
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const queryParams = new URLSearchParams(window.location.search);
+    const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
+    const errorDescription = hashParams.get('error_description') || queryParams.get('error_description');
+
+    if (errorCode || errorDescription) {
+      setError(translateAuthError(errorCode, errorDescription));
+      window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    }
+
+    const initializeAuth = async () => {
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        syncUserFromSession(session, setUser);
+      } catch (err) {
+        setUser(null);
+        setError((currentError) => currentError || translateAuthError(err.code, err.message));
+      } finally {
         setLoading(false);
       }
-    );
+    };
+
+    initializeAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      syncUserFromSession(session, setUser);
+      setLoading(false);
+    });
 
     return () => subscription?.unsubscribe();
   }, []);
+
+  const clearError = () => {
+    setError(null);
+  };
 
   const register = async (email, password, name) => {
     try {
@@ -40,6 +94,7 @@ export function AuthProvider({ children }) {
         email,
         password,
         options: {
+          emailRedirectTo: window.location.origin,
           data: {
             name,
           },
@@ -65,7 +120,11 @@ export function AuthProvider({ children }) {
         if (profileError) throw profileError;
       }
 
-      return { success: true, data };
+      return {
+        success: true,
+        data,
+        requiresEmailConfirmation: !data.session,
+      };
     } catch (err) {
       setError(err.message);
       throw err;
@@ -133,6 +192,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     completeOnboarding,
+    clearError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
