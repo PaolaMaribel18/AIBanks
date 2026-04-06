@@ -1,0 +1,257 @@
+.page {
+  padding-bottom: calc(var(--bottom-nav-height) + 20px);
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  padding: 28px 20px 32px;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+}
+.heroBg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(213, 0, 249, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0a0f 0%, #12121c 100%);
+  z-index: 0;
+}
+.heroContent {
+  position: relative;
+  z-index: 2;
+}
+.heroParticles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+}
+
+.worldcupBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+
+.heroTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+.goldText {
+  font-family: var(--font-display);
+  background: linear-gradient(135deg, #ffd700, #ffaa00, #ffd700);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+.heroSub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 0 16px;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+.statContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+.statIcon {
+  font-size: 1.1rem;
+}
+.statValue {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.statLabel {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Jackpot */
+.jackpot {
+  margin: 0 16px 20px;
+  background: linear-gradient(135deg, rgba(0, 230, 118, 0.08), rgba(0, 230, 118, 0.02));
+  border: 1px solid rgba(0, 230, 118, 0.15);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+.jackpot::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.4), transparent);
+}
+.jackpotInner {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.jackpotLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.jackpotIcon {
+  font-size: 1.8rem;
+  animation: float 3s ease-in-out infinite;
+}
+.jackpotLabel {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  color: #00e676;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.jackpotValue {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Sections */
+.section {
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fireIcon {
+  color: #ff6b35;
+}
+.seeAll {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #ffd700;
+  font-weight: 600;
+  background: none;
+}
+
+.matchList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Promos */
+.promoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.promoCard {
+  border: 1px solid;
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.promoCard::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -40%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+}
+.promoIcon {
+  font-size: 1.6rem;
+  display: block;
+  margin-bottom: 10px;
+}
+.promoTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.promoDesc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Powered */
+.powered {
+  text-align: center;
+  padding: 24px 16px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.powered strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  letter-spacing: 3px;
+}
+.tcsLabel {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}

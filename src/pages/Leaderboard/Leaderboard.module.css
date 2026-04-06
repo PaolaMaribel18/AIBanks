@@ -1,0 +1,211 @@
+.page {
+  padding: 0 16px calc(var(--bottom-nav-height) + 20px);
+}
+
+.header {
+  padding: 20px 0 16px;
+}
+.title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.tab {
+  flex: 1;
+  padding: 10px;
+  border-radius: 11px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+.tabActive {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 170, 0, 0.08));
+  color: #ffd700;
+  box-shadow: 0 2px 10px rgba(255, 215, 0, 0.1);
+}
+
+/* Podium */
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 20px 10px 0;
+}
+.podiumSpot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  flex: 1;
+  max-width: 110px;
+}
+.podiumAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 215, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+.podiumAvatarFirst {
+  width: 56px;
+  height: 56px;
+  font-size: 1.6rem;
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+}
+.crownWrap {
+  font-size: 1.3rem;
+  margin-bottom: -6px;
+}
+.podiumBadge {
+  font-size: 1rem;
+}
+.podiumName {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.podiumPoints {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+.podiumBar {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.12), rgba(255, 215, 0, 0.04));
+  border-radius: 10px 10px 0 0;
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-bottom: none;
+  margin-top: 6px;
+}
+.first .podiumBar {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.06));
+  border-color: rgba(255, 215, 0, 0.2);
+}
+
+/* Your Position */
+.yourPos {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 170, 0, 0.03));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.yourPosLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.yourRank {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffd700;
+  min-width: 32px;
+}
+.yourAvatar {
+  font-size: 1.4rem;
+}
+.yourName {
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.yourTier {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.yourPoints {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+.ptLabel {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+
+/* List */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.listItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+.listItem:active {
+  background: rgba(255, 255, 255, 0.04);
+}
+.listLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.listRank {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 28px;
+}
+.listAvatar {
+  font-size: 1.2rem;
+}
+.listName {
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+.listStreak {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+.listPoints {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}

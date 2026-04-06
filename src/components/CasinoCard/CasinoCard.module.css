@@ -1,0 +1,27 @@
+.card {
+  background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(255, 215, 0, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+}
+
+.glow {
+  border-color: rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.inner {
+  padding: 16px;
+  position: relative;
+  z-index: 1;
+}

@@ -1,0 +1,289 @@
+.page {
+  padding: 0 16px calc(var(--bottom-nav-height) + 20px);
+}
+
+.header {
+  padding: 20px 0 16px;
+}
+.title {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* Profile Card */
+.profileCard {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255, 215, 0, 0.12);
+}
+.profileBg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 215, 0, 0.1) 0%, transparent 60%),
+    linear-gradient(145deg, #1a1a2e, #16213e);
+}
+.profileContent {
+  position: relative;
+  padding: 28px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.avatarWrap {
+  position: relative;
+  margin-bottom: 4px;
+}
+.avatar {
+  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 2px solid rgba(255, 215, 0, 0.2);
+  border-radius: 50%;
+}
+.tierBadge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 1.2rem;
+  background: #0a0a0f;
+  border-radius: 50%;
+  padding: 2px;
+}
+.name {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+.tier {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+.pointsBig {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pointsNum {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffd700;
+}
+.ptsCurrency {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.statBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+.ringWrap {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+.ring {
+  width: 100%;
+  height: 100%;
+}
+.ringValue {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ffd700;
+}
+.statBigNum {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.statBoxLabel {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.statMini {
+  display: flex;
+  gap: 10px;
+  font-size: 0.65rem;
+}
+.statWin { color: #00e676; }
+.statLoss { color: #ff1744; }
+
+/* Section */
+.section {
+  margin-bottom: 20px;
+}
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* Achievements */
+.achievements {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.achBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 215, 0, 0.08);
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+}
+.achLocked {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.achIcon {
+  font-size: 1.5rem;
+}
+.achName {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 500;
+}
+.achLock {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 0.6rem;
+}
+
+/* Activity */
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.actItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+.actLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.actDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.actMatch {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.actPred {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.actPoints {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* Menu */
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
+}
+.menuDanger {
+  color: #ff1744;
+}
+.menuIcon {
+  display: flex;
+  align-items: center;
+  opacity: 0.6;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 24px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.footerBrand {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+.footerPowered {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+.footerPowered strong {
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+}
+.footerVersion {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  opacity: 0.4;
+}
