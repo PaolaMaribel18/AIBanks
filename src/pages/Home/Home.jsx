@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightning, TrendUp, Fire, Trophy, Gift, Eye, EyeSlash, ArrowRight, Target, Coin, Crown, Star, Handshake, Check, X } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
-import SplashScreen from '../../components/SplashScreen/SplashScreen';
 import MatchCard from '../../components/MatchCard/MatchCard';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
@@ -31,16 +30,8 @@ export default function Home() {
   const [popEye, setPopEye] = useState(false);
   const hotMatches = UPCOMING_MATCHES.filter((m) => m.hot).slice(0, 2);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 1400);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (showSplash) {
-    return <SplashScreen />;
-  }
+  const { matches, loading } = useWorldCupMatches();
+  const hotMatches = matches.filter((m) => m.hot).slice(0, 2);
 
   const quickActions = [
     { icon: Target, label: 'Predecir', color: '#ffd700', bg: 'rgba(255,215,0,0.12)', path: '/predictions' },

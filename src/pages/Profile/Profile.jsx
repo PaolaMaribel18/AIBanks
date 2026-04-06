@@ -41,9 +41,13 @@ export default function Profile() {
     }
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   };
 
   const predictionHistory = Object.entries(predictions).map(([matchId, choice]) => {
