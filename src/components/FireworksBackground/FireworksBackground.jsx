@@ -44,54 +44,34 @@ class Firework {
   constructor(canvas, colors) {
     this.canvas = canvas;
     this.colors = colors;
-    this.x = randomRange(canvas.width * 0.2, canvas.width * 0.8);
-    this.y = canvas.height;
-    this.targetY = randomRange(canvas.height * 0.15, canvas.height * 0.45);
-    this.speed = randomRange(3, 5);
-    this.size = randomRange(2, 3);
+    // Explode immediately at a random position across the screen
+    this.x = randomRange(canvas.width * 0.1, canvas.width * 0.9);
+    this.y = randomRange(canvas.height * 0.1, canvas.height * 0.7);
     this.color = colors[Math.floor(Math.random() * colors.length)];
-    this.exploded = false;
     this.particles = [];
-    this.alpha = 1;
+    this.explode();
   }
   update() {
-    if (!this.exploded) {
-      this.y -= this.speed;
-      if (this.y <= this.targetY) {
-        this.explode();
-      }
-    }
     this.particles.forEach(p => p.update());
     this.particles = this.particles.filter(p => p.alpha > 0);
   }
   explode() {
-    this.exploded = true;
-    const count = Math.floor(randomRange(30, 50));
+    const count = Math.floor(randomRange(40, 65));
     for (let i = 0; i < count; i++) {
       this.particles.push(
         new Particle(
           this.x, this.y, this.color,
-          randomRange(1, 5),
-          randomRange(1, 3)
+          randomRange(1.5, 6),
+          randomRange(1.2, 3.5)
         )
       );
     }
   }
   draw(ctx) {
-    if (!this.exploded) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-      ctx.fillStyle = this.color;
-      ctx.shadowBlur = 6;
-      ctx.shadowColor = this.color;
-      ctx.fill();
-      ctx.restore();
-    }
     this.particles.forEach(p => p.draw(ctx));
   }
   get isDone() {
-    return this.exploded && this.particles.length === 0;
+    return this.particles.length === 0;
   }
 }
 
@@ -118,7 +98,8 @@ export default function FireworksBackground({
     });
     fireworksRef.current = fireworksRef.current.filter(fw => !fw.isDone);
 
-    if (activeRef.current && Math.random() < 0.04 * population) {
+    // Continuous spawning while active — higher rate for more spectacle
+    if (activeRef.current && Math.random() < 0.08 * population) {
       fireworksRef.current.push(new Firework(canvas, colors));
     }
 
@@ -133,11 +114,11 @@ export default function FireworksBackground({
     canvas.height = canvas.offsetHeight;
     activeRef.current = true;
 
-    // Launch initial burst
-    for (let i = 0; i < population + 1; i++) {
+    // Immediate burst — several fireworks at once so user sees explosions right away
+    for (let i = 0; i < population + 3; i++) {
       setTimeout(() => {
         fireworksRef.current.push(new Firework(canvas, colors));
-      }, i * 300);
+      }, i * 150);
     }
 
     animate(ctx, canvas);
