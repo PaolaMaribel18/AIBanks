@@ -5,6 +5,7 @@
   padding: 18px;
   position: relative;
   overflow: hidden;
+  transition: border-color 0.3s;
 }
 .card::before {
   content: '';
@@ -18,6 +19,32 @@
 
 .hot {
   border-color: rgba(255, 215, 0, 0.12);
+}
+.confirmed {
+  border-color: rgba(0, 230, 118, 0.15);
+}
+.confirmed::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.2), transparent);
+}
+
+/* Corner glows for hot matches */
+.cornerGlow {
+  position: absolute;
+  top: -30px;
+  left: -30px;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.08), transparent 70%);
+  pointer-events: none;
+}
+.cornerGlowBR {
+  position: absolute;
+  bottom: -30px;
+  right: -30px;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.06), transparent 70%);
+  pointer-events: none;
 }
 
 /* Header */
@@ -64,36 +91,58 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 10px;
 }
 .team {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: 1;
 }
 .flag {
-  font-size: 2.6rem;
+  font-size: 3.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
 }
 .teamName {
-  font-weight: 600;
-  font-size: 0.88rem;
+  font-weight: 700;
+  font-size: 0.82rem;
   color: var(--text-primary);
+}
+.teamCode {
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  opacity: 0.5;
 }
 .vsWrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+.vsCircle {
+  position: absolute;
+  inset: 0;
+}
+.vsRing {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 215, 0, 0.15);
 }
 .vs {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 1;
   letter-spacing: 1px;
 }
 
@@ -123,22 +172,32 @@
   cursor: pointer;
   transition: all 0.2s ease;
   min-height: 56px;
+  position: relative;
+  overflow: hidden;
+}
+.oddSelectedBg {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 215, 0, 0.08);
+  border-radius: inherit;
+  z-index: 0;
 }
 .oddBtn:active {
   background: rgba(255, 215, 0, 0.06);
 }
 .oddSelected {
   border-color: var(--gold-primary);
-  background: rgba(255, 215, 0, 0.08);
 }
 .oddConfirmed {
   border-color: var(--accent-green);
-  background: rgba(0, 230, 118, 0.08);
+  background: rgba(0, 230, 118, 0.06);
 }
 .oddLabel {
   font-weight: 600;
   font-size: 0.72rem;
   color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
 }
 .oddSelected .oddLabel {
   color: var(--gold-primary);
@@ -148,6 +207,8 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
+  position: relative;
+  z-index: 1;
 }
 
 /* Footer */
@@ -182,6 +243,9 @@
 }
 
 .confirmedBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.78rem;
   color: var(--accent-green);
   font-weight: 600;

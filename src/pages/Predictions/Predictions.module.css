@@ -38,11 +38,20 @@
   white-space: nowrap;
   transition: all 0.2s ease;
   min-height: 38px;
+  position: relative;
+  overflow: hidden;
+}
+.filterIndicator {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 20px;
+  border: 1px solid var(--border-gold);
+  z-index: -1;
 }
 .filterActive {
-  background: rgba(255, 215, 0, 0.1);
   color: var(--gold-primary);
-  border-color: var(--border-gold);
+  border-color: transparent;
 }
 
 /* Stats Bar */
@@ -67,6 +76,12 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--gold-primary);
+}
+.statValueGold {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-green);
 }
 .statLabel {
   font-size: 0.65rem;

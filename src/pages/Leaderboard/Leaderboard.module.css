@@ -33,10 +33,28 @@
   background: transparent;
   color: var(--text-muted);
   transition: all 0.2s ease;
+  position: relative;
 }
 .tabActive {
-  background: rgba(255, 215, 0, 0.1);
   color: var(--gold-primary);
+}
+.tabIndicator {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 11px;
+  z-index: -1;
+}
+
+/* Podium Wrapper */
+.podiumWrap {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.04), transparent);
+  border: 1px solid var(--border-gold);
+  margin-bottom: 14px;
+  padding: 16px 10px 0;
 }
 
 /* Podium */
@@ -45,8 +63,8 @@
   align-items: flex-end;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
-  padding: 20px 10px 0;
+  position: relative;
+  z-index: 1;
 }
 .podiumSpot {
   display: flex;
@@ -62,7 +80,7 @@
   height: 48px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
-  border: 2px solid var(--border-gold);
+  border: 2px solid rgba(255, 215, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,7 +91,7 @@
   height: 58px;
   font-size: 1.6rem;
   border-color: var(--gold-primary);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.2);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
 }
 .crownWrap {
   font-size: 1.3rem;
@@ -94,17 +112,39 @@
   font-weight: 700;
   color: var(--gold-primary);
 }
+
+/* Podium Bars with gradients */
 .podiumBar {
   width: 100%;
-  background: linear-gradient(180deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.02));
   border-radius: 10px 10px 0 0;
-  border: 1px solid rgba(255, 215, 0, 0.08);
-  border-bottom: none;
   margin-top: 6px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  overflow: hidden;
 }
-.first .podiumBar {
-  background: linear-gradient(180deg, rgba(255, 215, 0, 0.14), rgba(255, 215, 0, 0.04));
-  border-color: rgba(255, 215, 0, 0.15);
+.barGold {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.2), rgba(255, 170, 0, 0.06));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-bottom: none;
+}
+.barSilver {
+  background: linear-gradient(180deg, rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.03));
+  border: 1px solid rgba(192, 192, 192, 0.12);
+  border-bottom: none;
+}
+.barBronze {
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.03));
+  border: 1px solid rgba(205, 127, 50, 0.12);
+  border-bottom: none;
+}
+.barRank {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  opacity: 0.6;
 }
 
 /* Your Position */
@@ -117,6 +157,17 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.yourPos::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
 }
 .yourPosLeft {
   display: flex;
@@ -143,8 +194,11 @@
 }
 .yourPoints {
   display: flex;
-  align-items: baseline;
-  gap: 4px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.yourPointsNum {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 700;
@@ -161,7 +215,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 .listItem {
   display: flex;
@@ -172,9 +226,6 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   transition: background 0.2s;
-}
-.listItem:active {
-  background: rgba(255, 255, 255, 0.04);
 }
 .listLeft {
   display: flex;
@@ -199,6 +250,12 @@
   font-size: 0.65rem;
   color: var(--text-muted);
 }
+.listRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
 .listPoints {
   display: flex;
   align-items: baseline;
@@ -207,4 +264,16 @@
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-secondary);
+}
+.listBar {
+  width: 60px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.listBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary));
+  border-radius: 2px;
 }
