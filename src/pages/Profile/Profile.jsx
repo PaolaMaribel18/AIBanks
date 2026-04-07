@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   SignOut,
@@ -13,9 +13,12 @@ import {
   Coin,
 } from '@phosphor-icons/react';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
-import { USER_PROFILE, UPCOMING_MATCHES } from '../../data/mockData';
+import FlipCard from '../../components/FlipCard/FlipCard';
+import StarsBackground from '../../components/StarsBackground/StarsBackground';
+import { LEADERBOARD_DATA, USER_PROFILE, UPCOMING_MATCHES } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import styles from './Profile.module.css';
 
 const staggerContainer = {
@@ -31,15 +34,17 @@ export default function Profile() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [predictions, setPredictions] = useState({});
-  const archetype = localStorage.getItem('archetype') || 'moderado';
-
-  useEffect(() => {
-    const stored = localStorage.getItem('predictions');
-    if (stored) {
-      setPredictions(JSON.parse(stored));
+  const { matches } = useWorldCupMatches();
+  const [predictions] = useState(() => {
+    try {
+      const stored = localStorage.getItem('predictions');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
     }
-  }, []);
+  });
+  const archetype = localStorage.getItem('archetype') || 'moderado';
+  const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
 
   const handleLogout = async () => {
     try {
@@ -51,9 +56,15 @@ export default function Profile() {
   };
 
   const predictionHistory = Object.entries(predictions).map(([matchId, choice]) => {
-    const match = UPCOMING_MATCHES.find(m => m.id === parseInt(matchId));
+    const match = allMatches.find((m) => String(m.id) === String(matchId));
     return match ? { ...match, prediction: choice } : null;
   }).filter(Boolean);
+
+  const earnedPredictionPoints = predictionHistory.reduce((acc, match) => acc + (match.points || 0), 0);
+  const currentPoints = USER_PROFILE.points + earnedPredictionPoints;
+  const currentPredictionsCount = USER_PROFILE.totalPredictions + predictionHistory.length;
+  const currentRank = 1 + LEADERBOARD_DATA.filter((player) => player.points > currentPoints).length;
+  const recentProfileActivity = predictionHistory.length > 0 ? predictionHistory.slice(0, 4) : USER_PROFILE.recentActivity;
 
   const accuracy = USER_PROFILE.winRate;
   const circumference = 2 * Math.PI * 42;
@@ -106,7 +117,7 @@ export default function Profile() {
           <div className={styles.pointsBig}>
             <Coin size={24} weight="bold" />
             <AnimatedCounter
-              value={USER_PROFILE.points.toLocaleString()}
+              value={currentPoints.toLocaleString()}
               className={styles.pointsNum}
             />
             <span className={styles.ptsCurrency}>puntos</span>
@@ -158,7 +169,7 @@ export default function Profile() {
         {/* Predictions */}
         <motion.div variants={staggerItem}>
           <div className={styles.statCard}>
-            <span className={styles.statBigNum}>{USER_PROFILE.totalPredictions}</span>
+            <span className={styles.statBigNum}>{currentPredictionsCount}</span>
             <span className={styles.statBoxLabel}>Predicciones</span>
             <div className={styles.statMini}>
               <span className={styles.statWin}>✅ {USER_PROFILE.correctPredictions}</span>
@@ -172,7 +183,7 @@ export default function Profile() {
         {/* Ranking */}
         <motion.div variants={staggerItem}>
           <div className={styles.statCard}>
-            <AnimatedCounter value={`#${USER_PROFILE.rank}`} className={styles.statBigNum} />
+            <AnimatedCounter value={`#${currentRank}`} className={styles.statBigNum} />
             <span className={styles.statBoxLabel}>Ranking</span>
           </div>
         </motion.div>
@@ -231,38 +242,47 @@ export default function Profile() {
           initial="hidden"
           animate="show"
         >
-          {USER_PROFILE.recentActivity.map((act, i) => (
-            <motion.div
-              key={i}
-              className={styles.actItem}
-              variants={staggerItem}
-            >
-              <div className={styles.actLeft}>
-                <motion.span
-                  className={styles.actDot}
-                  style={{
-                    background: act.result === 'win' ? (theme === 'dark' ? '#00e676' : '#28a745') : (theme === 'dark' ? '#ff1744' : '#dc3545'),
-                  }}
-                  animate={{
-                    boxShadow: act.result === 'win'
-                      ? ['0 0 0 rgba(0,230,118,0)', '0 0 10px rgba(0,230,118,0.5)', '0 0 0 rgba(0,230,118,0)']
-                      : ['0 0 0 rgba(255,23,68,0)', '0 0 10px rgba(255,23,68,0.5)', '0 0 0 rgba(255,23,68,0)'],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                <div>
-                  <div className={styles.actMatch}>{act.match}</div>
-                  <div className={styles.actPred}>Predicción: {act.prediction}</div>
-                </div>
-              </div>
-              <span
-                className={styles.actPoints}
-                style={{ color: act.result === 'win' ? (theme === 'dark' ? '#00e676' : '#28a745') : (theme === 'dark' ? '#ff1744' : '#dc3545') }}
+          {recentProfileActivity.map((act, i) => {
+            const isSavedPrediction = 'home' in act || 'away' in act;
+            const predictionLabel = isSavedPrediction
+              ? (act.prediction === 'home' ? act.home.name : act.prediction === 'away' ? act.away.name : 'Empate')
+              : act.prediction;
+            const pointsLabel = isSavedPrediction ? `+${act.points}` : act.points;
+            const accentColor = isSavedPrediction || act.result === 'win'
+              ? (theme === 'dark' ? '#00e676' : '#28a745')
+              : (theme === 'dark' ? '#ff1744' : '#dc3545');
+
+            return (
+              <motion.div
+                key={isSavedPrediction ? act.id : i}
+                className={styles.actItem}
+                variants={staggerItem}
               >
-                {act.points}
-              </span>
-            </motion.div>
-          ))}
+                <div className={styles.actLeft}>
+                  <motion.span
+                    className={styles.actDot}
+                    style={{ background: accentColor }}
+                    animate={{
+                      boxShadow: isSavedPrediction || act.result === 'win'
+                        ? ['0 0 0 rgba(0,230,118,0)', '0 0 10px rgba(0,230,118,0.5)', '0 0 0 rgba(0,230,118,0)']
+                        : ['0 0 0 rgba(255,23,68,0)', '0 0 10px rgba(255,23,68,0.5)', '0 0 0 rgba(255,23,68,0)'],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  <div>
+                    <div className={styles.actMatch}>{isSavedPrediction ? `${act.home.name} vs ${act.away.name}` : act.match}</div>
+                    <div className={styles.actPred}>Predicción: {predictionLabel}</div>
+                  </div>
+                </div>
+                <span
+                  className={styles.actPoints}
+                  style={{ color: accentColor }}
+                >
+                  {pointsLabel}
+                </span>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </section>
 

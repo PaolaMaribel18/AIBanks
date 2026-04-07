@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lightning, TrendUp, Fire, Trophy, Gift, Eye, EyeSlash, ArrowRight, Target, Coin, Crown, Star, Handshake, Check, X } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import RippleButton from '../../components/RippleButton/RippleButton';
 import FifaLive from '../../components/FifaLive/FifaLive';
-import { USER_PROFILE } from '../../data/mockData';
+import { UPCOMING_MATCHES, USER_PROFILE } from '../../data/mockData';
 import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import styles from './Home.module.css';
 
@@ -25,13 +25,49 @@ const staggerItem = {
 export default function Home() {
   const navigate = useNavigate();
   const [showBalance, setShowBalance] = useState(true);
-  const [showSplash, setShowSplash] = useState(true);
   const [claimedBonus, setClaimedBonus] = useState(false);
   const [popEye, setPopEye] = useState(false);
-  const hotMatches = UPCOMING_MATCHES.filter((m) => m.hot).slice(0, 2);
-
+  const [predictions, setPredictions] = useState(() => {
+    try {
+      const stored = localStorage.getItem('predictions');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
   const { matches, loading } = useWorldCupMatches();
-  const hotMatches = matches.filter((m) => m.hot).slice(0, 2);
+  const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
+  const predictionHistory = Object.entries(predictions)
+    .map(([matchId, choice]) => {
+      const match = allMatches.find((item) => String(item.id) === String(matchId));
+      return match ? { ...match, prediction: choice } : null;
+    })
+    .filter(Boolean);
+  const earnedPredictionPoints = predictionHistory.reduce((acc, match) => acc + (match.points || 0), 0);
+  const currentPoints = USER_PROFILE.points + earnedPredictionPoints;
+  const pendingMatches = allMatches.filter((match) => !predictions[match.id]);
+  const featuredMatches = pendingMatches.filter((match) => match.hot).slice(0, 2);
+  const matchesToShow = featuredMatches.length > 0 ? featuredMatches : pendingMatches.slice(0, 2);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('predictions', JSON.stringify(predictions));
+    } catch {
+      // Ignore localStorage write errors
+    }
+  }, [predictions]);
+
+  const handlePredict = (matchId, choice) => {
+    setPredictions((prev) => ({ ...prev, [matchId]: choice }));
+  };
+
+  const getPredictionLabel = (match) => (
+    match.prediction === 'home'
+      ? match.home.name
+      : match.prediction === 'away'
+        ? match.away.name
+        : 'Empate'
+  );
 
   const quickActions = [
     { icon: Target, label: 'Predecir', color: '#ffd700', bg: 'rgba(255,215,0,0.12)', path: '/predictions' },
@@ -98,7 +134,7 @@ export default function Home() {
                     className={styles.balanceNumWrap}
                   >
                     <AnimatedCounter
-                      value={USER_PROFILE.points.toLocaleString()}
+                      value={currentPoints.toLocaleString()}
                       className={styles.balanceNum}
                     />
                     <span className={styles.balancePts}>pts</span>
@@ -133,6 +169,8 @@ export default function Home() {
           >
             <Crown size={16} weight="bold" />
             <span>{USER_PROFILE.tier}</span>
+            <span className={styles.badgeDot}>•</span>
+            <span>+{earnedPredictionPoints} por predicciones</span>
             <span className={styles.badgeDot}>•</span>
             <span>Racha {USER_PROFILE.streak}</span>
             {USER_PROFILE.streak > 5 && (
@@ -231,48 +269,52 @@ export default function Home() {
           initial="hidden"
           animate="show"
         >
-          {USER_PROFILE.recentActivity.map((act, i) => (
-            <motion.div
-              key={i}
-              className={styles.actItem}
-              variants={staggerItem}
-              whileTap={{ scale: 0.98, backgroundColor: 'rgba(255,255,255,0.03)' }}
-              whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,215,0,0.05)' }}
-            >
-              <div className={styles.actLeft}>
-                <motion.div
-                  className={styles.actAvatar}
-                  style={{
-                    background: act.result === 'win'
-                      ? 'rgba(0, 230, 118, 0.12)'
-                      : 'rgba(255, 23, 68, 0.12)',
-                    color: act.result === 'win' ? '#00e676' : '#ff1744',
-                  }}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.4 + i * 0.1, type: 'spring', stiffness: 400 }}
-                >
-                  {act.result === 'win' ? <Check size={16} weight="bold" /> : <X size={16} weight="bold" />}
-                </motion.div>
-                <div>
-                  <div className={styles.actMatch}>{act.match}</div>
-                  <div className={styles.actPred}>{act.prediction}</div>
+          {predictionHistory.length > 0 ? (
+            predictionHistory.slice(0, 3).map((match, i) => (
+              <motion.div
+                key={match.id}
+                className={styles.actItem}
+                variants={staggerItem}
+                whileTap={{ scale: 0.98, backgroundColor: 'rgba(255,255,255,0.03)' }}
+                whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,215,0,0.05)' }}
+              >
+                <div className={styles.actLeft}>
+                  <motion.div
+                    className={styles.actAvatar}
+                    style={{
+                      background: 'rgba(0, 230, 118, 0.12)',
+                      color: '#00e676',
+                    }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.4 + i * 0.1, type: 'spring', stiffness: 400 }}
+                  >
+                    <Check size={16} weight="bold" />
+                  </motion.div>
+                  <div>
+                    <div className={styles.actMatch}>{match.home.name} vs {match.away.name}</div>
+                    <div className={styles.actPred}>Tu pronóstico: {getPredictionLabel(match)}</div>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.actRight}>
-                <motion.span
-                  className={styles.actPoints}
-                  style={{ color: act.result === 'win' ? '#00e676' : '#ff1744' }}
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + i * 0.1 }}
-                >
-                  {act.result === 'win' ? act.points : '0'}
-                </motion.span>
-                <span className={styles.actBalance}>{act.points}</span>
-              </div>
-            </motion.div>
-          ))}
+                <div className={styles.actRight}>
+                  <motion.span
+                    className={styles.actPoints}
+                    style={{ color: '#00e676' }}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
+                  >
+                    +{match.points}
+                  </motion.span>
+                  <span className={styles.actBalance}>guardada</span>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
+              Aún no has guardado predicciones.
+            </div>
+          )}
         </motion.div>
       </section>
 
@@ -293,9 +335,15 @@ export default function Home() {
             <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
               Cargando partidos... ⚽
             </div>
-          ) : hotMatches.length > 0 ? (
-            hotMatches.map((match, i) => (
-              <MatchCard key={match.id} match={match} delay={0.1 * i} />
+          ) : matchesToShow.length > 0 ? (
+            matchesToShow.map((match, i) => (
+              <MatchCard
+                key={match.id}
+                match={match}
+                delay={0.1 * i}
+                onPredict={handlePredict}
+                predictedChoice={predictions[match.id]}
+              />
             ))
           ) : (
             <div style={{ padding: '1rem', color: '#888' }}>No hay partidos destacados por ahora.</div>

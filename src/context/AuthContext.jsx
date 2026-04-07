@@ -94,17 +94,15 @@ export function AuthProvider({ children }) {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
-          data: {
-            name,
-          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: { name },
         },
       });
 
       if (signUpError) throw signUpError;
 
-      // Create profile in profiles table
-      if (data.user) {
+      // Solo insertar perfil si hay sesión activa
+      if (data.user && data.session) {
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([

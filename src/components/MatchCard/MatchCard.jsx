@@ -1,11 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Fire, Coin, Check } from '@phosphor-icons/react';
 import styles from './MatchCard.module.css';
 
-export default function MatchCard({ match, delay = 0, onPredict, prediction }) {
-  const [selected, setSelected] = useState(prediction || null);
-  const [confirmed, setConfirmed] = useState(!!prediction);
+export default function MatchCard({ match, delay = 0, onPredict, predictedChoice }) {
+  const [selected, setSelected] = useState(predictedChoice || null);
+  const [confirmed, setConfirmed] = useState(!!predictedChoice);
+
+  useEffect(() => {
+    if (predictedChoice) {
+      setSelected(predictedChoice);
+      setConfirmed(true);
+      return;
+    }
+
+    setSelected(null);
+    setConfirmed(false);
+  }, [predictedChoice]);
 
   const handleSelect = (choice) => {
     if (confirmed) return;

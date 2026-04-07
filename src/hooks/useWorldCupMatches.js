@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { getFlagByFifaCode } from '../utils/countryFlags';
 
 const API_URL = "https://api.fifa.com/api/v3/calendar/matches?language=es&idCompetition=17&idSeason=285023&count=400";
+const POINT_BUCKETS = [150, 200, 250, 300];
+
+const getStableMatchPoints = (matchId) => {
+  const numericId = Number(String(matchId).replace(/\D/g, '')) || 0;
+  return POINT_BUCKETS[numericId % POINT_BUCKETS.length];
+};
 
 export function useWorldCupMatches() {
   const [matches, setMatches] = useState([]);
@@ -46,9 +52,9 @@ export function useWorldCupMatches() {
               groupName = getLocText(match.StageName) || '?';
             }
 
-            // Simulamos puntos y propiedad "hot"
-            const points = [150, 200, 250, 300][Math.floor(Math.random() * 4)];
-            const isHot = Math.random() > 0.8; // 20% de probabilidad de ser partido destacado
+            // Puntos estables para que el puntaje del usuario sea consistente en toda la app
+            const points = getStableMatchPoints(match.IdMatch);
+            const isHot = points >= 250;
 
             return {
               id: match.IdMatch,

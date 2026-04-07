@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Fire, Trophy } from '@phosphor-icons/react';
-import { LEADERBOARD_DATA, USER_PROFILE } from '../../data/mockData';
+import { LEADERBOARD_DATA, UPCOMING_MATCHES, USER_PROFILE } from '../../data/mockData';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
+import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import styles from './Leaderboard.module.css';
 
 const TABS = ['Semanal', 'Mensual', 'Global'];
@@ -19,6 +20,22 @@ const staggerItem = {
 
 export default function Leaderboard() {
   const [activeTab, setActiveTab] = useState('Semanal');
+  const { matches } = useWorldCupMatches();
+  const [predictions] = useState(() => {
+    try {
+      const stored = localStorage.getItem('predictions');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
+  const earnedPredictionPoints = allMatches
+    .filter((match) => Boolean(predictions[match.id]))
+    .reduce((acc, match) => acc + (match.points || 0), 0);
+  const currentPoints = USER_PROFILE.points + earnedPredictionPoints;
+  const currentRank = 1 + LEADERBOARD_DATA.filter((player) => player.points > currentPoints).length;
 
   return (
     <div className={styles.page}>
@@ -163,7 +180,7 @@ export default function Leaderboard() {
             animate={{ scale: [1, 1.08, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            #{USER_PROFILE.rank}
+            #{currentRank}
           </motion.span>
           <span className={styles.yourAvatar}>{USER_PROFILE.avatar}</span>
           <div>
@@ -172,7 +189,7 @@ export default function Leaderboard() {
           </div>
         </div>
         <div className={styles.yourPoints}>
-          <AnimatedCounter value={USER_PROFILE.points.toLocaleString()} className={styles.yourPointsNum} />
+          <AnimatedCounter value={currentPoints.toLocaleString()} className={styles.yourPointsNum} />
           <span className={styles.ptLabel}>pts</span>
         </div>
       </motion.div>
