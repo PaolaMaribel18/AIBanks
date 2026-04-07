@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabaseClient';
+import FireworksBackground from '../../components/FireworksBackground/FireworksBackground';
+import useGameSounds from '../../hooks/useGameSounds';
 import styles from './AuthCallback.module.css';
 
 export default function AuthCallback() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState('processing'); // processing | error
+  const [status, setStatus] = useState('processing'); // processing | verified | error
   const [errorMsg, setErrorMsg] = useState('');
+  const { playLoginLong, playFirework, playError } = useGameSounds();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -25,6 +28,7 @@ export default function AuthCallback() {
             : 'Ocurrió un error al verificar tu cuenta.';
           setStatus('error');
           setErrorMsg(decoded);
+          playError();
           return;
         }
 
@@ -38,8 +42,13 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          // Successfully authenticated — redirect to home
-          navigate('/', { replace: true });
+          // Successfully authenticated — show celebration then redirect
+          setStatus('verified');
+          playLoginLong();
+          setTimeout(() => playFirework(), 300);
+          setTimeout(() => playFirework(), 800);
+          setTimeout(() => playFirework(), 1400);
+          setTimeout(() => navigate('/', { replace: true }), 3500);
         } else {
           // No session yet, wait for the auth state change
           const {
@@ -47,7 +56,11 @@ export default function AuthCallback() {
           } = supabase.auth.onAuthStateChange((_event, session) => {
             if (session) {
               subscription.unsubscribe();
-              navigate('/', { replace: true });
+              setStatus('verified');
+              playLoginLong();
+              setTimeout(() => playFirework(), 300);
+              setTimeout(() => playFirework(), 800);
+              setTimeout(() => navigate('/', { replace: true }), 3500);
             }
           });
 
@@ -68,6 +81,23 @@ export default function AuthCallback() {
 
     handleCallback();
   }, [navigate]);
+
+  if (status === 'verified') {
+    return (
+      <div className={styles.container}>
+        <FireworksBackground
+          population={3}
+          duration={4000}
+          colors={['#ffd700', '#ffaa00', '#00e676', '#00b0ff', '#d500f9', '#ff6b35']}
+        />
+        <div className={styles.card} style={{ position: 'relative', zIndex: 2 }}>
+          <div className={styles.iconSuccess}>✓</div>
+          <h2>¡Cuenta verificada!</h2>
+          <p>Bienvenido a AI Bank 🎉</p>
+        </div>
+      </div>
+    );
+  }
 
   if (status === 'error') {
     return (
