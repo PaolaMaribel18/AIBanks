@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { NavigationProvider } from './context/NavigationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
@@ -25,7 +25,7 @@ function AppContent() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 3000);
+    }, 6500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -66,6 +66,8 @@ function AppContent() {
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
+            {/* Catch any stale/unknown route (e.g. /login after auth) → Home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
         <BottomNav />

@@ -7,6 +7,7 @@ import {
   Gift,
   UserCircle,
 } from '@phosphor-icons/react';
+import useGameSounds from '../../hooks/useGameSounds';
 import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
@@ -19,6 +20,15 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const location = useLocation();
+  const { playNav, playClick } = useGameSounds();
+
+  const handleNavClick = (to) => {
+    if (location.pathname !== to) {
+      playNav();
+    } else {
+      playClick();
+    }
+  };
 
   return (
     <nav className={styles.nav}>
@@ -26,7 +36,7 @@ export default function BottomNav() {
       {NAV_ITEMS.map(({ to, icon: Icon, label, center }) => {
         const isActive = location.pathname === to;
         return (
-          <NavLink key={to} to={to} className={`${styles.item} ${center ? styles.centerItem : ''}`}>
+          <NavLink key={to} to={to} className={`${styles.item} ${center ? styles.centerItem : ''}`} onClick={() => handleNavClick(to)}>
             {center ? (
               <motion.div
                 className={`${styles.centerBtn} ${isActive ? styles.centerActive : ''}`}

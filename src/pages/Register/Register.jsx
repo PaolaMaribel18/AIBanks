@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { UserPlus } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
 import GlowButton from '../../components/GlowButton/GlowButton';
+import useGameSounds from '../../hooks/useGameSounds';
 import styles from './Register.module.css';
 
 export default function Register() {
   const navigate = useNavigate();
   const { register, clearError } = useAuth();
+  const { playSuccess, playError } = useGameSounds();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,6 +40,7 @@ export default function Register() {
       }
 
       const result = await register(formData.email, formData.password, formData.name);
+      playSuccess();
 
       if (result.requiresEmailConfirmation) {
         navigate('/login', {
@@ -49,6 +52,7 @@ export default function Register() {
       }
       // Navigation will be handled by AppContent when a session exists
     } catch (err) {
+      playError();
       setError(err.message || 'Error al registrarse');
     } finally {
       setLoading(false);

@@ -4,10 +4,116 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary), var(--bg-surface));
 }
 
+/* ── Background image with pulsating blur ──────────────── */
+.bgImageWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bgImage {
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  filter: blur(18px) saturate(0.6);
+  transform: scale(1.08); /* prevent blur white edges */
+}
+
+/* Theme-aware overlay that fades the image into the background */
+.bgDark .bgImage {
+  opacity: 0.35;
+}
+.bgLight .bgImage {
+  opacity: 0.4;
+}
+.bgDark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 20%, var(--bg-primary) 85%);
+  pointer-events: none;
+}
+.bgLight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 20%, var(--bg-primary) 85%);
+  pointer-events: none;
+}
+
+/* ── Mascot Intro Overlay ──────────────────────────────── */
+.introOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+  overflow: hidden;
+}
+
+.introTitle {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.introSubtitle {
+  position: relative;
+  z-index: 2;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+/* Each mascot is absolutely positioned so it can cross through center */
+.mascotCross {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mascotGlow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-primary), transparent 70%);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mascotImg {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  position: relative;
+  z-index: 1;
+  filter: blur(1.2px) saturate(1.4) drop-shadow(0 4px 24px rgba(0, 0, 0, 0.5));
+}
+
+/* ── Login form container ──────────────────────────────── */
 .container {
+  position: relative;
+  z-index: 1;
   border: 2px solid transparent;
   background:
     linear-gradient(145deg, var(--bg-card), var(--bg-surface)) padding-box,
@@ -18,6 +124,7 @@
   max-width: 400px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   animation: rotateBorder 4s linear infinite;
+  backdrop-filter: blur(12px);
 }
 
 .title {
@@ -105,4 +212,32 @@
   color: var(--accent-red);
   font-size: 0.9rem;
   text-align: center;
+}
+
+/* ── Powered by TCS ────────────────────────────────────── */
+.poweredBy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.poweredLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.poweredTCS {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, #0064B6, #00A3E0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

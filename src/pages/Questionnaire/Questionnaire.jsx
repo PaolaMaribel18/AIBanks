@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Trophy, Shield, Scales, DiceFive, Money, FilmSlate } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContext';
 import GlowButton from '../../components/GlowButton/GlowButton';
+import useGameSounds from '../../hooks/useGameSounds';
 import styles from './Questionnaire.module.css';
 
 const questions = [
@@ -39,12 +40,14 @@ const questions = [
 export default function Questionnaire() {
   const navigate = useNavigate();
   const { completeOnboarding } = useAuth();
+  const { playClick, playSuccess, playCoin } = useGameSounds();
   const [answers, setAnswers] = useState({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   const handleAnswer = (value, points) => {
+    playClick();
     const newAnswers = { ...answers, [value]: (answers[value] || 0) + points };
     setAnswers(newAnswers);
 
@@ -67,6 +70,8 @@ export default function Questionnaire() {
   };
 
   const finishOnboarding = (archetype) => {
+    playSuccess();
+    playCoin();
     localStorage.setItem('archetype', archetype);
     completeOnboarding(archetype);
     navigate('/');

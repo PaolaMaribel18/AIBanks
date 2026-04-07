@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import styles from './RippleButton.module.css';
 import { useState, useCallback } from 'react';
+import useGameSounds from '../../hooks/useGameSounds';
 
 // Ripple Button inspired by animate-ui/buttons/ripple
 // Material Design-style ripple effect on click
@@ -16,8 +17,10 @@ export default function RippleButton({
   fullWidth = false,
 }) {
   const [ripples, setRipples] = useState([]);
+  const { playClick } = useGameSounds();
 
   const handleClick = useCallback((e) => {
+    playClick();
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -31,7 +34,7 @@ export default function RippleButton({
     }, 800);
 
     onClick?.(e);
-  }, [onClick]);
+  }, [onClick, playClick]);
 
   return (
     <motion.button
