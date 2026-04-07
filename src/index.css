@@ -1,46 +1,68 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+/* ── Rotating-border custom property ─────────────────────── */
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-primary-rgb: 10, 10, 15;
-  --bg-secondary: #12121c;
-  --bg-card: #1a1a2e;
-  --bg-card-hover: #22223a;
-  --bg-surface: #16213e;
+  /* ── Backgrounds ────────────────────────────────────────── */
+  --bg-primary: #07080d;
+  --bg-primary-rgb: 7, 8, 13;
+  --bg-secondary: #0d0f16;
+  --bg-card: #111420;
+  --bg-card-hover: #181c2a;
+  --bg-surface: #151826;
 
-  --gold-primary: #ffd700;
-  --gold-primary-rgba: 255, 215, 0;
-  --gold-light: #ffe44d;
-  --gold-dark: #b8960c;
-  --gold-gradient: linear-gradient(135deg, #ffd700, #ffaa00, #ffd700);
-  --gold-shine: linear-gradient(90deg, #fff7cc, #ffd700, #b8960c, #ffd700, #fff7cc);
+  /* ── Primary accent (violet) ────────────────────────────── */
+  --gold-primary: #a78bfa;
+  --gold-primary-rgba: 167, 139, 250;
+  --gold-light: #c4b5fd;
+  --gold-dark: #7c3aed;
+  --gold-gradient: linear-gradient(135deg, #22d3ee, #a78bfa);
+  --gold-shine: linear-gradient(90deg, #22d3ee, #a78bfa, #fb7185, #a78bfa, #22d3ee);
 
-  --accent-green: #00e676;
-  --accent-green-rgba: 0, 230, 118;
-  --accent-red: #ff1744;
-  --accent-blue: #00b0ff;
-  --accent-blue-rgba: 0, 176, 255;
-  --accent-purple: #d500f9;
-  --accent-purple-rgba: 213, 0, 249;
-  --accent-cyan: #00e5ff;
+  /* ── Functional accents ─────────────────────────────────── */
+  --accent-green: #34d399;
+  --accent-green-rgba: 52, 211, 153;
+  --accent-red: #f43f5e;
+  --accent-blue: #38bdf8;
+  --accent-blue-rgba: 56, 189, 248;
+  --accent-purple: #a78bfa;
+  --accent-purple-rgba: 167, 139, 250;
+  --accent-cyan: #22d3ee;
 
-  --glow-gold: 0 0 20px rgba(255, 215, 0, 0.15);
-  --glow-green: 0 0 15px rgba(0, 230, 118, 0.2);
-  --glow-red: 0 0 15px rgba(255, 23, 68, 0.2);
-  --glow-blue: 0 0 15px rgba(0, 176, 255, 0.2);
-  --glow-purple: 0 0 15px rgba(213, 0, 249, 0.15);
+  /* ── Glows ──────────────────────────────────────────────── */
+  --glow-gold: 0 0 20px rgba(167, 139, 250, 0.15);
+  --glow-green: 0 0 15px rgba(52, 211, 153, 0.2);
+  --glow-red: 0 0 15px rgba(244, 63, 94, 0.2);
+  --glow-blue: 0 0 15px rgba(34, 211, 238, 0.2);
+  --glow-purple: 0 0 15px rgba(167, 139, 250, 0.15);
 
-  --text-primary: #ffffff;
-  --text-secondary: #b0b0c8;
-  --text-muted: #6c6c8a;
-  --text-gold: #ffd700;
+  /* ── Text ───────────────────────────────────────────────── */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-gold: #a78bfa;
 
   --nav-height: 56px;
   --bottom-nav-height: 68px;
 
+  /* ── Borders ────────────────────────────────────────────── */
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-gold: rgba(255, 215, 0, 0.15);
+  --border-gold: rgba(167, 139, 250, 0.18);
 
+  /* ── Rotating-border color stops ────────────────────────── */
+  --rb-1: #22d3ee;
+  --rb-2: #a78bfa;
+  --rb-3: #fb7185;
+  --rb-4: #fbbf24;
+  --rb-5: #34d399;
+
+  /* ── Typography & layout ────────────────────────────────── */
   --font-display: 'Orbitron', monospace;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
@@ -58,42 +80,48 @@
 }
 
 :root[data-theme="light"] {
-  --bg-primary: #f8f9fa;
-  --bg-primary-rgb: 248, 249, 250;
-  --bg-secondary: #e9ecef;
+  --bg-primary: #f8fafc;
+  --bg-primary-rgb: 248, 250, 252;
+  --bg-secondary: #f1f5f9;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8f9fa;
+  --bg-card-hover: #f8fafc;
   --bg-surface: #ffffff;
 
-  --gold-primary: #b8960c;
-  --gold-primary-rgba: 184, 150, 12;
-  --gold-light: #d4af37;
-  --gold-dark: #8b6914;
-  --gold-gradient: linear-gradient(135deg, #b8960c, #d4af37, #b8960c);
-  --gold-shine: linear-gradient(90deg, #f5e6a3, #b8960c, #8b6914, #b8960c, #f5e6a3);
+  --gold-primary: #7c3aed;
+  --gold-primary-rgba: 124, 58, 237;
+  --gold-light: #a78bfa;
+  --gold-dark: #5b21b6;
+  --gold-gradient: linear-gradient(135deg, #0891b2, #7c3aed);
+  --gold-shine: linear-gradient(90deg, #0891b2, #7c3aed, #e11d48, #7c3aed, #0891b2);
 
-  --accent-green: #28a745;
-  --accent-green-rgba: 40, 167, 69;
-  --accent-red: #dc3545;
-  --accent-blue: #007bff;
-  --accent-blue-rgba: 0, 123, 255;
-  --accent-purple: #6f42c1;
-  --accent-purple-rgba: 111, 66, 193;
-  --accent-cyan: #17a2b8;
+  --accent-green: #059669;
+  --accent-green-rgba: 5, 150, 105;
+  --accent-red: #e11d48;
+  --accent-blue: #0284c7;
+  --accent-blue-rgba: 2, 132, 199;
+  --accent-purple: #7c3aed;
+  --accent-purple-rgba: 124, 58, 237;
+  --accent-cyan: #0891b2;
 
-  --glow-gold: 0 0 20px rgba(184, 150, 12, 0.15);
-  --glow-green: 0 0 15px rgba(40, 167, 69, 0.2);
-  --glow-red: 0 0 15px rgba(220, 53, 69, 0.2);
-  --glow-blue: 0 0 15px rgba(0, 123, 255, 0.2);
-  --glow-purple: 0 0 15px rgba(111, 66, 193, 0.15);
+  --glow-gold: 0 0 20px rgba(124, 58, 237, 0.1);
+  --glow-green: 0 0 15px rgba(5, 150, 105, 0.15);
+  --glow-red: 0 0 15px rgba(225, 29, 72, 0.15);
+  --glow-blue: 0 0 15px rgba(8, 145, 178, 0.15);
+  --glow-purple: 0 0 15px rgba(124, 58, 237, 0.1);
 
-  --text-primary: #212529;
-  --text-secondary: #495057;
-  --text-muted: #6c757d;
-  --text-gold: #b8960c;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-gold: #7c3aed;
 
   --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-gold: rgba(184, 150, 12, 0.15);
+  --border-gold: rgba(124, 58, 237, 0.15);
+
+  --rb-1: #0891b2;
+  --rb-2: #7c3aed;
+  --rb-3: #e11d48;
+  --rb-4: #d97706;
+  --rb-5: #059669;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -169,4 +197,7 @@ img { max-width: 100%; display: block; }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
+}
+@keyframes rotateBorder {
+  to { --border-angle: 360deg; }
 }

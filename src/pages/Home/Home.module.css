@@ -5,19 +5,22 @@
 /* Balance Card */
 .balanceCard {
   margin: 12px 20px 0;
-  background: linear-gradient(145deg, var(--bg-card), var(--bg-surface));
-  border: 1px solid var(--border-gold);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(145deg, var(--bg-card), var(--bg-surface)) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   border-radius: var(--radius-xl);
   padding: 20px;
   position: relative;
   overflow: hidden;
+  animation: rotateBorder 4s linear infinite;
 }
 .balanceCard::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--gold-primary-rgba), 0.2), transparent);
 }
 .balanceContent {
   position: relative;
@@ -128,8 +131,8 @@
 /* Bonus */
 .bonus {
   margin: 16px 20px;
-  background: rgba(0, 230, 118, 0.06);
-  border: 1px solid rgba(0, 230, 118, 0.12);
+  background: rgba(var(--accent-green-rgba), 0.06);
+  border: 1px solid rgba(var(--accent-green-rgba), 0.12);
   border-radius: var(--radius-lg);
   padding: 14px 16px;
   display: flex;
@@ -143,7 +146,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-green-rgba), 0.3), transparent);
 }
 .bonusLeft {
   display: flex;
@@ -165,8 +168,8 @@
   color: var(--text-primary);
 }
 .bonusBtn {
-  background: linear-gradient(135deg, #00e676, #00c853);
-  color: #0a0a0f;
+  background: linear-gradient(135deg, #34d399, #059669);
+  color: var(--bg-primary);
   font-weight: 800;
   font-size: 0.78rem;
   padding: 8px 18px;

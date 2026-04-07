@@ -22,12 +22,15 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(var(--gold-primary-rgba), 0.12), rgba(var(--gold-primary-rgba), 0.06));
-  border: 2px solid var(--border-gold);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(135deg, rgba(var(--gold-primary-rgba), 0.12), rgba(var(--gold-primary-rgba), 0.06)) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
+  animation: rotateBorder 6s linear infinite;
 }
 
 .greeting {

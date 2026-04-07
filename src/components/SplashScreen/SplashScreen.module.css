@@ -26,7 +26,9 @@
 .title {
   font-size: 3rem;
   font-weight: bold;
-  color: var(--text-gold);
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  background: linear-gradient(135deg, var(--rb-1), var(--rb-2), var(--rb-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
 }

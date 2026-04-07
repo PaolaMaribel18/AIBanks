@@ -41,7 +41,7 @@
 .tabIndicator {
   position: absolute;
   inset: 0;
-  background: rgba(255, 215, 0, 0.1);
+  background: rgba(var(--gold-primary-rgba), 0.1);
   border-radius: 11px;
   z-index: -1;
 }
@@ -51,10 +51,13 @@
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(255, 215, 0, 0.04), transparent);
-  border: 1px solid var(--border-gold);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(var(--gold-primary-rgba), 0.04), var(--bg-primary)) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   margin-bottom: 14px;
   padding: 16px 10px 0;
+  animation: rotateBorder 4s linear infinite;
 }
 
 /* Podium */
@@ -80,7 +83,7 @@
   height: 48px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  border: 2px solid rgba(var(--gold-primary-rgba), 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,7 +94,7 @@
   height: 58px;
   font-size: 1.6rem;
   border-color: var(--gold-primary);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 20px rgba(var(--gold-primary-rgba), 0.25);
 }
 .crownWrap {
   font-size: 1.3rem;
@@ -125,8 +128,8 @@
   overflow: hidden;
 }
 .barGold {
-  background: linear-gradient(180deg, rgba(255, 215, 0, 0.2), rgba(255, 170, 0, 0.06));
-  border: 1px solid rgba(255, 215, 0, 0.2);
+  background: linear-gradient(180deg, rgba(var(--gold-primary-rgba), 0.2), rgba(var(--gold-primary-rgba), 0.06));
+  border: 1px solid rgba(var(--gold-primary-rgba), 0.2);
   border-bottom: none;
 }
 .barSilver {
@@ -149,8 +152,10 @@
 
 /* Your Position */
 .yourPos {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.06), rgba(255, 170, 0, 0.02));
-  border: 1px solid var(--border-gold);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(135deg, rgba(var(--gold-primary-rgba), 0.06), rgba(var(--gold-primary-rgba), 0.02)) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   border-radius: var(--radius-md);
   padding: 14px 16px;
   display: flex;
@@ -159,6 +164,7 @@
   margin-bottom: 14px;
   position: relative;
   overflow: hidden;
+  animation: rotateBorder 4s linear infinite;
 }
 .yourPos::before {
   content: '';
@@ -167,7 +173,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--gold-primary-rgba), 0.3), transparent);
 }
 .yourPosLeft {
   display: flex;

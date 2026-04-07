@@ -8,8 +8,10 @@
 }
 
 .container {
-  background: linear-gradient(145deg, var(--bg-card), var(--bg-surface));
-  border: 1px solid var(--border-gold);
+  border: 2px solid transparent;
+  background:
+    linear-gradient(145deg, var(--bg-card), var(--bg-surface)) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   border-radius: var(--radius-xl);
   padding: 40px 30px;
   width: 100%;
@@ -17,6 +19,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  animation: rotateBorder 4s linear infinite;
 }
 
 .progressBar {
@@ -34,7 +37,7 @@
   font-weight: bold;
   color: var(--text-primary);
   margin-bottom: 10px;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 10px rgba(var(--gold-primary-rgba), 0.3);
 }
 
 .subtitle {
@@ -79,7 +82,7 @@
 
 .optionButton:hover {
   border-color: var(--gold-primary);
-  background: rgba(255, 215, 0, 0.1);
+  background: rgba(var(--gold-primary-rgba), 0.1);
   transform: translateY(-2px);
 }
 

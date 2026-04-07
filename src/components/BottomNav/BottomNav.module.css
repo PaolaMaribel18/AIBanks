@@ -42,17 +42,21 @@
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background: var(--gold-gradient);
+  border: 3px solid transparent;
+  background:
+    linear-gradient(135deg, var(--rb-1), var(--rb-2)) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--bg-primary);
-  box-shadow: 0 4px 20px rgba(var(--gold-primary-rgba), 0.3), 0 0 0 3px rgba(var(--bg-primary-rgb), 0.95);
+  box-shadow: 0 4px 20px rgba(var(--gold-primary-rgba), 0.3);
   position: relative;
+  animation: rotateBorder 3s linear infinite;
 }
 
 .centerActive {
-  box-shadow: 0 4px 24px rgba(255, 215, 0, 0.45), 0 0 0 3px rgba(10, 10, 15, 0.95);
+  box-shadow: 0 4px 24px rgba(var(--gold-primary-rgba), 0.45);
 }
 
 .iconWrap {
@@ -67,7 +71,7 @@
 .activeBg {
   position: absolute;
   inset: -3px -6px;
-  background: rgba(255, 215, 0, 0.1);
+  background: rgba(var(--gold-primary-rgba), 0.1);
   border-radius: var(--radius-sm);
 }
 
