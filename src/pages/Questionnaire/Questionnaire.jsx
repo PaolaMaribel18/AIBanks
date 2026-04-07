@@ -9,29 +9,29 @@ import styles from './Questionnaire.module.css';
 const questions = [
   {
     id: 1,
-    question: '¿Qué tipo de premios prefieres?',
+    question: '¿Qué te motiva más a participar en los pronósticos?',
     options: [
-      { text: 'Premios seguros y garantizados', value: 'conservador', icon: Shield },
-      { text: 'Premios con buen equilibrio', value: 'moderado', icon: Scales },
-      { text: 'Premios emocionantes y de alto valor', value: 'arriesgado', icon: DiceFive },
+      { text: 'Quedar arriba entre los participantes', value: 'competidor', points: 2, icon: Trophy },
+      { text: 'Sumar puntos y acercarme a una meta grande', value: 'acumulador', points: 2, icon: Shield },
+      { text: 'Ganar algo útil de forma rápida', value: 'practico', points: 2, icon: Money },
     ],
   },
   {
     id: 2,
-    question: '¿Cómo te sientes con los sorteos?',
+    question: 'Cuando vuelves a una app como esta, ¿qué te anima más?',
     options: [
-      { text: 'Prefiero evitarlos, quiero certeza', value: 'conservador', icon: Shield },
-      { text: 'Me gusta participar en algunos', value: 'moderado', icon: Scales },
-      { text: '¡Me encantan los sorteos grandes!', value: 'arriesgado', icon: Trophy },
+      { text: 'Ver cómo voy frente a otros', value: 'competidor', points: 2, icon: Scales },
+      { text: 'Ver que mis puntos siguen creciendo', value: 'acumulador', points: 2, icon: DiceFive },
+      { text: 'Encontrar un beneficio claro y fácil de usar', value: 'practico', points: 2, icon: FilmSlate },
     ],
   },
   {
     id: 3,
-    question: '¿Qué valoras más en un premio?',
+    question: 'Si entras hoy a la app, ¿qué te gustaría revisar primero?',
     options: [
-      { text: 'Estabilidad y utilidad diaria', value: 'conservador', icon: Money },
-      { text: 'Diversión y entretenimiento', value: 'moderado', icon: FilmSlate },
-      { text: 'Experiencias únicas y emocionantes', value: 'arriesgado', icon: Trophy },
+      { text: 'Mi posición actual', value: 'competidor', points: 1, icon: Trophy },
+      { text: 'Mis puntos acumulados', value: 'acumulador', points: 1, icon: Shield },
+      { text: 'Qué premio o beneficio puedo obtener hoy', value: 'practico', points: 1, icon: Money },
     ],
   },
 ];
@@ -44,22 +44,32 @@ export default function Questionnaire() {
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  const handleAnswer = (value) => {
-    const newAnswers = { ...answers, [questions[currentQuestion].id]: value };
+  const handleAnswer = (value, points) => {
+    const newAnswers = { ...answers, [value]: (answers[value] || 0) + points };
     setAnswers(newAnswers);
 
     if (currentQuestion < questions.length - 1) {
+      if (currentQuestion === 1) {
+        // Evaluate tie-breaker need after Q2
+        const sorted = Object.entries(newAnswers).sort((a,b) => b[1] - a[1]);
+        if (sorted.length > 1 && sorted[0][1] !== sorted[1][1]) {
+          // No tie
+          finishOnboarding(sorted[0][0]);
+          return;
+        }
+      }
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Calculate archetype
-      const counts = { conservador: 0, moderado: 0, arriesgado: 0 };
-      Object.values(newAnswers).forEach(val => {
-        counts[val]++;
-      });
-      const archetype = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-      completeOnboarding(archetype);
-      navigate('/');
+      // Finished all 3
+      const sorted = Object.entries(newAnswers).sort((a,b) => b[1] - a[1]);
+      finishOnboarding(sorted[0][0]);
     }
+  };
+
+  const finishOnboarding = (archetype) => {
+    localStorage.setItem('archetype', archetype);
+    completeOnboarding(archetype);
+    navigate('/');
   };
 
   const question = questions[currentQuestion];
@@ -109,7 +119,7 @@ export default function Questionnaire() {
                 <motion.button
                   key={option.value}
                   className={styles.optionButton}
-                  onClick={() => handleAnswer(option.value)}
+                  onClick={() => handleAnswer(option.value, option.points)}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6 + index * 0.1, duration: 0.3 }}

@@ -22,9 +22,94 @@
   font-weight: 800;
 }
 
+/* Onboarding overlay */
+.onboardingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 5, 10, 0.95);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.onboardingBox {
+  background: linear-gradient(145deg, var(--bg-card), var(--bg-surface));
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-xl);
+  padding: 30px 24px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(255, 215, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+.onboardingBox::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+}
+.onboardingTitle {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--gold-primary);
+  margin-bottom: 8px;
+}
+.onboardingSub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+.onboardingQuestion {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+.onboardingOpts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.onboardingBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.onboardingBtn:active {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: var(--gold-primary);
+}
+
 /* Recommended Section */
 .recommended {
   margin-bottom: 24px;
+  position: relative;
+}
+.archExplainer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--gold-primary);
+  padding: 10px 14px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.archExplainer strong {
+  color: var(--gold-primary);
 }
 .sectionTitle {
   font-size: 1.1rem;
@@ -142,6 +227,15 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+/* Glowing effect for recommended cards */
+.recommendedGrid .rewardCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 12px rgba(255, 215, 0, 0.18);
+  pointer-events: none;
 }
 .rewardCard::before {
   content: '';

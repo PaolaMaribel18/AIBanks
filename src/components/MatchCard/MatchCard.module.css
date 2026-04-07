@@ -111,6 +111,11 @@
   font-size: 0.82rem;
   color: var(--text-primary);
 }
+.teamName {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+}
 .teamCode {
   font-family: var(--font-display);
   font-size: 0.55rem;
@@ -119,6 +124,18 @@
   letter-spacing: 1px;
   opacity: 0.5;
 }
+.aiProbability {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
 .vsWrap {
   display: flex;
   align-items: center;
@@ -210,6 +227,18 @@
   position: relative;
   z-index: 1;
 }
+.aiMultiplier {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #ffaa00;
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 170, 0, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
 
 /* Footer */
 .footer {

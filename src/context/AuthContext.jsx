@@ -38,7 +38,9 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(
+    localStorage.getItem('hasCompletedOnboarding') === 'true'
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -163,21 +165,22 @@ export function AuthProvider({ children }) {
   const completeOnboarding = async (archetype) => {
     try {
       setError(null);
-      if (!user?.id) throw new Error('Usuario no autenticado');
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ archetype })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
+      
+      // 1. Guardar primero de forma INMEDIATA en el FrontEnd (Independiente de backend)
       setHasCompletedOnboarding(true);
       localStorage.setItem('hasCompletedOnboarding', 'true');
       localStorage.setItem('archetype', archetype);
+
+      // 2. Intentar respaldarlo en base de datos de manera silenciosa si hay usuario
+      if (user?.id) {
+        await supabase
+          .from('profiles')
+          .update({ archetype })
+          .eq('id', user.id);
+      }
     } catch (err) {
-      setError(err.message);
-      throw err;
+      console.error("Error silencioso guardando en Supabase:", err);
+      // No frenamos a la aplicación si falla la DB, el LocalStorage ya tiene la respuesta.
     }
   };
 

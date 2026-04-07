@@ -6,6 +6,27 @@ import styles from './MatchCard.module.css';
 export default function MatchCard({ match, delay = 0, onPredict, predictedChoice }) {
   const [selected, setSelected] = useState(predictedChoice || null);
   const [confirmed, setConfirmed] = useState(!!predictedChoice);
+  const [aiData, setAiData] = useState(null);
+
+  useEffect(() => {
+    async function fetchAI() {
+      try {
+        const url = import.meta.env.VITE_AI_BACKEND_URL || 'http://127.0.0.1:8000';
+        const response = await fetch(`${url}/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ home_team: match.home.name, away_team: match.away.name })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAiData(data);
+        }
+      } catch (err) {
+        console.error("AI fetch failed:", err);
+      }
+    }
+    fetchAI();
+  }, [match.home.name, match.away.name]);
 
   useEffect(() => {
     if (predictedChoice) {
@@ -93,6 +114,11 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
           </motion.span>
           <span className={styles.teamName}>{match.home.name}</span>
           <span className={styles.teamCode}>{match.home.code}</span>
+          {aiData && aiData.probabilidades_victoria && (
+            <motion.span className={styles.aiProbability} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+              {aiData.probabilidades_victoria[match.home.name]}%
+            </motion.span>
+          )}
         </motion.div>
         <div className={styles.vsWrap}>
           <motion.div
@@ -117,6 +143,11 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
           </motion.span>
           <span className={styles.teamName}>{match.away.name}</span>
           <span className={styles.teamCode}>{match.away.code}</span>
+          {aiData && aiData.probabilidades_victoria && (
+            <motion.span className={styles.aiProbability} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
+              {aiData.probabilidades_victoria[match.away.name]}%
+            </motion.span>
+          )}
         </motion.div>
       </div>
 
@@ -125,10 +156,10 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
       {/* Prediction Buttons (sin cuotas) */}
       <div className={styles.odds}>
         {[
-          { key: 'home', label: match.home.code },
-          { key: 'draw', label: 'Empate' },
-          { key: 'away', label: match.away.code },
-        ].map(({ key, label }) => (
+          { key: 'home', label: match.home.code, name: match.home.name },
+          { key: 'draw', label: 'Empate', name: 'draw' },
+          { key: 'away', label: match.away.code, name: match.away.name },
+        ].map(({ key, label, name }) => (
           <motion.button
             key={key}
             className={`${styles.oddBtn} ${selected === key ? styles.oddSelected : ''} ${confirmed && selected === key ? styles.oddConfirmed : ''}`}
@@ -145,6 +176,9 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
               />
             )}
             <span className={styles.oddLabel} style={{ width: '100%', textAlign: 'center' }}>{label}</span>
+            {aiData?.gamificacion?.multiplicadores?.[name] && (
+               <span className={styles.aiMultiplier}>{aiData.gamificacion.multiplicadores[name]}x</span>
+            )}
           </motion.button>
         ))}
       </div>

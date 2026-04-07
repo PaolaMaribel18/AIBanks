@@ -28,13 +28,22 @@ const staggerItem = {
 
 export default function Rewards() {
   const { theme } = useTheme();
-  const archetype = localStorage.getItem('archetype') || 'moderado'; // Default to moderado
+  const getValidArchetype = () => {
+    const saved = localStorage.getItem('archetype');
+    return ['competidor', 'acumulador', 'practico'].includes(saved) ? saved : null;
+  };
+
+  const [archetype, setArchetype] = useState(getValidArchetype());
+  const [showOnboarding, setShowOnboarding] = useState(!getValidArchetype());
+  const [step, setStep] = useState(1);
+  const [answers, setAnswers] = useState({ competidor: 0, acumulador: 0, practico: 0 });
+
   const [activeCategory, setActiveCategory] = useState('all');
   const [redeemed, setRedeemed] = useState({});
   const [showFireworks, setShowFireworks] = useState(false);
   const [lastRedeemed, setLastRedeemed] = useState(null);
 
-  const recommended = REWARDS_CATALOG.filter((r) => r.archetype === archetype).slice(0, 3);
+  const recommended = archetype ? REWARDS_CATALOG.filter((r) => r.archetype === archetype).slice(0, 4) : [];
   const filtered =
     activeCategory === 'all'
       ? REWARDS_CATALOG
@@ -48,8 +57,97 @@ export default function Rewards() {
     setTimeout(() => setShowFireworks(false), 3500);
   };
 
+  const handleAnswer = (pointsTo, val) => {
+    const newAnswers = { ...answers, [pointsTo]: answers[pointsTo] + val };
+    setAnswers(newAnswers);
+
+    if (step === 1) {
+      setStep(2);
+    } else if (step === 2) {
+      const sorted = Object.entries(newAnswers).sort((a,b) => b[1] - a[1]);
+      if (sorted[0][1] === sorted[1][1]) {
+        setStep(3); // Empate
+      } else {
+        finishOnboarding(sorted[0][0]);
+      }
+    } else if (step === 3) {
+      const sorted = Object.entries(newAnswers).sort((a,b) => b[1] - a[1]);
+      finishOnboarding(sorted[0][0]);
+    }
+  };
+
+  const finishOnboarding = (winner) => {
+    localStorage.setItem('archetype', winner);
+    setArchetype(winner);
+    setShowOnboarding(false);
+  };
+
+  // Preguntas del quiz
+  const qData = [
+    {
+      q: "¿Qué te motiva más a participar en los pronósticos?",
+      opts: [
+        { label: "Quedar arriba entre los participantes", val: 2, t: "competidor" },
+        { label: "Sumar puntos y acercarme a una meta grande", val: 2, t: "acumulador" },
+        { label: "Ganar algo útil de forma rápida", val: 2, t: "practico" },
+      ]
+    },
+    {
+      q: "Cuando vuelves a una app como esta, ¿qué te anima más?",
+      opts: [
+        { label: "Ver cómo voy frente a otros", val: 2, t: "competidor" },
+        { label: "Ver que mis puntos siguen creciendo", val: 2, t: "acumulador" },
+        { label: "Encontrar un beneficio claro y fácil de usar", val: 2, t: "practico" },
+      ]
+    },
+    {
+      q: "Si entras hoy a la app, ¿qué te gustaría revisar primero?",
+      opts: [
+        { label: "Mi posición actual", val: 1, t: "competidor" },
+        { label: "Mis puntos acumulados", val: 1, t: "acumulador" },
+        { label: "Qué premio o beneficio puedo obtener hoy", val: 1, t: "practico" },
+      ]
+    }
+  ];
+
+  const archetypeExplanations = {
+    competidor: "Prefiere reconocimiento, posición y premios aspiracionales.",
+    acumulador: "Prefiere progreso, metas y premios de mayor valor por acumulación.",
+    practico: "Prefiere utilidad inmediata, canje rápido y beneficios claros."
+  };
+
   return (
     <div className={styles.page}>
+      {/* ONBOARDING MODAL OVERLAY */}
+      <AnimatePresence>
+        {showOnboarding && (
+          <motion.div
+            className={styles.onboardingOverlay}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className={styles.onboardingBox}
+              initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }}
+            >
+              <h3 className={styles.onboardingTitle}>Descubramos tu perfil 🧠</h3>
+              <p className={styles.onboardingSub}>Queremos recomendarte los premios que mejor conectan contigo. (Paso {step} de {step===3 ? '3' : '2'})</p>
+              
+              <h4 className={styles.onboardingQuestion}>{qData[step - 1].q}</h4>
+              <div className={styles.onboardingOpts}>
+                {qData[step - 1].opts.map((o, idx) => (
+                  <button 
+                    key={idx} 
+                    className={styles.onboardingBtn}
+                    onClick={() => handleAnswer(o.t, o.val)}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Fireworks Effect on Redeem! */}
       <AnimatePresence>
         {showFireworks && (
@@ -97,7 +195,17 @@ export default function Rewards() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <h3 className={styles.sectionTitle}><Star size={18} /> Recomendados para ti</h3>
+        {archetype && (
+          <div className={styles.archExplainer}>
+            <p>Usamos 3 arquetipos simples para identificar qué motiva a cada cliente dentro de la experiencia gamificada: competir, acumular o obtener beneficios rápidos. Con solo 2 preguntas y una tercera de desempate, personalizamos la experiencia y priorizamos el tipo de premio más atractivo para cada perfil.</p>
+            <br/>
+            <p>
+              <strong>Perfil {archetype.charAt(0).toUpperCase() + archetype.slice(1)}:</strong> {archetypeExplanations[archetype]}
+            </p>
+          </div>
+        )}
+
+        <h3 className={styles.sectionTitle}><Star size={18} /> Recomendados exclusivamente para ti</h3>
         <motion.div className={styles.recommendedGrid} variants={staggerContainer} initial="hidden" animate="show">
           {recommended.map((reward) => (
             <motion.div key={reward.id} variants={staggerItem}>
