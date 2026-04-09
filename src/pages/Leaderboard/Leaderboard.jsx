@@ -7,6 +7,7 @@ import { LEADERBOARD_DATA, UPCOMING_MATCHES, USER_PROFILE } from '../../data/moc
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import { useMAIis } from '../../hooks/useMAIis';
+import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import styles from './Leaderboard.module.css';
 
 const TABS = ['Semanal', 'Mensual', 'Global'];
