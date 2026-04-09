@@ -238,7 +238,7 @@ function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
 
       <div className={styles.compactRight}>
         {isRedeemed ? (
-          <div className={styles.redeemedBadge} style={{ padding: '4px 8px', fontSize: '0.7rem' }}><Check size={14}/> Canjeado</div>
+          <div className={styles.redeemedBadge} style={{ padding: '4px 8px', fontSize: '0.7rem' }}><Check size={14} /> Canjeado</div>
         ) : (
           <RippleButton
             variant={canAfford ? 'gold' : ''}
@@ -246,8 +246,8 @@ function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
             size="sm"
             onClick={() => onRedeem(reward)}
             disabled={!canAfford}
-            style={canAfford 
-              ? { padding: '6px 14px', fontSize: '0.75rem', boxShadow: '0 2px 10px rgba(255, 215, 0, 0.2)' } 
+            style={canAfford
+              ? { padding: '6px 14px', fontSize: '0.75rem', boxShadow: '0 2px 10px rgba(255, 215, 0, 0.2)' }
               : { padding: '6px 10px', fontSize: '0.72rem' }
             }
           >
@@ -284,23 +284,23 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
           <Star size={14} /> Popular
         </motion.div>
       )}
-      
+
       <div className={styles.rewardHeader}>
         <span className={styles.rewardIcon}>{reward.icon}</span>
         <div className={styles.rewardTitleArea}>
           <h4 className={styles.rewardName}>{reward.name}</h4>
           <div className={styles.rewardCost}>
             <Coin size={14} />
-            <span className={styles.costValue}>{reward.cost.toLocaleString()} mAIles</span>
+            <span className={styles.costValue}>{reward.cost.toLocaleString()} mAiles</span>
           </div>
         </div>
       </div>
-      
+
       <p className={styles.rewardDesc}>{reward.description}</p>
-      
+
       <div className={styles.rewardActions}>
         {isRedeemed ? (
-          <div className={styles.redeemedBadge}><Check size={16}/> Canjeado</div>
+          <div className={styles.redeemedBadge}><Check size={16} /> Canjeado</div>
         ) : (
           <RippleButton
             variant={canAfford ? (isAiRecommend ? 'purple' : 'gold') : ''}
@@ -313,7 +313,7 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
               boxShadow: isAiRecommend ? '0 4px 15px rgba(213, 0, 249, 0.35)' : '0 4px 15px rgba(255, 215, 0, 0.25)'
             } : {}}
           >
-            {canAfford ? 'Canjear Ahora' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()} mAIles`}
+            {canAfford ? 'Canjear Ahora' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()} mAiles`}
           </RippleButton>
         )}
       </div>
@@ -381,6 +381,11 @@ export default function Rewards() {
 
   const userName = String(user?.name || '').trim() || 'Usuario';
 
+  // Filtrar categorías que tienen al menos un producto
+  const activeCategories = CATEGORIES.filter(cat =>
+    cat.key === 'all' || REWARDS_CATALOG.some(r => r.category === cat.key)
+  );
+
   const recommended = effectiveArchetype
     ? REWARDS_CATALOG.filter((r) => r.archetype === effectiveArchetype)
     : [];
@@ -404,14 +409,14 @@ export default function Rewards() {
     if (step === 1) {
       setStep(2);
     } else if (step === 2) {
-      const sorted = Object.entries(newAnswers).sort((a,b) => b[1] - a[1]);
+      const sorted = Object.entries(newAnswers).sort((a, b) => b[1] - a[1]);
       if (sorted[0][1] === sorted[1][1]) {
         setStep(3); // Empate
       } else {
         finishOnboarding(sorted[0][0]);
       }
     } else if (step === 3) {
-      const sorted = Object.entries(newAnswers).sort((a,b) => b[1] - a[1]);
+      const sorted = Object.entries(newAnswers).sort((a, b) => b[1] - a[1]);
       finishOnboarding(sorted[0][0]);
     }
   };
@@ -530,7 +535,7 @@ export default function Rewards() {
       ]
     },
     {
-      q: "Si tuvieras 5000 mAIles, ¿qué harías?",
+      q: "Si tuvieras 5000 mAiles, ¿qué harías?",
       opts: [
         { label: "Rebajar mi porcentaje de préstamo", val: 1, t: "acumulador" },
         { label: "Canjear la consola del momento", val: 1, t: "competidor" },
@@ -553,18 +558,18 @@ export default function Rewards() {
             className={styles.onboardingOverlay}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           >
-            <motion.div 
+            <motion.div
               className={styles.onboardingBox}
               initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }}
             >
               <h3 className={styles.onboardingTitle}>Tu Identidad AIBank 🌟</h3>
-              <p className={styles.onboardingSub}>Queremos armar un portafolio de beneficios ideal para ti. (Paso {step} de {step===3 ? '3' : '2'})</p>
-              
+              <p className={styles.onboardingSub}>Queremos armar un portafolio de beneficios ideal para ti. (Paso {step} de {step === 3 ? '3' : '2'})</p>
+
               <h4 className={styles.onboardingQuestion}>{qData[step - 1].q}</h4>
               <div className={styles.onboardingOpts}>
                 {qData[step - 1].opts.map((o, idx) => (
-                  <button 
-                    key={idx} 
+                  <button
+                    key={idx}
                     className={styles.onboardingBtn}
                     onClick={() => handleAnswer(o.t, o.val)}
                   >
@@ -620,7 +625,7 @@ export default function Rewards() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h2 className={styles.title}><Gift size={24} /> Beneficios AIBank</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAIles por recompensas y mejoras financieras.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAiles por recompensas y mejoras financieras.</p>
       </motion.div>
 
       {/* Balance Card */}
@@ -631,7 +636,7 @@ export default function Rewards() {
         transition={{ delay: 0.05 }}
       >
         <div className={styles.balanceInfo}>
-          <span className={styles.balanceLabel}>Tu capital en mAIles</span>
+          <span className={styles.balanceLabel}>Tu capital en mAiles</span>
           <div className={styles.balanceValue}>
             <Coin size={20} />
             <AnimatedCounter
@@ -649,11 +654,11 @@ export default function Rewards() {
         </motion.div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         onClick={() => setShowLeaderboard(true)}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        style={{ 
+        style={{
           margin: '0 0 20px 0',
           background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%)',
           border: '1px solid var(--gold-primary)',
@@ -781,7 +786,7 @@ export default function Rewards() {
 
       {/* Categories */}
       <div className={styles.categories}>
-        {CATEGORIES.map((cat) => (
+        {activeCategories.map((cat) => (
           <motion.button
             key={cat.key}
             className={`${styles.catBtn} ${activeCategory === cat.key ? styles.catActive : ''}`}
@@ -795,11 +800,11 @@ export default function Rewards() {
       </div>
 
       <div className={styles.catalogHeader}>
-         <h3 className={styles.catalogTitle}>Catálogo</h3>
-         <div className={styles.viewToggle}>
-            <button className={`${styles.viewBtn} ${viewMode === 'list' ? styles.activeView : ''}`} onClick={() => setViewMode('list')}><List size={18}/></button>
-            <button className={`${styles.viewBtn} ${viewMode === 'grid' ? styles.activeView : ''}`} onClick={() => setViewMode('grid')}><SquaresFour size={18}/></button>
-         </div>
+        <h3 className={styles.catalogTitle}>Catálogo</h3>
+        <div className={styles.viewToggle}>
+          <button className={`${styles.viewBtn} ${viewMode === 'list' ? styles.activeView : ''}`} onClick={() => setViewMode('list')}><List size={18} /></button>
+          <button className={`${styles.viewBtn} ${viewMode === 'grid' ? styles.activeView : ''}`} onClick={() => setViewMode('grid')}><SquaresFour size={18} /></button>
+        </div>
       </div>
 
       {/* Main Catalog */}
@@ -814,11 +819,11 @@ export default function Rewards() {
         >
           {filtered.map((reward) => (
             <motion.div key={reward.id} variants={staggerItem}>
-                {viewMode === 'list' ? (
-                  <RewardCompactCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
-                ) : (
-                  <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
-                )}
+              {viewMode === 'list' ? (
+                <RewardCompactCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
+              ) : (
+                <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
+              )}
             </motion.div>
           ))}
         </motion.div>

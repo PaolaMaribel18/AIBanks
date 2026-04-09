@@ -15,8 +15,8 @@ export default function TopBar() {
 
   return (
     <header className={styles.header}>
-      <div 
-        className={styles.left} 
+      <div
+        className={styles.left}
         style={{ cursor: 'pointer' }}
         onClick={() => navigate('/profile')}
         whileHover={{ scale: 1.02 }}
@@ -25,10 +25,10 @@ export default function TopBar() {
           <span>{USER_PROFILE.avatar}</span>
         </div>
         <motion.div
-           className={styles.greeting}
-           initial={{ opacity: 0, x: -10 }}
-           animate={{ opacity: 1, x: 0 }}
-           transition={{ duration: 0.4 }}
+          className={styles.greeting}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
         >
           <span className={styles.hello}>Hola, {user?.name || USER_PROFILE.name}</span>
           <span className={styles.tier}>{tier}</span>

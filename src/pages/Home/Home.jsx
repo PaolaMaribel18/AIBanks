@@ -91,7 +91,7 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
   return (
     <AnimatePresence>
       <div className={styles.modalOverlay}>
-        <motion.div 
+        <motion.div
           className={styles.modalContent}
           style={{ background: 'linear-gradient(135deg, #1a1a2e, #3a1c71)', border: '1px solid rgba(213,0,249,0.3)', textAlign: 'center' }}
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -104,14 +104,14 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
           </div>
           <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px' }}>Nueva Función IA Activada</h2>
           <p className={styles.modalDesc} style={{ color: '#cbd5e1', lineHeight: '1.5' }}>
-            Tu AIBank App ahora incluye predicciones deportivas impulsadas por Inteligencia Artificial. <br/><br/>
+            Tu AIBank App ahora incluye predicciones deportivas impulsadas por Inteligencia Artificial. <br /><br />
             Desafía los pronósticos y gana mAIles canjeables.
           </p>
-          <button 
-             onClick={handlePlayNow}
-             style={{ background: '#d500f9', color: 'white', padding: '12px 24px', borderRadius: '24px', fontWeight: 'bold', border: 'none', cursor: 'pointer', width: '100%', marginTop: '16px', fontSize: '1rem', boxShadow: '0 4px 15px rgba(213,0,249,0.4)' }}
+          <button
+            onClick={handlePlayNow}
+            style={{ background: '#d500f9', color: 'white', padding: '12px 24px', borderRadius: '24px', fontWeight: 'bold', border: 'none', cursor: 'pointer', width: '100%', marginTop: '16px', fontSize: '1rem', boxShadow: '0 4px 15px rgba(213,0,249,0.4)' }}
           >
-             Jugar Ahora
+            Jugar Ahora
           </button>
         </motion.div>
       </div>
@@ -304,9 +304,9 @@ export default function Home() {
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleTransactionSuccess}
       />
-      <FeatureAnnouncementModal 
-        isOpen={showFeaturePopup} 
-        onClose={() => setShowFeaturePopup(false)} 
+      <FeatureAnnouncementModal
+        isOpen={showFeaturePopup}
+        onClose={() => setShowFeaturePopup(false)}
       />
     </div>
   );

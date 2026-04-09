@@ -51,7 +51,10 @@
 }
 
 .accountCard {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 2px solid transparent;
+  background: 
+    linear-gradient(135deg, #0284c7, #0369a1) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   color: #fff;
@@ -60,6 +63,7 @@
   overflow: hidden;
   flex: 0 0 85%;
   scroll-snap-align: center;
+  animation: rotateBorder 4s linear infinite;
 }
 
 .accountCard::before {
@@ -74,7 +78,9 @@
 }
 
 .creditCard {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
+  background: 
+    linear-gradient(135deg, #0f172a, #1e293b) padding-box,
+    conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
 }
 

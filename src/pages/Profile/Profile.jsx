@@ -77,20 +77,20 @@ export default function Profile() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button 
-            onClick={() => navigate(-1)} 
-            style={{ 
-              background: 'transparent', 
-              border: 'none', 
-              color: 'var(--text-primary)', 
-              cursor: 'pointer', 
-              display: 'flex', 
-              alignItems: 'center', 
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
               padding: '4px'
             }}
           >
-             <CaretLeft size={26} weight="bold" />
+            <CaretLeft size={26} weight="bold" />
           </button>
           <h2 className={styles.title} style={{ marginBottom: 0 }}>Mi AIBank ID</h2>
         </div>
@@ -137,62 +137,39 @@ export default function Profile() {
               value={currentMAIis.toLocaleString()}
               className={styles.pointsNum}
             />
-            <span className={styles.ptsCurrency}>mAIles</span>
+            <span className={styles.ptsCurrency}>mAiles</span>
           </div>
         </div>
       </motion.div>
 
-      {/* Stats Grid - FlipCards for each stat */}
+      {/* Stats Grid */}
       <motion.div
         className={styles.statsGrid}
         variants={staggerContainer}
         initial="hidden"
         animate="show"
       >
-        {/* Precision - FlipCard shows details on back */}
-        <motion.div variants={staggerItem}>
-          <FlipCard
-            front={
-              <div className={styles.statCard}>
-                <div className={styles.ringWrap}>
-                  <svg viewBox="0 0 100 100" className={styles.ring}>
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="6" />
-                    <motion.circle
-                      cx="50" cy="50" r="42" fill="none" stroke={theme === 'dark' ? '#ffd700' : '#b8960c'} strokeWidth="6" strokeLinecap="round"
-                      strokeDasharray={circumference}
-                      initial={{ strokeDashoffset: circumference }}
-                      animate={{ strokeDashoffset: offset }}
-                      transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
-                      transform="rotate(-90 50 50)"
-                    />
-                  </svg>
-                  <span className={styles.ringValue}>{accuracy}%</span>
-                </div>
-                <span className={styles.statBoxLabel}>Precisión</span>
-                <span className={styles.flipHint}>Toca para detalles</span>
-              </div>
-            }
-            back={
-              <div className={`${styles.statCard} ${styles.statCardBack}`}>
-                <span className={styles.statBigNum}>✅ {USER_PROFILE.correctPredictions}</span>
-                <span className={styles.statBoxLabel}>Aciertos de {USER_PROFILE.totalPredictions}</span>
-                <span className={styles.statBigNum} style={{ color: theme === 'dark' ? '#ff1744' : '#dc3545' }}>❌ {USER_PROFILE.totalPredictions - USER_PROFILE.correctPredictions}</span>
-                <span className={styles.statBoxLabel}>Errores</span>
-              </div>
-            }
-          />
-        </motion.div>
-
-        {/* Predictions */}
+        {/* Precision & Totals */}
         <motion.div variants={staggerItem}>
           <div className={styles.statCard}>
-            <span className={styles.statBigNum}>{currentPredictionsCount}</span>
-            <span className={styles.statBoxLabel}>Predicciones</span>
+            <div className={styles.ringWrap}>
+              <svg viewBox="0 0 100 100" className={styles.ring}>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="6" />
+                <motion.circle
+                  cx="50" cy="50" r="42" fill="none" stroke={theme === 'dark' ? '#ffd700' : '#b8960c'} strokeWidth="6" strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  initial={{ strokeDashoffset: circumference }}
+                  animate={{ strokeDashoffset: offset }}
+                  transition={{ duration: 1.5, delay: 0.5, ease: 'easeOut' }}
+                  transform="rotate(-90 50 50)"
+                />
+              </svg>
+              <span className={styles.ringValue}>{accuracy}%</span>
+            </div>
+            <span className={styles.statBoxLabel}>Efectividad</span>
             <div className={styles.statMini}>
               <span className={styles.statWin}>✅ {USER_PROFILE.correctPredictions}</span>
-              <span className={styles.statLoss}>
-                ❌ {USER_PROFILE.totalPredictions - USER_PROFILE.correctPredictions}
-              </span>
+              <span className={styles.statLoss}>❌ {USER_PROFILE.totalPredictions - USER_PROFILE.correctPredictions}</span>
             </div>
           </div>
         </motion.div>
@@ -201,21 +178,22 @@ export default function Profile() {
         <motion.div variants={staggerItem}>
           <div className={styles.statCard}>
             <AnimatedCounter value={`#${currentRank}`} className={styles.statBigNum} />
-            <span className={styles.statBoxLabel}>Ranking</span>
+            <span className={styles.statBoxLabel}>Ranking Global</span>
           </div>
         </motion.div>
 
         {/* Streak */}
-        <motion.div variants={staggerItem}>
-          <div className={styles.statCard}>
-            <motion.span
-              className={styles.statBigNum}
+        <motion.div variants={staggerItem} style={{ gridColumn: 'span 2' }}>
+          <div className={`${styles.statCard} ${styles.streakCard}`}>
+            <motion.div
+              className={styles.streakWrap}
               animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              transition={{ duration: 2, repeat: Infinity }}
             >
-              {USER_PROFILE.streak} <Fire size={20} weight="bold" />
-            </motion.span>
-            <span className={styles.statBoxLabel}>Racha</span>
+              <Fire size={32} weight="fill" className={styles.fireIcon} />
+              <span className={styles.statBigNum} style={{ fontSize: '1.8rem' }}>{USER_PROFILE.streak} Días</span>
+            </motion.div>
+            <span className={styles.statBoxLabel}>Tu mejor racha de pronósticos</span>
           </div>
         </motion.div>
       </motion.div>
@@ -250,58 +228,7 @@ export default function Profile() {
         </motion.div>
       </section>
 
-      {/* Recent Activity */}
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>📊 Actividad Reciente</h3>
-        <motion.div
-          className={styles.activity}
-          variants={staggerContainer}
-          initial="hidden"
-          animate="show"
-        >
-          {recentProfileActivity.map((act, i) => {
-            const isSavedPrediction = 'home' in act || 'away' in act;
-            const predictionLabel = isSavedPrediction
-              ? (act.prediction === 'home' ? act.home.name : act.prediction === 'away' ? act.away.name : 'Empate')
-              : act.prediction;
-            const pointsLabel = isSavedPrediction ? `+${act.points}` : act.points;
-            const accentColor = isSavedPrediction || act.result === 'win'
-              ? (theme === 'dark' ? '#00e676' : '#28a745')
-              : (theme === 'dark' ? '#ff1744' : '#dc3545');
 
-            return (
-              <motion.div
-                key={isSavedPrediction ? act.id : i}
-                className={styles.actItem}
-                variants={staggerItem}
-              >
-                <div className={styles.actLeft}>
-                  <motion.span
-                    className={styles.actDot}
-                    style={{ background: accentColor }}
-                    animate={{
-                      boxShadow: isSavedPrediction || act.result === 'win'
-                        ? ['0 0 0 rgba(0,230,118,0)', '0 0 10px rgba(0,230,118,0.5)', '0 0 0 rgba(0,230,118,0)']
-                        : ['0 0 0 rgba(255,23,68,0)', '0 0 10px rgba(255,23,68,0.5)', '0 0 0 rgba(255,23,68,0)'],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                  <div>
-                    <div className={styles.actMatch}>{isSavedPrediction ? `${act.home.name} vs ${act.away.name}` : act.match}</div>
-                    <div className={styles.actPred}>Predicción: {predictionLabel}</div>
-                  </div>
-                </div>
-                <span
-                  className={styles.actPoints}
-                  style={{ color: accentColor }}
-                >
-                  {pointsLabel}
-                </span>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      </section>
 
       {/* Archetype Section */}
       <section className={styles.section}>
@@ -324,8 +251,8 @@ export default function Profile() {
                 {archetype === 'practico'
                   ? 'Prefieres utilidad inmediata, canje rápido y beneficios claros.'
                   : archetype === 'acumulador'
-                  ? 'Prefieres progreso, metas y premios de mayor valor por acumulación.'
-                  : 'Prefieres reconocimiento, posición y premios aspiracionales.'}
+                    ? 'Prefieres progreso, metas y premios de mayor valor por acumulación.'
+                    : 'Prefieres reconocimiento, posición y premios aspiracionales.'}
               </p>
             </div>
           </div>
@@ -356,7 +283,7 @@ export default function Profile() {
                 <div className={styles.historyPred}>
                   Tu predicción: <strong>{pred.prediction === 'home' ? pred.home.name : pred.prediction === 'away' ? pred.away.name : 'Empate'}</strong>
                 </div>
-                <div className={styles.historyPoints}>+{pred.points} mAIles</div>
+                <div className={styles.historyPoints}>+{pred.points} mAiles</div>
               </motion.div>
             ))
           ) : (

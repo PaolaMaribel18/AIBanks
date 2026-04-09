@@ -44,26 +44,24 @@ export default function BottomNav() {
                 <Icon size={34} weight="fill" />
               </motion.div>
             ) : (
-              <>
-                <div className={styles.iconWrap}>
-                  {isActive && (
-                    <motion.div
-                      className={styles.activeBg}
-                      layoutId="activeTab"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <Icon
-                    size={23}
-                    weight={isActive ? 'fill' : 'regular'}
-                    className={`${styles.icon} ${isActive ? styles.activeIcon : ''}`}
+              <div className={styles.iconWrap}>
+                {isActive && (
+                  <motion.div
+                    className={styles.activeBg}
+                    layoutId="activeTab"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
-                </div>
-                <span className={`${styles.label} ${isActive ? styles.activeLabel : ''}`}>
-                  {label}
-                </span>
-              </>
+                )}
+                <Icon
+                  size={23}
+                  weight={isActive ? 'fill' : 'regular'}
+                  className={`${styles.icon} ${isActive ? styles.activeIcon : ''}`}
+                />
+              </div>
             )}
+            <span className={`${styles.label} ${isActive ? styles.activeLabel : ''}`}>
+              {label}
+            </span>
           </NavLink>
         );
       })}

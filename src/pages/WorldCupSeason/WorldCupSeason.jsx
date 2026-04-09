@@ -3,6 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Lightning, TrendUp, Fire, Trophy, Gift, Eye, EyeSlash, ArrowRight, Target, Coin, Crown, Star, Handshake, Check, X } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
+import * as reactJoyride from 'react-joyride';
+const Joyride = reactJoyride.default ? reactJoyride.default : reactJoyride.Joyride || reactJoyride;
+const { STATUS } = reactJoyride;
 import MatchCard from '../../components/MatchCard/MatchCard';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
@@ -12,6 +15,7 @@ import { UPCOMING_MATCHES, USER_PROFILE } from '../../data/mockData';
 import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import { useTier } from '../../hooks/useTier';
 import { useMAIis } from '../../hooks/useMAIis';
+import { useTheme } from '../../context/ThemeContextBase';
 import styles from './WorldCupSeason.module.css';
 
 // Staggered children animation
@@ -27,12 +31,53 @@ const staggerItem = {
 export default function WorldCupSeason() {
   const navigate = useNavigate();
   const tier = useTier();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [showBalance, setShowBalance] = useState(true);
   const [claimedBonus, setClaimedBonus] = useState(() => {
     const today = new Date().toISOString().slice(0, 10);
     return localStorage.getItem('dailyBonusClaimed') === today;
   });
   const [popEye, setPopEye] = useState(false);
+
+  // Joyride Tour Logic
+  const [runTour, setRunTour] = useState(false);
+  const [tourSteps] = useState([
+    {
+      target: '.tour-step-balance',
+      content: '¡Bienvenido a la temporada Mundial! Aquí verás todas tus mAiles acumuladas. Úsalas para canjear beneficios VIP.',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-step-tabs',
+      content: 'Navega entre Desafíos diarios, tu Portafolio de pronósticos y revisar resultados En Vivo.',
+    },
+    {
+      target: '.tour-step-bonus',
+      content: '¡No olvides reclamar este bono! Todos los días te regalaremos mAiles por ingresar.',
+    },
+    {
+      target: '.tour-step-matches',
+      content: 'Participa pronosticando ganadores. Fíjate bien en la recomendación de la Inteligencia Artificial y decide tu nivel de riesgo. ¡A jugar!',
+    }
+  ]);
+
+  useEffect(() => {
+    const hasSeenTour = localStorage.getItem('hasSeenSeasonTour_v1');
+    if (!hasSeenTour) {
+      setTimeout(() => setRunTour(true), 500);
+    }
+  }, []);
+
+  const handleJoyrideCallback = (data) => {
+    const { status } = data;
+    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      localStorage.setItem('hasSeenSeasonTour_v1', 'true');
+      setRunTour(false);
+    }
+  };
+
   const { currentMAIis, earnedPredictionMAIis, predictions, setPredictions, addBankMAIis } = useMAIis();
   const { matches, loading } = useWorldCupMatches();
   const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
@@ -65,9 +110,72 @@ export default function WorldCupSeason() {
 
   return (
     <div className={styles.page}>
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        continuous
+        showProgress
+        showSkipButton
+        callback={handleJoyrideCallback}
+        styles={{
+          options: {
+            primaryColor: '#d500f9',
+            backgroundColor: isDark ? '#0f172a' : '#ffffff',
+            textColor: isDark ? '#f8fafc' : '#1e293b',
+            arrowColor: isDark ? '#0f172a' : '#ffffff',
+            overlayColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)',
+            zIndex: 10000,
+          },
+          tooltip: {
+            borderRadius: '16px',
+            boxShadow: isDark ? '0 8px 32px rgba(213, 0, 249, 0.25)' : '0 8px 32px rgba(0, 0, 0, 0.15)',
+            fontFamily: 'Inter, sans-serif',
+            padding: '20px',
+          },
+          tooltipContent: {
+            padding: '10px 0',
+            fontSize: '0.9rem',
+            lineHeight: 1.5,
+          },
+          buttonNext: {
+            background: 'linear-gradient(135deg, #d500f9, #7c3aed)',
+            color: '#ffffff',
+            borderRadius: '24px',
+            padding: '8px 20px',
+            fontWeight: '700',
+            fontSize: '0.85rem',
+            outline: 'none',
+            border: 'none'
+          },
+          buttonBack: {
+            color: isDark ? '#94a3b8' : '#64748b',
+            fontSize: '0.85rem',
+            marginRight: '8px'
+          },
+          buttonSkip: {
+            color: isDark ? '#64748b' : '#94a3b8',
+            fontSize: '0.85rem'
+          },
+          beaconInner: {
+            backgroundColor: '#00e676'
+          },
+          beaconOuter: {
+            borderColor: '#00e676',
+            backgroundColor: 'rgba(0, 230, 118, 0.2)'
+          }
+        }}
+        locale={{
+          back: 'Atrás',
+          close: 'Cerrar',
+          last: '¡Jugar!',
+          next: 'Siguiente',
+          skip: 'Saltar Tour'
+        }}
+      />
+
       {/* Balance Card with Stars Background */}
       <motion.section
-        className={styles.balanceCard}
+        className={`${styles.balanceCard} tour-step-balance`}
         initial={{ opacity: 0, y: 16, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
@@ -167,7 +275,7 @@ export default function WorldCupSeason() {
       </motion.section>
 
       {/* Tab Navigation */}
-      <div className={styles.tabsMain}>
+      <div className={`${styles.tabsMain} tour-step-tabs`}>
         {['Desafios', 'Pronosticos', 'En Vivo'].map((tab) => (
           <button
             key={tab}
@@ -198,7 +306,7 @@ export default function WorldCupSeason() {
             >
               {/* Daily Bonus */}
               <motion.section
-                className={styles.bonus}
+                className={`${styles.bonus} tour-step-bonus`}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
@@ -233,7 +341,7 @@ export default function WorldCupSeason() {
               {claimedBonus && <Confetti recycle={false} numberOfPieces={200} />}
 
               {/* Info Banner */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
@@ -249,18 +357,18 @@ export default function WorldCupSeason() {
                 }}
               >
                 <div style={{ background: 'rgba(213,0,249,0.2)', padding: '8px', borderRadius: '50%', color: '#d500f9', flexShrink: 0 }}>
-                   <Lightning size={20} weight="fill" />
+                  <Lightning size={20} weight="fill" />
                 </div>
                 <div>
-                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#fff', fontWeight: '800' }}>¿Cómo ganar más mAIles?</h4>
-                  <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '800' }}>¿Cómo ganar más mAIles?</h4>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                     Nuestra IA analiza los datos para predecir al favorito de cada partido. Al <strong>consultar a AI-Gents</strong>, obtendrás ganancias conservadoras o te llevarás una recompensa masiva según el riesgo.
                   </p>
                 </div>
               </motion.div>
 
               {/* Hot Matches */}
-              <section className={styles.section} style={{ marginTop: '16px' }}>
+              <section className={`${styles.section} tour-step-matches`} style={{ marginTop: '16px' }}>
                 <div className={styles.sectionHeader}>
                   <h3 className={styles.sectionTitle}>Partidos para ti 🔥</h3>
                   <motion.button
@@ -342,7 +450,7 @@ export default function WorldCupSeason() {
                     ))
                   ) : (
                     <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
-                      Aún no has guardado predicciones. <br/> ¡Ve a Desafíos!
+                      Aún no has guardado predicciones. <br /> ¡Ve a Desafíos!
                     </div>
                   )}
                 </motion.div>

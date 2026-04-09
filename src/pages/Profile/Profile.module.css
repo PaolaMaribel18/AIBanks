@@ -175,6 +175,26 @@
 .statWin { color: var(--accent-green); }
 .statLoss { color: var(--accent-red); }
 
+/* Streak specific */
+.streakCard {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(251, 113, 133, 0.05));
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.streakWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fireIcon {
+  color: #ff3d00;
+  filter: drop-shadow(0 0 8px rgba(255, 61, 0, 0.4));
+}
+
 /* Section */
 .section {
   margin-bottom: 24px;

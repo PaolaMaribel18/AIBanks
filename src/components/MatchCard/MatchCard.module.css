@@ -7,6 +7,7 @@
   overflow: hidden;
   transition: border-color 0.3s;
 }
+
 .card::before {
   content: '';
   position: absolute;
@@ -24,9 +25,11 @@
     conic-gradient(from var(--border-angle), var(--rb-1), var(--rb-2), var(--rb-3), var(--rb-4), var(--rb-5), var(--rb-1)) border-box;
   animation: rotateBorder 4s linear infinite;
 }
+
 .confirmed {
   border-color: rgba(var(--accent-green-rgba), 0.2);
 }
+
 .confirmed::before {
   background: linear-gradient(90deg, transparent, rgba(var(--accent-green-rgba), 0.2), transparent);
 }
@@ -41,6 +44,7 @@
   background: radial-gradient(circle, rgba(var(--gold-primary-rgba), 0.08), transparent 70%);
   pointer-events: none;
 }
+
 .cornerGlowBR {
   position: absolute;
   bottom: -30px;
@@ -58,11 +62,13 @@
   align-items: center;
   margin-bottom: 16px;
 }
+
 .headerLeft {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .group {
   font-size: 0.72rem;
   color: var(--gold-primary);
@@ -70,6 +76,7 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
+
 .hotBadge {
   background: linear-gradient(135deg, rgba(244, 63, 94, 0.85), rgba(251, 113, 133, 0.85));
   color: white;
@@ -79,6 +86,7 @@
   border-radius: 6px;
   letter-spacing: 0.8px;
 }
+
 .meta {
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -86,6 +94,7 @@
   align-items: center;
   gap: 5px;
 }
+
 .dot {
   color: rgba(var(--gold-primary-rgba), 0.3);
 }
@@ -116,11 +125,13 @@
   transition: all 0.2s ease;
   backdrop-filter: blur(4px);
 }
+
 .aiConsultBtn:hover {
   background: rgba(213, 0, 249, 0.15);
   box-shadow: 0 0 16px rgba(213, 0, 249, 0.3);
   transform: translateY(-1px);
 }
+
 .aiConsultBtn:active {
   transform: translateY(1px) scale(0.98);
 }
@@ -163,6 +174,7 @@
   gap: 12px;
   margin-bottom: 10px;
 }
+
 .team {
   display: flex;
   flex-direction: column;
@@ -170,21 +182,25 @@
   gap: 4px;
   flex: 1;
 }
+
 .flag {
   font-size: 3.5rem;
   line-height: 1;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
 }
+
 .teamName {
   font-weight: 700;
   font-size: 0.82rem;
   color: var(--text-primary);
 }
+
 .teamName {
   font-weight: 700;
   font-size: 0.82rem;
   color: var(--text-primary);
 }
+
 .aiProbBadge {
   display: flex;
   align-items: center;
@@ -207,6 +223,7 @@
   width: 48px;
   height: 48px;
 }
+
 .vsWrap {
   display: flex;
   align-items: center;
@@ -215,10 +232,11 @@
   width: 48px;
   height: 48px;
 }
+
 .vs {
   font-size: 0.8rem;
   font-weight: 800;
-  color: rgba(255,255,255,0.15);
+  color: rgba(255, 255, 255, 0.15);
   letter-spacing: 1px;
 }
 
@@ -248,6 +266,7 @@
   position: relative;
   overflow: hidden;
 }
+
 .oddSelectedBg {
   position: absolute;
   inset: 0;
@@ -255,22 +274,27 @@
   border-radius: inherit;
   z-index: 0;
 }
+
 .oddBtn:active:not(:disabled) {
   background: rgba(var(--gold-primary-rgba), 0.06);
 }
+
 .oddBtn:disabled {
   opacity: 0.75;
   cursor: not-allowed;
   border-color: rgba(255, 255, 255, 0.05);
   background: rgba(0, 0, 0, 0.2);
 }
+
 .oddSelected {
   border-color: var(--gold-primary);
 }
+
 .oddConfirmed {
   border-color: var(--accent-green);
   background: rgba(var(--accent-green-rgba), 0.06);
 }
+
 .btnContent {
   display: flex;
   flex-direction: column;
@@ -279,6 +303,7 @@
   z-index: 1;
   gap: 2px;
 }
+
 .btnLabel {
   font-size: 0.6rem;
   font-weight: 700;
@@ -286,19 +311,22 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 .btnPrize {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 800;
   color: var(--gold-primary);
 }
+
 .btnPrizeAudaz {
   font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 800;
   color: #d500f9;
-  text-shadow: 0 0 10px rgba(213,0,249,0.3);
+  text-shadow: 0 0 10px rgba(213, 0, 249, 0.3);
 }
+
 .btnPrizeHidden {
   font-family: var(--font-display);
   font-size: 0.85rem;
@@ -316,6 +344,7 @@
   align-items: center;
   justify-content: space-between;
 }
+
 .pointsBadge {
   display: flex;
   align-items: center;
@@ -323,6 +352,7 @@
   font-size: 0.78rem;
   color: var(--text-muted);
 }
+
 .pointsBadge span {
   font-family: var(--font-display);
   font-weight: 600;

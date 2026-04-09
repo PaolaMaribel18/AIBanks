@@ -96,7 +96,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
           {match.matchLink && (
             <>
               <span className={styles.dot}>•</span>
-              <a href={match.matchLink} target="_blank" rel="noopener noreferrer" style={{ color: '#00ff88', textDecoration: 'none', fontWeight: 'bold' }}>
+              <a href={match.matchLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-green)', textDecoration: 'none', fontWeight: 'bold' }}>
                 🔗 FIFA
               </a>
             </>
@@ -107,7 +107,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
       {/* AI Consultation */}
       <AnimatePresence mode="popLayout">
         {aiViewState !== 'revealed' && (
-          <motion.div 
+          <motion.div
             className={styles.aiConsultWrap}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -152,7 +152,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
           <span className={styles.teamName}>{match.home.name}</span>
           <AnimatePresence>
             {aiViewState === 'revealed' && aiData && aiData.probabilidades_victoria && (
-              <motion.div 
+              <motion.div
                 className={styles.aiProbBadge}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -184,7 +184,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
             </div>
           </motion.button>
         </motion.div>
-        
+
         <div className={styles.vsWrap}>
           <span className={styles.vs}>VS</span>
         </div>
@@ -203,7 +203,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
           <span className={styles.teamName}>{match.away.name}</span>
           <AnimatePresence>
             {aiViewState === 'revealed' && aiData && aiData.probabilidades_victoria && (
-              <motion.div 
+              <motion.div
                 className={styles.aiProbBadge}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
