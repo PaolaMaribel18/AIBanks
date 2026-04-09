@@ -291,7 +291,7 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
           <h4 className={styles.rewardName}>{reward.name}</h4>
           <div className={styles.rewardCost}>
             <Coin size={14} />
-            <span className={styles.costValue}>{reward.cost.toLocaleString()} mAIis</span>
+            <span className={styles.costValue}>{reward.cost.toLocaleString()} mAIles</span>
           </div>
         </div>
       </div>
@@ -313,7 +313,7 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
               boxShadow: isAiRecommend ? '0 4px 15px rgba(213, 0, 249, 0.35)' : '0 4px 15px rgba(255, 215, 0, 0.25)'
             } : {}}
           >
-            {canAfford ? 'Canjear Ahora' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()} mAIis`}
+            {canAfford ? 'Canjear Ahora' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()} mAIles`}
           </RippleButton>
         )}
       </div>
@@ -530,7 +530,7 @@ export default function Rewards() {
       ]
     },
     {
-      q: "Si tuvieras 5000 mAIis, ¿qué harías?",
+      q: "Si tuvieras 5000 mAIles, ¿qué harías?",
       opts: [
         { label: "Rebajar mi porcentaje de préstamo", val: 1, t: "acumulador" },
         { label: "Canjear la consola del momento", val: 1, t: "competidor" },
@@ -620,7 +620,7 @@ export default function Rewards() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h2 className={styles.title}><Gift size={24} /> Beneficios AIBank</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAIis por recompensas y mejoras financieras.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAIles por recompensas y mejoras financieras.</p>
       </motion.div>
 
       {/* Balance Card */}
@@ -631,7 +631,7 @@ export default function Rewards() {
         transition={{ delay: 0.05 }}
       >
         <div className={styles.balanceInfo}>
-          <span className={styles.balanceLabel}>Tu capital en mAIis</span>
+          <span className={styles.balanceLabel}>Tu capital en mAIles</span>
           <div className={styles.balanceValue}>
             <Coin size={20} />
             <AnimatedCounter

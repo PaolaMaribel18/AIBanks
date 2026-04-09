@@ -90,6 +90,71 @@
   color: rgba(var(--gold-primary-rgba), 0.3);
 }
 
+/* AI Consultation */
+.aiConsultWrap {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.aiConsultBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(213, 0, 249, 0.08);
+  border: 1px solid rgba(213, 0, 249, 0.4);
+  color: #d500f9;
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(213, 0, 249, 0.15);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+.aiConsultBtn:hover {
+  background: rgba(213, 0, 249, 0.15);
+  box-shadow: 0 0 16px rgba(213, 0, 249, 0.3);
+  transform: translateY(-1px);
+}
+.aiConsultBtn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.aiLoadingBar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.aiLoadingText {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+.progressTrack {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #d500f9, #00ff88);
+  border-radius: 2px;
+}
+
 /* Teams */
 .teams {
   display: flex;
@@ -190,8 +255,14 @@
   border-radius: inherit;
   z-index: 0;
 }
-.oddBtn:active {
+.oddBtn:active:not(:disabled) {
   background: rgba(var(--gold-primary-rgba), 0.06);
+}
+.oddBtn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
 }
 .oddSelected {
   border-color: var(--gold-primary);
@@ -227,6 +298,13 @@
   font-weight: 800;
   color: #d500f9;
   text-shadow: 0 0 10px rgba(213,0,249,0.3);
+}
+.btnPrizeHidden {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 1px;
 }
 
 

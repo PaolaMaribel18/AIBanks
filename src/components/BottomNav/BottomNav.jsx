@@ -11,9 +11,8 @@ import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
   { to: '/', icon: House, label: 'Banco' },
-  { to: '/season', icon: SoccerBall, label: 'Mundial' },
-  { to: '/rewards', icon: Gift, label: 'Beneficios' },
-  { to: '/profile', icon: UserCircle, label: 'Perfil' }
+  { to: '/season', icon: SoccerBall, label: 'Mundial', center: true },
+  { to: '/rewards', icon: Gift, label: 'Beneficios' }
 ];
 
 export default function BottomNav() {

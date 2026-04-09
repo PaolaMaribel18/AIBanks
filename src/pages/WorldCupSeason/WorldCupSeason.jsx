@@ -33,13 +33,16 @@ export default function WorldCupSeason() {
     return localStorage.getItem('dailyBonusClaimed') === today;
   });
   const [popEye, setPopEye] = useState(false);
-  const { currentMAIis, earnedPredictionMAIis, predictions, setPredictions } = useMAIis();
+  const { currentMAIis, earnedPredictionMAIis, predictions, setPredictions, addBankMAIis } = useMAIis();
   const { matches, loading } = useWorldCupMatches();
   const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
   const predictionHistory = Object.entries(predictions)
-    .map(([matchId, choice]) => {
+    .map(([matchId, predData]) => {
       const match = allMatches.find((item) => String(item.id) === String(matchId));
-      return match ? { ...match, prediction: choice } : null;
+      if (!match) return null;
+      const choice = typeof predData === 'object' ? predData.choice : predData;
+      const points = typeof predData === 'object' ? predData.points : match.points;
+      return { ...match, prediction: choice, calculatedPoints: points };
     })
     .filter(Boolean);
   const pendingMatches = allMatches.filter((match) => !predictions[match.id]);
@@ -72,7 +75,7 @@ export default function WorldCupSeason() {
         <StarsBackground count={25} />
         <div className={styles.balanceContent}>
           <div className={styles.balanceTop}>
-            <span className={styles.balanceLabel}>Mis mAIis Temporada Mundial</span>
+            <span className={styles.balanceLabel}>Mis mAIles Temporada Mundial</span>
             <motion.button
               className={styles.eyeBtn}
               onClick={() => {
@@ -121,7 +124,7 @@ export default function WorldCupSeason() {
                       value={currentMAIis.toLocaleString()}
                       className={styles.balanceNum}
                     />
-                    <span className={styles.balancePts}>mAIis</span>
+                    <span className={styles.balancePts}>mAIles</span>
                   </motion.div>
                 ) : (
                   <motion.span
@@ -137,13 +140,6 @@ export default function WorldCupSeason() {
                 )}
               </AnimatePresence>
             </div>
-            <motion.span
-              className={styles.balanceArrow}
-              animate={{ x: [0, 4, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              ›
-            </motion.span>
           </div>
           <motion.div
             className={styles.balanceBadge}
@@ -217,7 +213,7 @@ export default function WorldCupSeason() {
                   </motion.span>
                   <div>
                     <div className={styles.bonusLabel}>BONO DIARIO</div>
-                    <div className={styles.bonusValue}>+50 mAIis gratis</div>
+                    <div className={styles.bonusValue}>+50 mAIles gratis</div>
                   </div>
                 </div>
                 <RippleButton
@@ -227,6 +223,7 @@ export default function WorldCupSeason() {
                     const today = new Date().toISOString().slice(0, 10);
                     localStorage.setItem('dailyBonusClaimed', today);
                     setClaimedBonus(true);
+                    addBankMAIis(50);
                   }}
                   disabled={claimedBonus}
                 >
@@ -255,9 +252,9 @@ export default function WorldCupSeason() {
                    <Lightning size={20} weight="fill" />
                 </div>
                 <div>
-                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#fff', fontWeight: '800' }}>¿Cómo ganar más mAIis?</h4>
+                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#fff', fontWeight: '800' }}>¿Cómo ganar más mAIles?</h4>
                   <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
-                    Nuestra IA analiza los datos para predecir al favorito de cada partido. Elige <strong>"Seguir a la IA"</strong> para ganancias conservadoras, o atrévete a <strong>"Desafiar a la IA"</strong> para llevarte una recompensa masiva.
+                    Nuestra IA analiza los datos para predecir al favorito de cada partido. Al <strong>consultar a AI-Gents</strong>, obtendrás ganancias conservadoras o te llevarás una recompensa masiva según el riesgo.
                   </p>
                 </div>
               </motion.div>
@@ -338,7 +335,7 @@ export default function WorldCupSeason() {
                         </div>
                         <div className={styles.actRight}>
                           <span className={styles.actPoints} style={{ color: '#00e676' }}>
-                            +{match.points} mAIis
+                            +{match.calculatedPoints} mAIles
                           </span>
                         </div>
                       </motion.div>

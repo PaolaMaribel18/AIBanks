@@ -193,7 +193,7 @@ export default function Leaderboard({ onClose }) {
         </div>
         <div className={styles.yourPoints}>
           <AnimatedCounter value={currentMAIis.toLocaleString()} className={styles.yourPointsNum} />
-          <span className={styles.ptLabel}>mAIis</span>
+          <span className={styles.ptLabel}>mAIles</span>
         </div>
       </motion.div>
 
@@ -227,7 +227,7 @@ export default function Leaderboard({ onClose }) {
             <div className={styles.listRight}>
               <div className={styles.listPoints}>
                 <span>{player.points.toLocaleString()}</span>
-                <span className={styles.ptLabel}>mAIis</span>
+                <span className={styles.ptLabel}>mAIles</span>
               </div>
               <div className={styles.listBar}>
                 <motion.div

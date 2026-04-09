@@ -18,7 +18,7 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
-      onSuccess(250); // Misión paga 250 mAIis
+      onSuccess(250); // Misión paga 250 mAIles
     }, 1500);
   };
 
@@ -105,7 +105,7 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
           <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px' }}>Nueva Función IA Activada</h2>
           <p className={styles.modalDesc} style={{ color: '#cbd5e1', lineHeight: '1.5' }}>
             Tu AIBank App ahora incluye predicciones deportivas impulsadas por Inteligencia Artificial. <br/><br/>
-            Desafía los pronósticos y gana mAIis canjeables.
+            Desafía los pronósticos y gana mAIles canjeables.
           </p>
           <button 
              onClick={handlePlayNow}
@@ -240,7 +240,7 @@ export default function Home() {
           <div className={styles.bannerTitles}>
             <span className={styles.seasonTag}>MÓDULO EXCLUSIVO</span>
             <h3 className={styles.bannerTitle}>Temporada Mundial 2026</h3>
-            <p className={styles.bannerDesc}>Tienes <strong>{currentMAIis} mAIis</strong> disponibles.</p>
+            <p className={styles.bannerDesc}>Tienes <strong>{currentMAIis} mAIles</strong> disponibles.</p>
           </div>
           <div className={styles.bannerIcon}>
             <Trophy size={32} weight="fill" />
@@ -255,7 +255,7 @@ export default function Home() {
           <div className={styles.missionInfo}>
             <h4>Usa tu Tarjeta</h4>
             <p>Haz una transferencia con tarjeta hoy mismo.</p>
-            <span className={styles.missionReward}>+250 mAIis</span>
+            <span className={styles.missionReward}>+250 mAIles</span>
           </div>
           <button className={styles.missionActionBtn} onClick={() => setIsModalOpen(true)}>
             Completar
@@ -265,7 +265,7 @@ export default function Home() {
           <div className={styles.missionInfo}>
             <h4>Meta de Ahorro</h4>
             <p>Inicia un plan de ahorro Mundial.</p>
-            <span className={styles.missionReward}>+500 mAIis</span>
+            <span className={styles.missionReward}>+500 mAIles</span>
           </div>
           <button className={styles.missionActionBtn} onClick={() => handleTransactionSuccess(500)}>
             Simular
@@ -275,7 +275,7 @@ export default function Home() {
           <div className={styles.missionInfo}>
             <h4>Actualizar Datos</h4>
             <p>Confirma tus datos de contacto.</p>
-            <span className={styles.missionReward}>+100 mAIis</span>
+            <span className={styles.missionReward}>+100 mAIles</span>
           </div>
           <button className={styles.missionActionBtn} onClick={() => handleTransactionSuccess(100)}>
             Actualizar
@@ -294,7 +294,7 @@ export default function Home() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
             <Trophy size={24} weight="fill" color="var(--gold-primary)" />
-            <span className={styles.toastText}>¡Misión Completada! <strong>+{successMessage} mAIis</strong></span>
+            <span className={styles.toastText}>¡Misión Completada! <strong>+{successMessage} mAIles</strong></span>
           </motion.div>
         )}
       </AnimatePresence>

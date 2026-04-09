@@ -33,10 +33,12 @@ export function useMAIis() {
     }
   });
 
-  // Calcular mAIis ganados en predicciones
-  const earnedPredictionMAIis = Object.entries(predictions).reduce((acc, [matchId]) => {
+  // Calcular mAIles ganados en predicciones
+  const earnedPredictionMAIis = Object.entries(predictions).reduce((acc, [matchId, predData]) => {
     const match = allMatches.find((m) => String(m.id) === String(matchId));
-    return acc + (match ? (match.points || 0) : 0);
+    if (!match) return acc;
+    const pts = typeof predData === 'object' ? predData.points : (match.points || 0);
+    return acc + pts;
   }, 0);
 
   // Calcular mAIis gastados

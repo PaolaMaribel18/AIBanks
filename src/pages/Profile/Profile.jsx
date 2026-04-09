@@ -137,7 +137,7 @@ export default function Profile() {
               value={currentMAIis.toLocaleString()}
               className={styles.pointsNum}
             />
-            <span className={styles.ptsCurrency}>mAIis</span>
+            <span className={styles.ptsCurrency}>mAIles</span>
           </div>
         </div>
       </motion.div>
@@ -356,7 +356,7 @@ export default function Profile() {
                 <div className={styles.historyPred}>
                   Tu predicción: <strong>{pred.prediction === 'home' ? pred.home.name : pred.prediction === 'away' ? pred.away.name : 'Empate'}</strong>
                 </div>
-                <div className={styles.historyPoints}>+{pred.points} mAIis</div>
+                <div className={styles.historyPoints}>+{pred.points} mAIles</div>
               </motion.div>
             ))
           ) : (

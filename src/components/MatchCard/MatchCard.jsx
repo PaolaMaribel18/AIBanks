@@ -6,6 +6,7 @@ import styles from './MatchCard.module.css';
 export default function MatchCard({ match, delay = 0, onPredict, predictedChoice }) {
   const [pendingChoice, setPendingChoice] = useState(null);
   const [aiData, setAiData] = useState(null);
+  const [aiViewState, setAiViewState] = useState('hidden'); // hidden, loading, revealed
 
   const selected = predictedChoice ?? pendingChoice;
   const confirmed = Boolean(predictedChoice);
@@ -43,7 +44,15 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
 
   const handleConfirm = () => {
     if (!selected) return;
-    onPredict?.(match.id, selected);
+    const finalPoints = Math.round(selected === 'home' ? match.points * homeMult : match.points * awayMult);
+    onPredict?.(match.id, { choice: selected, points: finalPoints });
+  };
+
+  const handleAiConsult = () => {
+    setAiViewState('loading');
+    setTimeout(() => {
+      setAiViewState('revealed');
+    }, 2000);
   };
 
   const matchDate = new Date(match.date);
@@ -95,6 +104,38 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
         </div>
       </div>
 
+      {/* AI Consultation */}
+      <AnimatePresence mode="popLayout">
+        {aiViewState !== 'revealed' && (
+          <motion.div 
+            className={styles.aiConsultWrap}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            {aiViewState === 'hidden' && (
+              <button className={styles.aiConsultBtn} onClick={handleAiConsult}>
+                <Sparkle size={18} weight="fill" />
+                <span>Consultar a AI-Gents</span>
+              </button>
+            )}
+            {aiViewState === 'loading' && (
+              <div className={styles.aiLoadingBar}>
+                <span className={styles.aiLoadingText}>AI-Gents está analizando el partido, espera...</span>
+                <div className={styles.progressTrack}>
+                  <motion.div
+                    className={styles.progressFill}
+                    initial={{ width: '0%' }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 2, ease: 'easeInOut' }}
+                  />
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Teams */}
       <div className={styles.teams}>
         <motion.div
@@ -109,17 +150,24 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
             {match.home.flag}
           </motion.span>
           <span className={styles.teamName}>{match.home.name}</span>
-          {aiData && aiData.probabilidades_victoria && (
-            <div className={styles.aiProbBadge}>
-              <Sparkle size={12} weight="fill" />
-              <span>{Math.round(aiData.probabilidades_victoria[match.home.name])}%</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {aiViewState === 'revealed' && aiData && aiData.probabilidades_victoria && (
+              <motion.div 
+                className={styles.aiProbBadge}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring' }}
+              >
+                <Sparkle size={12} weight="fill" />
+                <span>{Math.round(aiData.probabilidades_victoria[match.home.name])}%</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <motion.button
             className={`${styles.oddBtn} ${selected === 'home' ? styles.oddSelected : ''} ${confirmed && selected === 'home' ? styles.oddConfirmed : ''}`}
             onClick={(e) => { e.stopPropagation(); handleSelect('home'); }}
-            whileTap={{ scale: 0.93 }}
-            disabled={confirmed}
+            whileTap={aiViewState === 'revealed' && !confirmed ? { scale: 0.93 } : {}}
+            disabled={confirmed || aiViewState !== 'revealed'}
             layout
           >
             {selected === 'home' && (
@@ -129,10 +177,9 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <div className={styles.btnContent}>
-              <span className={styles.btnLabel}>{isHomeFavorite ? 'Seguir a la IA' : 'Desafiar a la IA'}</span>
-              <span className={isHomeFavorite ? styles.btnPrize : styles.btnPrizeAudaz}>
-                +{(match.points * homeMult).toLocaleString()} mAIis
+            <div className={styles.btnContent} style={{ paddingTop: '4px', paddingBottom: '4px' }}>
+              <span className={aiViewState === 'revealed' ? (isHomeFavorite ? styles.btnPrize : styles.btnPrizeAudaz) : styles.btnPrizeHidden}>
+                {aiViewState === 'revealed' ? `+${(match.points * homeMult).toLocaleString()} mAIles` : '??? mAIles'}
               </span>
             </div>
           </motion.button>
@@ -154,17 +201,24 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
             {match.away.flag}
           </motion.span>
           <span className={styles.teamName}>{match.away.name}</span>
-          {aiData && aiData.probabilidades_victoria && (
-            <div className={styles.aiProbBadge}>
-              <Sparkle size={12} weight="fill" />
-              <span>{Math.round(aiData.probabilidades_victoria[match.away.name])}%</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {aiViewState === 'revealed' && aiData && aiData.probabilidades_victoria && (
+              <motion.div 
+                className={styles.aiProbBadge}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring' }}
+              >
+                <Sparkle size={12} weight="fill" />
+                <span>{Math.round(aiData.probabilidades_victoria[match.away.name])}%</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <motion.button
             className={`${styles.oddBtn} ${selected === 'away' ? styles.oddSelected : ''} ${confirmed && selected === 'away' ? styles.oddConfirmed : ''}`}
             onClick={(e) => { e.stopPropagation(); handleSelect('away'); }}
-            whileTap={{ scale: 0.93 }}
-            disabled={confirmed}
+            whileTap={aiViewState === 'revealed' && !confirmed ? { scale: 0.93 } : {}}
+            disabled={confirmed || aiViewState !== 'revealed'}
             layout
           >
             {selected === 'away' && (
@@ -174,10 +228,9 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <div className={styles.btnContent}>
-              <span className={styles.btnLabel}>{isAwayFavorite ? 'Seguir a la IA' : 'Desafiar a la IA'}</span>
-              <span className={isAwayFavorite ? styles.btnPrize : styles.btnPrizeAudaz}>
-                +{(match.points * awayMult).toLocaleString()} mAIis
+            <div className={styles.btnContent} style={{ paddingTop: '4px', paddingBottom: '4px' }}>
+              <span className={aiViewState === 'revealed' ? (isAwayFavorite ? styles.btnPrize : styles.btnPrizeAudaz) : styles.btnPrizeHidden}>
+                {aiViewState === 'revealed' ? `+${(match.points * awayMult).toLocaleString()} mAIles` : '??? mAIles'}
               </span>
             </div>
           </motion.button>
