@@ -5,6 +5,7 @@ import {
   SignOut,
   Info,
   CaretRight,
+  CaretLeft,
   Sun,
   Crown,
   Fire,
@@ -75,8 +76,25 @@ export default function Profile() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className={styles.title}>Mi AIBank ID</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Gestiona tus credenciales y actividad.</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button 
+            onClick={() => navigate(-1)} 
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: 'var(--text-primary)', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              padding: '4px'
+            }}
+          >
+             <CaretLeft size={26} weight="bold" />
+          </button>
+          <h2 className={styles.title} style={{ marginBottom: 0 }}>Mi AIBank ID</h2>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '6px' }}>Gestiona tus credenciales y actividad.</p>
       </motion.div>
 
       {/* Profile Card with Stars */}

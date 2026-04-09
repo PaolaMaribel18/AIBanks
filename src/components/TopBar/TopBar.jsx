@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Eye, Moon, Sun, Bank } from '@phosphor-icons/react';
 import { USER_PROFILE } from '../../data/mockData';
 import { useTheme } from '../../context/ThemeContextBase';
@@ -10,10 +11,16 @@ export default function TopBar() {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const tier = useTier();
+  const navigate = useNavigate();
 
   return (
     <header className={styles.header}>
-      <div className={styles.left}>
+      <div 
+        className={styles.left} 
+        style={{ cursor: 'pointer' }}
+        onClick={() => navigate('/profile')}
+        whileHover={{ scale: 1.02 }}
+      >
         <div className={styles.avatar}>
           <span>{USER_PROFILE.avatar}</span>
         </div>

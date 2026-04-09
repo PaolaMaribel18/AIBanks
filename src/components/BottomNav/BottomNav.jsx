@@ -2,7 +2,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   House,
-  Trophy,
   SoccerBall,
   Gift,
   UserCircle,
@@ -12,10 +11,8 @@ import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
   { to: '/', icon: House, label: 'Banco' },
-  { to: '/rewards', icon: Gift, label: 'Beneficios' },
   { to: '/season', icon: SoccerBall, label: 'Mundial', center: true },
-  { to: '/leaderboard', icon: Trophy, label: 'Ranking' },
-  { to: '/profile', icon: UserCircle, label: 'Mi AIBank' },
+  { to: '/rewards', icon: Gift, label: 'Beneficios' }
 ];
 
 export default function BottomNav() {
@@ -33,7 +30,8 @@ export default function BottomNav() {
   return (
     <nav className={styles.nav}>
       <div className={styles.bg} />
-      {NAV_ITEMS.map(({ to, icon: Icon, label, center }) => {
+      {NAV_ITEMS.map((item, index) => {
+        const { to, icon: Icon, label, center } = item;
         const isActive = location.pathname === to;
         return (
           <NavLink key={to} to={to} className={`${styles.item} ${center ? styles.centerItem : ''}`} onClick={() => handleNavClick(to)}>
@@ -43,7 +41,7 @@ export default function BottomNav() {
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
-                <Icon size={26} weight="bold" />
+                <Icon size={34} weight="fill" />
               </motion.div>
             ) : (
               <>

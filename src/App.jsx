@@ -13,7 +13,6 @@ import Home from './pages/Home/Home';
 import WorldCupSeason from './pages/WorldCupSeason/WorldCupSeason';
 import Predictions from './pages/Predictions/Predictions';
 import Rewards from './pages/Rewards/Rewards';
-import Leaderboard from './pages/Leaderboard/Leaderboard';
 import Profile from './pages/Profile/Profile';
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
@@ -66,7 +65,6 @@ function AppContent() {
               <Route path="/season" element={<WorldCupSeason />} />
               <Route path="/predictions" element={<Predictions />} />
               <Route path="/rewards" element={<Rewards />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
             {/* Catch any stale/unknown route (e.g. /login after auth) → Home */}

@@ -1,7 +1,9 @@
-import { motion } from 'framer-motion';
-import { Crown, Fire, Trophy } from '@phosphor-icons/react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Crown, Fire, Trophy, X } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContextBase';
-import { LEADERBOARD_DATA, USER_PROFILE } from '../../data/mockData';
+import { LEADERBOARD_DATA, UPCOMING_MATCHES, USER_PROFILE } from '../../data/mockData';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import { useMAIis } from '../../hooks/useMAIis';
@@ -18,18 +20,52 @@ const staggerItem = {
   show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 300, damping: 22 } },
 };
 
-export default function Leaderboard() {
+export default function Leaderboard({ onClose }) {
+  const [activeTab, setActiveTab] = useState('Semanal');
+  const { matches } = useWorldCupMatches();
   const { user } = useAuth();
   const { currentMAIis } = useMAIis();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Remove scroll on body when modal opens
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
   const currentRank = 1 + LEADERBOARD_DATA.filter((player) => player.points > currentMAIis).length;
 
-  return (
-    <div className={styles.page}>
-      <motion.div
-        className={styles.header}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
+  const modalContent = (
+    <motion.div 
+      className={styles.modalOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div 
+        className={styles.modalContent}
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        onClick={(e) => e.stopPropagation()}
       >
+        <button className={styles.closeBtn} onClick={onClose}>
+          <X size={18} weight="bold" />
+        </button>
+
+        <div className={styles.page}>
+          <motion.div
+            className={styles.header}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
         <h2 className={styles.title}><Trophy size={24} /> Ranking AIBank</h2>
         <p className={styles.subtitle}>Compite con tus amigos y otros clientes de AIBank.</p>
       </motion.div>
@@ -204,6 +240,11 @@ export default function Leaderboard() {
           </motion.div>
         ))}
       </motion.div>
-    </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
+
+  if (!mounted) return null;
+  return createPortal(modalContent, document.body);
 }
