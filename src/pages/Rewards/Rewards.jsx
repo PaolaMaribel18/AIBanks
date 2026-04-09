@@ -758,16 +758,7 @@ export default function Rewards() {
                 <p className={styles.aiMessage}>Listo. Ya personalizamos tus beneficios.</p>
               )}
 
-              {Array.isArray(aiRecommendation?.premios_recomendados) && aiRecommendation.premios_recomendados.length ? (
-                <div className={styles.aiList}>
-                  {aiRecommendation.premios_recomendados.slice(0, 5).map((r) => (
-                    <div key={r.nombre} className={styles.aiItem}>
-                      <div className={styles.aiItemName}>{r.nombre}</div>
-                      {r.razon ? <div className={styles.aiItemReason}>{r.razon}</div> : null}
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+
 
               {aiRetentionMessage ? <div className={styles.aiRetention}>{aiRetentionMessage}</div> : null}
             </>
