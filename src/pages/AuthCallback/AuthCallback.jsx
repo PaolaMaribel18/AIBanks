@@ -5,6 +5,36 @@ import FireworksBackground from '../../components/FireworksBackground/FireworksB
 import useGameSounds from '../../hooks/useGameSounds';
 import styles from './AuthCallback.module.css';
 
+/**
+ * Asegura que el perfil del usuario exista en la tabla profiles.
+ * Usa upsert para evitar duplicados si ya existe.
+ */
+async function ensureProfile(session) {
+  if (!session?.user) return;
+  const { user } = session;
+  
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          name: user.user_metadata?.name || user.email.split('@')[0],
+          email: user.email,
+          points: 0,
+          tier: 'Bronze',
+        },
+        { onConflict: 'id', ignoreDuplicates: true }
+      );
+
+    if (error) {
+      console.error('Error creando perfil:', error);
+    }
+  } catch (err) {
+    console.error('Error en ensureProfile:', err);
+  }
+}
+
 export default function AuthCallback() {
   const navigate = useNavigate();
   const [status, setStatus] = useState('processing'); // processing | verified | error
@@ -42,7 +72,8 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          // Successfully authenticated — show celebration then redirect
+          // Successfully authenticated — create profile & celebrate
+          await ensureProfile(data.session);
           setStatus('verified');
           playLoginLong();
           setTimeout(() => playFirework(), 300);
@@ -53,9 +84,10 @@ export default function AuthCallback() {
           // No session yet, wait for the auth state change
           const {
             data: { subscription },
-          } = supabase.auth.onAuthStateChange((_event, session) => {
+          } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (session) {
               subscription.unsubscribe();
+              await ensureProfile(session);
               setStatus('verified');
               playLoginLong();
               setTimeout(() => playFirework(), 300);
@@ -124,3 +156,4 @@ export default function AuthCallback() {
     </div>
   );
 }
+

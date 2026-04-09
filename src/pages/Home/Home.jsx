@@ -1,28 +1,149 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { PaperPlaneRight, Receipt, CreditCard, Bank, CaretRight, X, Trophy } from '@phosphor-icons/react';
+import { PaperPlaneRight, Receipt, CreditCard, Bank, CaretRight, X, Trophy, SpinnerGap } from '@phosphor-icons/react';
 import Confetti from 'react-confetti';
 import { useMAIis } from '../../hooks/useMAIis';
+import { useAuth } from '../../context/AuthContextBase';
+import { useNotifications } from '../../context/NotificationContextBase';
+import { supabase } from '../../services/supabaseClient';
+import { sendSenderEmail, sendRecipientEmail } from '../../services/emailService';
 import styles from './Home.module.css';
 
-function TransactionModal({ isOpen, onClose, onSuccess }) {
+function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
   const [amount, setAmount] = useState('');
-  const [account, setAccount] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [error, setError] = useState('');
+  const { sendTransferNotification } = useNotifications();
 
-  const handleSubmit = (e) => {
+  // Cargar usuarios registrados al abrir el modal
+  useEffect(() => {
+    if (!isOpen || !currentUser?.id) return;
+
+    const fetchUsers = async () => {
+      setLoadingUsers(true);
+      setError('');
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('profiles')
+          .select('id, name, email')
+          .neq('id', currentUser.id);
+
+        if (fetchError) throw fetchError;
+        setUsers(data || []);
+      } catch (err) {
+        console.error('Error cargando usuarios:', err);
+        setError('No se pudieron cargar los destinatarios.');
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, [isOpen, currentUser?.id]);
+
+  // Reset al cerrar
+  useEffect(() => {
+    if (!isOpen) {
+      setAmount('');
+      setSelectedUserId('');
+      setError('');
+    }
+  }, [isOpen]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount || !account) return;
+    if (!amount || !selectedUserId || isProcessing) return;
+
+    const transferAmount = parseFloat(amount);
+    if (transferAmount <= 0) {
+      setError('El monto debe ser mayor a 0.');
+      return;
+    }
 
     setIsProcessing(true);
-    setTimeout(() => {
+    setError('');
+
+    try {
+      // 1. Verificar saldo del remitente
+      const { data: senderProfile, error: senderError } = await supabase
+        .from('profiles')
+        .select('balance')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (senderError) throw senderError;
+
+      const currentBalance = parseFloat(senderProfile.balance);
+      if (currentBalance < transferAmount) {
+        setError(`Saldo insuficiente. Tu saldo es $${currentBalance.toFixed(2)}`);
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. Restar del remitente
+      const { error: deductError } = await supabase
+        .from('profiles')
+        .update({ balance: currentBalance - transferAmount })
+        .eq('id', currentUser.id);
+
+      if (deductError) throw deductError;
+
+      // 3. Sumar al destinatario
+      const { data: recipientProfile, error: recipientFetchError } = await supabase
+        .from('profiles')
+        .select('balance, name, email')
+        .eq('id', selectedUserId)
+        .single();
+
+      if (recipientFetchError) throw recipientFetchError;
+
+      const recipientBalance = parseFloat(recipientProfile.balance);
+      const { error: addError } = await supabase
+        .from('profiles')
+        .update({ balance: recipientBalance + transferAmount })
+        .eq('id', selectedUserId);
+
+      if (addError) throw addError;
+
+      // 4. Enviar notificación in-app al destinatario
+      await sendTransferNotification(selectedUserId, {
+        fromName: currentUser.name,
+        amount: transferAmount,
+      });
+
+      // 5. Enviar emails (non-blocking, no falla la transferencia si falla el email)
+      const earnedMAIles = 250;
+      sendSenderEmail({
+        senderName: currentUser.name,
+        senderEmail: currentUser.email,
+        recipientName: recipientProfile.name,
+        amount: transferAmount,
+        earnedMAIles,
+      });
+      sendRecipientEmail({
+        recipientName: recipientProfile.name,
+        recipientEmail: recipientProfile.email,
+        senderName: currentUser.name,
+        amount: transferAmount,
+      });
+
+      // 6. Éxito
       setIsProcessing(false);
-      onSuccess(250); // Misión paga 250 mAIles
-    }, 1500);
+      onSuccess(earnedMAIles, currentBalance - transferAmount);
+    } catch (err) {
+      console.error('Error en transferencia:', err);
+      setError('Ocurrió un error al procesar la transferencia.');
+      setIsProcessing(false);
+    }
   };
 
   if (!isOpen) return null;
+
+  const selectedUser = users.find((u) => u.id === selectedUserId);
 
   return (
     <AnimatePresence>
@@ -35,19 +156,51 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
         >
           <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
           <h2 className={styles.modalTitle}>Nueva Transferencia</h2>
-          <p className={styles.modalDesc}>Transfiere a otras cuentas desde tu App AIBank.</p>
+          <p className={styles.modalDesc}>Transfiere a otros usuarios de AIBank.</p>
+
+          {error && (
+            <div className={styles.errorBanner}>{error}</div>
+          )}
 
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.inputGroup}>
-              <label>Cuenta Destino</label>
-              <input
-                type="text"
-                placeholder="Ej. 2200334455"
-                value={account}
-                onChange={(e) => setAccount(e.target.value)}
-                disabled={isProcessing}
-              />
+              <label>Destinatario</label>
+              {loadingUsers ? (
+                <div className={styles.loadingUsers}>
+                  <SpinnerGap size={20} className={styles.spinner} />
+                  <span>Cargando usuarios...</span>
+                </div>
+              ) : users.length === 0 ? (
+                <div className={styles.noUsers}>No hay otros usuarios registrados.</div>
+              ) : (
+                <select
+                  className={styles.userSelect}
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  disabled={isProcessing}
+                >
+                  <option value="">Selecciona un destinatario</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} ({u.email})
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
+
+            {selectedUser && (
+              <div className={styles.selectedUserCard}>
+                <div className={styles.selectedUserAvatar}>
+                  {selectedUser.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className={styles.selectedUserName}>{selectedUser.name}</div>
+                  <div className={styles.selectedUserEmail}>{selectedUser.email}</div>
+                </div>
+              </div>
+            )}
+
             <div className={styles.inputGroup}>
               <label>Monto ($)</label>
               <input
@@ -63,9 +216,16 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
             <button
               type="submit"
               className={styles.submitBtn}
-              disabled={isProcessing || !amount || !account}
+              disabled={isProcessing || !amount || !selectedUserId}
             >
-              {isProcessing ? 'Procesando...' : 'Transferir'}
+              {isProcessing ? (
+                <span className={styles.processingBtn}>
+                  <SpinnerGap size={18} className={styles.spinner} />
+                  Procesando...
+                </span>
+              ) : (
+                'Transferir'
+              )}
             </button>
           </form>
         </motion.div>
@@ -121,11 +281,35 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { currentMAIis, addBankMAIis } = useMAIis();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [showFeaturePopup, setShowFeaturePopup] = useState(false);
+  const [balance, setBalance] = useState(null);
+
+  // Cargar saldo real desde Supabase
+  const fetchBalance = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('balance')
+        .eq('id', user.id)
+        .single();
+
+      if (!error && data) {
+        setBalance(parseFloat(data.balance));
+      }
+    } catch (err) {
+      console.error('Error cargando saldo:', err);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
 
   useEffect(() => {
     const hasSeen = localStorage.getItem('aiFeatureDismissed_v2');
@@ -135,16 +319,26 @@ export default function Home() {
     }
   }, []);
 
-  const handleTransactionSuccess = (earnedPts) => {
+  const handleTransactionSuccess = (earnedPts, newBalance) => {
     setIsModalOpen(false);
     addBankMAIis(earnedPts);
     setSuccessMessage(earnedPts);
+    if (newBalance !== undefined) {
+      setBalance(newBalance);
+    }
     setShowConfetti(true);
     setTimeout(() => {
       setShowConfetti(false);
       setSuccessMessage('');
     }, 5000);
   };
+
+  // Formatear saldo para display
+  const displayBalance = balance !== null ? balance.toFixed(2) : '4,250.00';
+  const [intPart, decPart] = displayBalance.split('.');
+  const formattedInt = balance !== null
+    ? parseInt(intPart).toLocaleString()
+    : '4,250';
 
   return (
     <div className={styles.dashboardContainer}>
@@ -169,8 +363,8 @@ export default function Home() {
           </div>
           <div className={styles.cardBalance}>
             <span className={styles.currency}>$</span>
-            <span className={styles.amount}>4,250</span>
-            <span className={styles.decimals}>.00</span>
+            <span className={styles.amount}>{formattedInt}</span>
+            <span className={styles.decimals}>.{decPart || '00'}</span>
           </div>
         </motion.div>
 
@@ -303,6 +497,7 @@ export default function Home() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={handleTransactionSuccess}
+        currentUser={user}
       />
       <FeatureAnnouncementModal
         isOpen={showFeaturePopup}
@@ -311,3 +506,4 @@ export default function Home() {
     </div>
   );
 }
+

@@ -142,6 +142,23 @@ export function AuthProvider({ children }) {
 
       if (signInError) throw signInError;
 
+      // Safety: crear perfil si no existe (cubre usuarios que confirmaron
+      // email antes del fix en AuthCallback)
+      if (data.user) {
+        await supabase
+          .from('profiles')
+          .upsert(
+            {
+              id: data.user.id,
+              name: data.user.user_metadata?.name || email.split('@')[0],
+              email,
+              points: 0,
+              tier: 'Bronze',
+            },
+            { onConflict: 'id', ignoreDuplicates: true }
+          );
+      }
+
       if (localStorage.getItem('hasCompletedOnboarding') === 'true') {
         setHasCompletedOnboarding(true);
       }

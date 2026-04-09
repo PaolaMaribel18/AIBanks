@@ -5,10 +5,12 @@ import { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContextBase';
 import { ThemeProvider } from './context/ThemeContext';
+import { NotificationProvider } from './context/NotificationContext';
 import TopBar from './components/TopBar/TopBar';
 import BottomNav from './components/BottomNav/BottomNav';
 import PageTransition from './components/PageTransition/PageTransition';
 import SplashScreen from './components/SplashScreen/SplashScreen';
+import NotificationToast from './components/NotificationToast/NotificationToast';
 import Home from './pages/Home/Home';
 import WorldCupSeason from './pages/WorldCupSeason/WorldCupSeason';
 import Predictions from './pages/Predictions/Predictions';
@@ -57,6 +59,7 @@ function AppContent() {
     >
       <NavigationProvider>
         <TopBar />
+        <NotificationToast />
         <main style={{ paddingTop: 0 }}>
           <Routes>
             <Route path="/auth/callback" element={<AuthCallback />} />
@@ -82,11 +85,14 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <AnimatePresence mode="wait">
-            <AppContent />
-          </AnimatePresence>
+          <NotificationProvider>
+            <AnimatePresence mode="wait">
+              <AppContent />
+            </AnimatePresence>
+          </NotificationProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
 }
+
