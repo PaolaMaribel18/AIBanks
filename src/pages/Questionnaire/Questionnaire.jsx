@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Shield, Scales, DiceFive, Money, FilmSlate } from '@phosphor-icons/react';
+import { Trophy, Shield, Scales, DiceFive, Money, FilmSlate, X } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContextBase';
 import GlowButton from '../../components/GlowButton/GlowButton';
 import useGameSounds from '../../hooks/useGameSounds';
@@ -258,16 +258,16 @@ export default function Questionnaire() {
         >
           Personaliza tus recomendaciones
         </motion.h1>
-        <motion.p
-          className={styles.subtitle}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
-          {status === 'quiz'
-            ? `Pregunta ${currentQuestion + 1} de ${questions.length}`
-            : 'Listo'}
-        </motion.p>
+        {status === 'quiz' && (
+          <motion.p
+            className={styles.subtitle}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            Pregunta {currentQuestion + 1} de {questions.length}
+          </motion.p>
+        )}
         <AnimatePresence mode="wait">
           {status === 'loading' ? (
             <motion.div
@@ -290,15 +290,43 @@ export default function Questionnaire() {
             <motion.div
               key="result"
               className={styles.statusBox}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.4 }}
             >
-              <h3 className={styles.resultTitle}>Listo</h3>
+              <button
+                className={styles.closeBtn}
+                onClick={async () => {
+                  if (aiRecommendation?.arquetipo) {
+                    await completeOnboarding(aiRecommendation.arquetipo);
+                  }
+                  navigate('/');
+                }}
+                aria-label="Cerrar e ir al banco"
+              >
+                <X size={20} weight="bold" />
+              </button>
 
-              <p className={styles.resultText}>
-                ¿Quieres descubrir lo que nuestro AI-Agent preparó para ti? Revisa nuestros beneficios.
+              <div className={styles.resultHeader}>
+                <div className={styles.checkIcon}>✅</div>
+                <h3 className={styles.resultDisplayTitle}>¡Perfil IA listo!</h3>
+              </div>
+
+              <div className={styles.archetypePreview}>
+                <div className={styles.archetypeIconMain}>
+                  {aiRecommendation?.arquetipo === 'practico' ? '🎁' : aiRecommendation?.arquetipo === 'acumulador' ? '📈' : '🏆'}
+                </div>
+                <div className={styles.archetypeInfoMain}>
+                  <div className={styles.archetypeLabelMain}>Arquetipo AIBank</div>
+                  <div className={styles.archetypeNameMain}>
+                    {aiRecommendation?.arquetipo === 'practico' ? 'Práctico' : aiRecommendation?.arquetipo === 'acumulador' ? 'Acumulador' : 'Competidor'}
+                  </div>
+                </div>
+              </div>
+
+              <p className={styles.resultTextCohesive}>
+                ¿Quieres descubrir los beneficios exclusivos que nuestro <strong>AI-Agent</strong> preparó para tu perfil?
               </p>
 
               <div className={styles.ctaRow}>
@@ -314,6 +342,17 @@ export default function Questionnaire() {
                 >
                   Ver beneficios
                 </GlowButton>
+                <button
+                  className={styles.secondaryBtn}
+                  onClick={async () => {
+                    if (aiRecommendation?.arquetipo) {
+                      await completeOnboarding(aiRecommendation.arquetipo);
+                    }
+                    navigate('/');
+                  }}
+                >
+                  Ir al Banco
+                </button>
               </div>
             </motion.div>
           ) : (

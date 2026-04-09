@@ -99,6 +99,7 @@
 
 .statusBox {
   text-align: center;
+  position: relative;
 }
 
 .spinner {
@@ -128,101 +129,127 @@
   line-height: 1.5;
 }
 
-.notice {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  border-left: 2px solid var(--accent-red);
-  color: var(--text-secondary);
-  padding: 10px 12px;
-  border-radius: var(--radius-md);
-  margin-bottom: 14px;
-  font-size: 0.82rem;
-  line-height: 1.4;
-}
-
-.resultBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  padding: 8px 12px;
-  border-radius: 999px;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  margin: 0 auto 14px;
-}
-
-.resultBadge strong {
-  color: var(--gold-primary);
-}
-
-.aiTag {
-  font-size: 0.7rem;
-  font-weight: 800;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(var(--gold-primary-rgba), 0.12);
-  border: 1px solid var(--border-gold);
-  color: var(--gold-primary);
-}
-
-.resultTitle {
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.resultText {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 10px;
-}
-
-.resultTextMuted {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  margin-bottom: 14px;
-}
-
-.recoList {
+/* Redesign Consistency styles */
+.resultHeader {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  text-align: left;
-  margin: 14px 0;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
 }
 
-.recoItem {
+.checkIcon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.3));
+}
+
+.resultDisplayTitle {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 1px;
+}
+
+.archetypePreview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  padding: 12px 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-align: left;
 }
 
-.recoName {
-  font-size: 0.92rem;
+.archetypeIconMain {
+  font-size: 2.2rem;
+  background: rgba(var(--gold-primary-rgba), 0.1);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.archetypeInfoMain {
+  display: flex;
+  flex-direction: column;
+}
+
+.archetypeLabelMain {
+  font-size: 0.75rem;
+  color: var(--gold-primary);
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.archetypeNameMain {
+  font-size: 1.2rem;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
-.recoReason {
-  margin-top: 4px;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  line-height: 1.4;
+.resultTextCohesive {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
-.retention {
-  font-size: 0.85rem;
+.closeBtn {
+  position: absolute;
+  top: -24px;
+  right: -16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
   color: var(--text-muted);
-  margin-top: 8px;
-  line-height: 1.4;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 20;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: scale(1.1);
 }
 
 .ctaRow {
-  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.secondaryBtn {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+@keyframes rotateBorder {
+  to { --border-angle: 360deg; }
 }

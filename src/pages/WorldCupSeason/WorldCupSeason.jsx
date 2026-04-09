@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Lightning, TrendUp, Fire, Trophy, Gift, Eye, EyeSlash, ArrowRight, Target, Coin, Crown, Star, Handshake, Check, X } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import Confetti from 'react-confetti';
-import * as reactJoyride from 'react-joyride';
-const Joyride = reactJoyride.default ? reactJoyride.default : reactJoyride.Joyride || reactJoyride;
-const { STATUS } = reactJoyride;
 import MatchCard from '../../components/MatchCard/MatchCard';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
@@ -16,6 +14,7 @@ import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import { useTier } from '../../hooks/useTier';
 import { useMAIis } from '../../hooks/useMAIis';
 import { useTheme } from '../../context/ThemeContextBase';
+import { useTour } from '../../context/TourContextBase';
 import styles from './WorldCupSeason.module.css';
 
 // Staggered children animation
@@ -28,6 +27,92 @@ const staggerItem = {
   show: { opacity: 1, y: [20, -5, 0], transition: { type: 'spring', stiffness: 300, damping: 24 } },
 };
 
+function SeasonAnnouncementModal({ isOpen, onClose }) {
+  if (!isOpen) return null;
+
+  const handlePlayNow = () => {
+    onClose();
+  };
+
+  return createPortal(
+    <AnimatePresence>
+      <div className={styles.modalOverlay}>
+        <motion.div
+          className={styles.modalContent}
+          style={{ 
+            background: 'linear-gradient(135deg, #052c1e, #0a4d36)', 
+            border: '1px solid rgba(0, 230, 118, 0.3)', 
+            textAlign: 'center',
+            boxShadow: '0 0 40px rgba(0, 230, 118, 0.15)'
+          }}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        >
+          <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
+          <div style={{ 
+            background: 'rgba(0, 230, 118, 0.15)', 
+            padding: '16px', 
+            borderRadius: '50%', 
+            color: '#00e676', 
+            display: 'inline-flex', 
+            marginBottom: '16px',
+            boxShadow: '0 0 20px rgba(0, 230, 118, 0.2)'
+          }}>
+            <Trophy size={40} weight="fill" />
+          </div>
+          <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px', fontFamily: 'var(--font-display)' }}>
+            ¡Temporada Mundial IA Activa!
+          </h2>
+          <p className={styles.modalDesc} style={{ color: '#cbd5e1', lineHeight: '1.5', fontSize: '0.95rem' }}>
+            Bienvenido al centro de predicciones. Usa tus mAIles para desafiar a la IA, completa desafíos diarios y escala en el ranking global.
+            <br /><br />
+            <strong>¡Tu bono diario de 50 mAIles te espera!</strong>
+          </p>
+          <button
+            onClick={handlePlayNow}
+            style={{ 
+              background: '#00e676', 
+              color: '#052c1e', 
+              padding: '12px 24px', 
+              borderRadius: '24px', 
+              fontWeight: '800', 
+              border: 'none', 
+              cursor: 'pointer', 
+              width: '100%', 
+              marginTop: '20px', 
+              fontSize: '1rem', 
+              boxShadow: '0 4px 15px rgba(0,230,118,0.3)',
+              textTransform: 'uppercase',
+              letterSpacing: '1px'
+            }}
+          >
+            Empezar Desafío
+          </button>
+          <button
+            onClick={onClose}
+            style={{ 
+              background: 'transparent', 
+              color: 'rgba(255,255,255,0.6)', 
+              padding: '8px 24px', 
+              borderRadius: '24px', 
+              fontWeight: '500', 
+              border: 'none', 
+              cursor: 'pointer', 
+              width: '100%', 
+              marginTop: '8px', 
+              fontSize: '0.85rem' 
+            }}
+          >
+            Omitir por ahora
+          </button>
+        </motion.div>
+      </div>
+    </AnimatePresence>,
+    document.body
+  );
+}
+
 export default function WorldCupSeason() {
   const navigate = useNavigate();
   const tier = useTier();
@@ -39,43 +124,22 @@ export default function WorldCupSeason() {
     return localStorage.getItem('dailyBonusClaimed') === today;
   });
   const [popEye, setPopEye] = useState(false);
-
-  // Joyride Tour Logic
-  const [runTour, setRunTour] = useState(false);
-  const [tourSteps] = useState([
-    {
-      target: '.tour-step-balance',
-      content: '¡Bienvenido a la temporada Mundial! Aquí verás todas tus mAiles acumuladas. Úsalas para canjear beneficios VIP.',
-      disableBeacon: true,
-    },
-    {
-      target: '.tour-step-tabs',
-      content: 'Navega entre Desafíos diarios, tu Portafolio de pronósticos y revisar resultados En Vivo.',
-    },
-    {
-      target: '.tour-step-bonus',
-      content: '¡No olvides reclamar este bono! Todos los días te regalaremos mAiles por ingresar.',
-    },
-    {
-      target: '.tour-step-matches',
-      content: 'Participa pronosticando ganadores. Fíjate bien en la recomendación de la Inteligencia Artificial y decide tu nivel de riesgo. ¡A jugar!',
-    }
-  ]);
+  const [showSeasonPopup, setShowSeasonPopup] = useState(false);
+  const { startTour } = useTour();
 
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem('hasSeenSeasonTour_v1');
-    if (!hasSeenTour) {
-      setTimeout(() => setRunTour(true), 500);
+    const seen = localStorage.getItem('seasonal_announcement_seen_v1');
+    if (!seen) {
+      setShowSeasonPopup(true);
+    } else {
+      startTour(false, 'season');
     }
-  }, []);
+  }, [startTour]);
 
-  const handleJoyrideCallback = (data) => {
-    const { status } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
-    if (finishedStatuses.includes(status)) {
-      localStorage.setItem('hasSeenSeasonTour_v1', 'true');
-      setRunTour(false);
-    }
+  const handleSeasonModalClose = () => {
+    localStorage.setItem('seasonal_announcement_seen_v1', 'true');
+    setShowSeasonPopup(false);
+    startTour(false, 'season');
   };
 
   const { currentMAIis, earnedPredictionMAIis, predictions, setPredictions, addBankMAIis } = useMAIis();
@@ -110,68 +174,6 @@ export default function WorldCupSeason() {
 
   return (
     <div className={styles.page}>
-      <Joyride
-        steps={tourSteps}
-        run={runTour}
-        continuous
-        showProgress
-        showSkipButton
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            primaryColor: '#d500f9',
-            backgroundColor: isDark ? '#0f172a' : '#ffffff',
-            textColor: isDark ? '#f8fafc' : '#1e293b',
-            arrowColor: isDark ? '#0f172a' : '#ffffff',
-            overlayColor: isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(0, 0, 0, 0.5)',
-            zIndex: 10000,
-          },
-          tooltip: {
-            borderRadius: '16px',
-            boxShadow: isDark ? '0 8px 32px rgba(213, 0, 249, 0.25)' : '0 8px 32px rgba(0, 0, 0, 0.15)',
-            fontFamily: 'Inter, sans-serif',
-            padding: '20px',
-          },
-          tooltipContent: {
-            padding: '10px 0',
-            fontSize: '0.9rem',
-            lineHeight: 1.5,
-          },
-          buttonNext: {
-            background: 'linear-gradient(135deg, #d500f9, #7c3aed)',
-            color: '#ffffff',
-            borderRadius: '24px',
-            padding: '8px 20px',
-            fontWeight: '700',
-            fontSize: '0.85rem',
-            outline: 'none',
-            border: 'none'
-          },
-          buttonBack: {
-            color: isDark ? '#94a3b8' : '#64748b',
-            fontSize: '0.85rem',
-            marginRight: '8px'
-          },
-          buttonSkip: {
-            color: isDark ? '#64748b' : '#94a3b8',
-            fontSize: '0.85rem'
-          },
-          beaconInner: {
-            backgroundColor: '#00e676'
-          },
-          beaconOuter: {
-            borderColor: '#00e676',
-            backgroundColor: 'rgba(0, 230, 118, 0.2)'
-          }
-        }}
-        locale={{
-          back: 'Atrás',
-          close: 'Cerrar',
-          last: '¡Jugar!',
-          next: 'Siguiente',
-          skip: 'Saltar Tour'
-        }}
-      />
 
       {/* Balance Card with Stars Background */}
       <motion.section
@@ -483,6 +485,11 @@ export default function WorldCupSeason() {
         <strong>TCS</strong>
         <span className={styles.tcsLabel}>Tata Consultancy Services</span>
       </motion.div>
+
+      <SeasonAnnouncementModal 
+        isOpen={showSeasonPopup} 
+        onClose={handleSeasonModalClose} 
+      />
     </div>
   );
 }

@@ -1,19 +1,24 @@
 import React from 'react';
-import Joyride from 'react-joyride';
-import { useTour } from '../context/TourContext';
+import * as reactJoyride from 'react-joyride';
+const Joyride = (reactJoyride.default ? reactJoyride.default : reactJoyride.Joyride) || reactJoyride;
+import { useTour } from '../../context/TourContextBase';
 import { useTheme } from '../../context/ThemeContextBase';
 
 export default function JoyrideManager() {
-  const { run, steps, handleJoyrideCallback } = useTour();
+  const { run, tourKey, steps, handleJoyrideCallback } = useTour();
   const { theme } = useTheme();
 
   const primaryColor = theme === 'dark' ? '#00e676' : '#2563eb';
 
+  if (!run) return null;
+
   return (
     <Joyride
+      key={tourKey}
       steps={steps}
       run={run}
       continuous
+      disableBeacons={true}
       showProgress
       showSkipButton
       scrollToFirstStep

@@ -10,9 +10,9 @@ import useGameSounds from '../../hooks/useGameSounds';
 import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
-  { to: '/', icon: House, label: 'Banco' },
-  { to: '/season', icon: SoccerBall, label: 'Mundial', center: true },
-  { to: '/rewards', icon: Gift, label: 'Beneficios' }
+  { to: '/', icon: House, label: 'Banco', tourClass: 'tour-step-banco' },
+  { to: '/season', icon: SoccerBall, label: 'Mundial', center: true, tourClass: 'tour-step-mundial' },
+  { to: '/rewards', icon: Gift, label: 'Beneficios', tourClass: 'tour-step-recompensas' }
 ];
 
 export default function BottomNav() {
@@ -31,10 +31,10 @@ export default function BottomNav() {
     <nav className={styles.nav}>
       <div className={styles.bg} />
       {NAV_ITEMS.map((item, index) => {
-        const { to, icon: Icon, label, center } = item;
+        const { to, icon: Icon, label, center, tourClass } = item;
         const isActive = location.pathname === to;
         return (
-          <NavLink key={to} to={to} className={`${styles.item} ${center ? styles.centerItem : ''}`} onClick={() => handleNavClick(to)}>
+          <NavLink key={to} to={to} className={`${styles.item} ${center ? styles.centerItem : ''} ${tourClass}`} onClick={() => handleNavClick(to)}>
             {center ? (
               <motion.div
                 className={`${styles.centerBtn} ${isActive ? styles.centerActive : ''}`}

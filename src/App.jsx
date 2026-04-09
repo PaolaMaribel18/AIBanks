@@ -6,11 +6,13 @@ import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContextBase';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { TourProvider } from './context/TourContext';
+import JoyrideManager from './components/JoyrideManager/JoyrideManager';
+import NotificationToast from './components/NotificationToast/NotificationToast';
 import TopBar from './components/TopBar/TopBar';
 import BottomNav from './components/BottomNav/BottomNav';
 import PageTransition from './components/PageTransition/PageTransition';
 import SplashScreen from './components/SplashScreen/SplashScreen';
-import NotificationToast from './components/NotificationToast/NotificationToast';
 import Home from './pages/Home/Home';
 import WorldCupSeason from './pages/WorldCupSeason/WorldCupSeason';
 import Predictions from './pages/Predictions/Predictions';
@@ -52,31 +54,33 @@ function AppContent() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <NavigationProvider>
-        <TopBar />
-        <NotificationToast />
-        <main style={{ paddingTop: 0 }}>
-          <Routes>
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route element={<PageTransition />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/season" element={<WorldCupSeason />} />
-              <Route path="/predictions" element={<Predictions />} />
-              <Route path="/rewards" element={<Rewards />} />
-              <Route path="/profile" element={<Profile />} />
-            </Route>
-            {/* Catch any stale/unknown route (e.g. /login after auth) → Home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-        <BottomNav />
-      </NavigationProvider>
-    </motion.div>
+    <TourProvider>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <NavigationProvider>
+          <TopBar />
+          <NotificationToast />
+          <main style={{ paddingTop: 0 }}>
+            <Routes>
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route element={<PageTransition />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/season" element={<WorldCupSeason />} />
+                <Route path="/predictions" element={<Predictions />} />
+                <Route path="/rewards" element={<Rewards />} />
+                <Route path="/profile" element={<Profile />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+          <BottomNav />
+        </NavigationProvider>
+        <JoyrideManager />
+      </motion.div>
+    </TourProvider>
   );
 }
 
@@ -95,4 +99,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-
