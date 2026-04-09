@@ -5,9 +5,11 @@ import FlipCard from '../../components/FlipCard/FlipCard';
 import RippleButton from '../../components/RippleButton/RippleButton';
 import FireworksBackground from '../../components/FireworksBackground/FireworksBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
+import { useAuth } from '../../context/AuthContextBase';
 import { useTheme } from '../../context/ThemeContextBase';
 import { useTier } from '../../hooks/useTier';
 import { useMAIis } from '../../hooks/useMAIis';
+import { inferArchetypeWithGemini, isGeminiConfigured } from '../../services/gemini';
 import styles from './Rewards.module.css';
 
 const CATEGORIES = [
@@ -51,6 +53,17 @@ const readAiRecommendation = () => {
 };
 
 const readStoredArchetype = () => toValidArchetype(localStorage.getItem('archetype'));
+
+const readQuestionnaireSelections = () => {
+  try {
+    const raw = localStorage.getItem('questionnaireSelections');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
 
 const REWARDS_CATALOG = [
   // Competidor (5)
@@ -204,6 +217,7 @@ const REWARDS_CATALOG = [
 
 export default function Rewards() {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const tier = useTier();
 
   const [aiRecommendation, setAiRecommendation] = useState(readAiRecommendation);
@@ -240,7 +254,7 @@ export default function Rewards() {
   const [answers, setAnswers] = useState({ competidor: 0, acumulador: 0, practico: 0 });
 
   const [activeCategory, setActiveCategory] = useState('all');
-  const { currentMAIis, redeemedRewards: redeemed, redeemReward } = useMAIis();
+  const { currentMAIis, redeemedRewards: redeemed, redeemReward, predictions } = useMAIis();
   const [showFireworks, setShowFireworks] = useState(false);
   const [lastRedeemed, setLastRedeemed] = useState(null);
 
@@ -248,14 +262,16 @@ export default function Rewards() {
   const [aiPanelState, setAiPanelState] = useState('teaser'); // teaser | thinking | shown
   const [aiThinkingStep, setAiThinkingStep] = useState(0);
   const aiThinkingTimersRef = useRef([]);
+  const aiRequestControllerRef = useRef(null);
 
   const effectiveArchetype = toValidArchetype(aiRecommendation?.arquetipo) || archetype;
 
-  const aiPrimaryMessage = String(
-    aiRecommendation?.mensaje?.motivacion || aiRecommendation?.mensaje?.recomendacion || ''
-  ).trim();
-  const aiSecondaryMessage = String(aiRecommendation?.mensaje?.retencion || '').trim();
+  const aiRecommendationMessage = String(aiRecommendation?.mensaje?.recomendacion || '').trim();
+  const aiMotivationMessage = String(aiRecommendation?.mensaje?.motivacion || '').trim();
+  const aiRetentionMessage = String(aiRecommendation?.mensaje?.retencion || '').trim();
   const showAiResult = aiPanelState === 'shown' && Boolean(effectiveArchetype);
+
+  const userName = String(user?.name || '').trim() || 'Usuario';
 
   const recommended = effectiveArchetype
     ? REWARDS_CATALOG.filter((r) => r.archetype === effectiveArchetype)
@@ -302,6 +318,8 @@ export default function Rewards() {
     return () => {
       aiThinkingTimersRef.current.forEach((t) => clearTimeout(t));
       aiThinkingTimersRef.current = [];
+      aiRequestControllerRef.current?.abort?.();
+      aiRequestControllerRef.current = null;
     };
   }, []);
 
@@ -309,14 +327,80 @@ export default function Rewards() {
     aiThinkingTimersRef.current.forEach((t) => clearTimeout(t));
     aiThinkingTimersRef.current = [];
 
+    aiRequestControllerRef.current?.abort?.();
+    aiRequestControllerRef.current = null;
+
+    const analysisStart = Date.now();
+
     setAiPanelState('thinking');
     setAiThinkingStep(0);
 
     aiThinkingTimersRef.current = [
       setTimeout(() => setAiThinkingStep(1), 650),
       setTimeout(() => setAiThinkingStep(2), 1300),
-      setTimeout(() => setAiPanelState('shown'), 2000),
     ];
+
+    const run = async () => {
+      try {
+        const shouldCallGemini = !aiRecommendation || aiRecommendation?.source !== 'gemini';
+
+        if (shouldCallGemini && isGeminiConfigured()) {
+          const controller = new AbortController();
+          aiRequestControllerRef.current = controller;
+
+          const redeemedRewardsList = Object.values(redeemed || {});
+          const redeemedCategories = Array.from(
+            new Set(redeemedRewardsList.map((r) => r?.category).filter(Boolean))
+          );
+
+          const geminiContext = {
+            userName,
+            currentPoints: currentMAIis,
+            predictionsCount: Object.keys(predictions || {}).length,
+            redeemedCount: redeemedRewardsList.length,
+            redeemedCategories,
+            financialTier: tier || window.sessionStorage.getItem('financial_tier') || null,
+            creditRating: window.sessionStorage.getItem('financial_segment') || null,
+            questionnaireSelections: readQuestionnaireSelections(),
+          };
+
+          const llm = await inferArchetypeWithGemini(geminiContext, { signal: controller.signal });
+          const archetypeFromLlm = toValidArchetype(llm?.arquetipo);
+          const finalArchetype = archetypeFromLlm || effectiveArchetype || 'practico';
+
+          const nextRecommendation = {
+            version: 1,
+            source: 'gemini',
+            createdAt: new Date().toISOString(),
+            arquetipo: finalArchetype,
+            premios_recomendados: Array.isArray(llm?.premios_recomendados) ? llm.premios_recomendados : [],
+            mensaje: llm?.mensaje || { recomendacion: '', motivacion: '', retencion: '' },
+            confianza: llm?.confianza ?? null,
+          };
+
+          localStorage.setItem('ai_recommendation', JSON.stringify(nextRecommendation));
+          localStorage.setItem('archetype', nextRecommendation.arquetipo);
+          setAiRecommendation(nextRecommendation);
+          setArchetype(nextRecommendation.arquetipo);
+          setShowOnboarding(false);
+        }
+
+        const minDelayMs = 2000;
+        const elapsed = Date.now() - analysisStart;
+        if (elapsed < minDelayMs) {
+          await new Promise((resolve) => setTimeout(resolve, minDelayMs - elapsed));
+        }
+
+        setAiPanelState('shown');
+      } catch (err) {
+        if (err?.name === 'AbortError') return;
+        setAiPanelState('shown');
+      } finally {
+        aiRequestControllerRef.current = null;
+      }
+    };
+
+    void run();
   };
 
   // Preguntas del quiz
@@ -486,8 +570,12 @@ export default function Rewards() {
                 Perfil detectado: <strong>{ARCHETYPE_LABEL[effectiveArchetype] || effectiveArchetype || '—'}</strong>
               </div>
 
-              {aiPrimaryMessage ? (
-                <p className={styles.aiMessage}>{aiPrimaryMessage}</p>
+              {aiRecommendationMessage ? (
+                <p className={styles.aiMessage}>{aiRecommendationMessage}</p>
+              ) : null}
+
+              {aiMotivationMessage ? (
+                <p className={styles.aiMessageMuted}>{aiMotivationMessage}</p>
               ) : (
                 <p className={styles.aiMessage}>Listo. Ya personalizamos tus beneficios.</p>
               )}
@@ -503,7 +591,7 @@ export default function Rewards() {
                 </div>
               ) : null}
 
-              {aiSecondaryMessage ? <div className={styles.aiRetention}>{aiSecondaryMessage}</div> : null}
+              {aiRetentionMessage ? <div className={styles.aiRetention}>{aiRetentionMessage}</div> : null}
             </>
           ) : null}
         </motion.div>

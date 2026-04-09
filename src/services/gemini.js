@@ -26,6 +26,73 @@ const PRIZE_LIBRARY = {
   ],
 };
 
+function sleepWithAbort(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, ms);
+
+    const onAbort = () => {
+      clearTimeout(timer);
+      cleanup();
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+
+    const cleanup = () => {
+      signal?.removeEventListener?.('abort', onAbort);
+    };
+
+    signal?.addEventListener?.('abort', onAbort, { once: true });
+  });
+}
+
+function parseRetryAfterMsFromHeaders(res) {
+  try {
+    const raw = res?.headers?.get?.('retry-after');
+    if (!raw) return null;
+
+    const seconds = Number(raw);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.round(seconds * 1000);
+
+    const dateMs = Date.parse(raw);
+    if (!Number.isNaN(dateMs)) {
+      const delta = dateMs - Date.now();
+      return delta > 0 ? delta : 0;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function parseRetryDelayMsFromGeminiErrorText(errorText) {
+  const text = String(errorText || '').trim();
+  if (!text) return null;
+
+  try {
+    const parsed = JSON.parse(text);
+    const retryInfo = Array.isArray(parsed?.error?.details)
+      ? parsed.error.details.find((d) => String(d?.['@type'] || '').includes('RetryInfo'))
+      : null;
+    const retryDelay = String(retryInfo?.retryDelay || '').trim();
+    const match = retryDelay.match(/(\d+(?:\.\d+)?)s/i);
+    if (match) return Math.round(Number(match[1]) * 1000);
+  } catch {
+    // ignore
+  }
+
+  const msgMatch = text.match(/retry\s+in\s+(\d+(?:\.\d+)?)s/i);
+  if (msgMatch) return Math.round(Number(msgMatch[1]) * 1000);
+
+  return null;
+}
+
 export function isGeminiConfigured() {
   return Boolean(String(import.meta.env.VITE_GEMINI_API_KEY || '').trim());
 }
@@ -179,40 +246,61 @@ export async function inferArchetypeWithGemini(context, options = {}) {
   const model = normalizeModelName(import.meta.env.VITE_GEMINI_MODEL);
   const prompt = buildGeminiPrompt(context);
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-    {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const payload = {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: prompt }],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.35,
+      maxOutputTokens: 512,
+      // Gemini 2.5 usa thinking por defecto; eso puede consumir el presupuesto
+      // de salida y truncar el JSON. Lo desactivamos para respuestas estructuradas.
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+    },
+  };
+
+  const MAX_429_DELAY_MS = 30_000;
+  let rateRetryUsed = false;
+  let res;
+  let data;
+
+  while (true) {
+    res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.35,
-          maxOutputTokens: 512,
-          // Gemini 2.5 usa thinking por defecto; eso puede consumir el presupuesto
-          // de salida y truncar el JSON. Lo desactivamos para respuestas estructuradas.
-          thinkingConfig: {
-            thinkingBudget: 0,
-          },
-        },
-      }),
+      body: JSON.stringify(payload),
       signal: options.signal,
-    }
-  );
+    });
 
-  if (!res.ok) {
+    if (res.ok) {
+      data = await res.json();
+      break;
+    }
+
     const errorText = await res.text().catch(() => '');
+
+    if (res.status === 429 && !rateRetryUsed) {
+      const retryAfterMs =
+        parseRetryAfterMsFromHeaders(res) ??
+        parseRetryDelayMsFromGeminiErrorText(errorText);
+
+      if (Number.isFinite(retryAfterMs) && retryAfterMs > 0 && retryAfterMs <= MAX_429_DELAY_MS) {
+        rateRetryUsed = true;
+        await sleepWithAbort(retryAfterMs + 250, options.signal);
+        continue;
+      }
+    }
+
     throw new Error(`Gemini HTTP ${res.status}${errorText ? `: ${errorText}` : ''}`);
   }
-
-  const data = await res.json();
   const text =
     data?.candidates?.[0]?.content?.parts
       ?.map((p) => p?.text)

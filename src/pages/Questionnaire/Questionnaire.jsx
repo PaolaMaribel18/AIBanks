@@ -136,6 +136,13 @@ export default function Questionnaire() {
 
     const fallbackArchetype = pickWinnerFromScores(scoresSnapshot);
 
+    // Guardamos las selecciones para re-usarlas luego (p.ej. en Rewards → "Analizar").
+    try {
+      window.localStorage.setItem('questionnaireSelections', JSON.stringify(selectionsSnapshot || []));
+    } catch {
+      // ignore
+    }
+
     const predictions = safeParse(window.localStorage.getItem('predictions'), {});
     const redeemedRewards = safeParse(window.localStorage.getItem('redeemedRewards'), {});
 
