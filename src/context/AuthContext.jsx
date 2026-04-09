@@ -19,17 +19,21 @@ const translateAuthError = (errorCode, errorDescription) => {
   return decodedDescription || 'Ocurrió un problema al autenticar tu cuenta.';
 };
 
-const syncUserFromSession = (session, setUser) => {
+const syncUserFromSession = (session, setUser, setHasCompletedOnboarding) => {
   if (session?.user) {
     setUser({
       id: session.user.id,
       email: session.user.email,
       name: session.user.user_metadata?.name || session.user.email.split('@')[0],
     });
+    if (localStorage.getItem('hasCompletedOnboarding') === 'true') {
+       setHasCompletedOnboarding(true);
+    }
     return;
   }
 
   setUser(null);
+  setHasCompletedOnboarding(false);
 };
 
 export function AuthProvider({ children }) {
@@ -60,9 +64,10 @@ export function AuthProvider({ children }) {
 
         if (sessionError) throw sessionError;
 
-        syncUserFromSession(session, setUser);
+        syncUserFromSession(session, setUser, setHasCompletedOnboarding);
       } catch (err) {
         setUser(null);
+        setHasCompletedOnboarding(false);
         setError((currentError) => currentError || translateAuthError(err.code, err.message));
       } finally {
         setLoading(false);
@@ -74,7 +79,7 @@ export function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      syncUserFromSession(session, setUser);
+      syncUserFromSession(session, setUser, setHasCompletedOnboarding);
       setLoading(false);
     });
 
@@ -136,6 +141,10 @@ export function AuthProvider({ children }) {
       });
 
       if (signInError) throw signInError;
+
+      if (localStorage.getItem('hasCompletedOnboarding') === 'true') {
+        setHasCompletedOnboarding(true);
+      }
 
       return { success: true, data };
     } catch (err) {
