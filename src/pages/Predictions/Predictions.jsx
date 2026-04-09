@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
 import MatchCard from '../../components/MatchCard/MatchCard';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
@@ -15,6 +17,7 @@ const staggerItem = {
 };
 
 export default function Predictions() {
+  const navigate = useNavigate();
   const { matches, loading, error } = useWorldCupMatches();
   const [activeGroup, setActiveGroup] = useState('Todos');
   const [predictions, setPredictions] = useState(() => {
@@ -62,8 +65,16 @@ export default function Predictions() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className={styles.title}>🎯 Predicciones</h2>
-        <p className={styles.subtitle}>Elige el ganador y acumula puntos</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button 
+             onClick={() => navigate('/season')}
+             style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+             <ArrowLeft size={20} weight="bold" />
+          </button>
+          <h2 className={styles.title} style={{ margin: 0 }}>🎯 Predicciones</h2>
+        </div>
+        <p className={styles.subtitle} style={{ marginTop: '8px' }}>Elige el ganador y acumula puntos</p>
       </motion.div>
 
       {/* Group Filter Tabs with animated indicator */}

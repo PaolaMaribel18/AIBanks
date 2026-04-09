@@ -99,6 +99,44 @@
   color: var(--text-muted);
 }
 
+/* Tabs */
+.tabsMain {
+  display: flex;
+  position: relative;
+  margin: 10px 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 4px;
+}
+
+.tabMainBtn {
+  flex: 1;
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 12px 0;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  z-index: 1;
+  transition: color 0.3s;
+}
+
+.tabMainActive {
+  color: #fff;
+}
+
+.tabMainIndicator {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(213,0,249,0.3), rgba(0,230,118,0.2));
+  border-radius: 16px;
+  z-index: -1;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
 /* Quick Actions */
 .quickActions {
   display: flex;

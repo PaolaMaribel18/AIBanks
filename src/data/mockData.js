@@ -113,6 +113,10 @@ export const REWARDS_CATALOG = [
   { id: 10, name: 'Gift Card Supermaxi', description: 'Cupón aplicable de forma inmediata.', cost: 1000, icon: '💳', category: 'cashback', popular: true, archetype: 'practico' },
   { id: 11, name: 'Parlante JBL', description: 'Portátil y útil en cualquier ocasión.', cost: 2000, icon: '🔊', category: 'merchandise', popular: false, archetype: 'practico' },
   { id: 12, name: 'Power Bank Xiaomi', description: 'Batería de 20000 mAh ultrarrápida.', cost: 1200, icon: '🔋', category: 'merchandise', popular: false, archetype: 'practico' },
+  // FINANCIEROS (Nuevos para AIBank)
+  { id: 13, name: 'Cero Mantenimiento', description: 'Exoneración cuota de manejo tarjeta (3 meses).', cost: 800, icon: '🏦', category: 'financial', popular: true, archetype: 'practico' },
+  { id: 14, name: 'Bono Hipoteca', description: '$15 para tu próxima cuota crediticia.', cost: 1500, icon: '🏠', category: 'financial', popular: true, archetype: 'competidor' },
+  { id: 15, name: '-1% Interés', description: 'Reducción en la tasa de tu próximo préstamo.', cost: 2500, icon: '📉', category: 'financial', popular: false, archetype: 'acumulador' },
 ];
 
 export const LEADERBOARD_DATA = [

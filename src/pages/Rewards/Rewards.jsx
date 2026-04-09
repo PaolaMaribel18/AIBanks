@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Crown, Coin, Check, Gift, Star, CurrencyDollar, TShirt, FilmSlate, Buildings } from '@phosphor-icons/react';
-import FlipCard from '../../components/FlipCard/FlipCard';
+import { Crown, Coin, Check, Gift, Star, CurrencyDollar, TShirt, FilmSlate, Buildings, Bank, Sparkle, SquaresFour, List } from '@phosphor-icons/react';
 import RippleButton from '../../components/RippleButton/RippleButton';
 import FireworksBackground from '../../components/FireworksBackground/FireworksBackground';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
@@ -14,6 +13,7 @@ import styles from './Rewards.module.css';
 
 const CATEGORIES = [
   { key: 'all', icon: Gift, label: 'Todos' },
+  { key: 'financial', icon: Bank, label: 'Finanzas' },
   { key: 'cashback', icon: CurrencyDollar, label: 'Cashback' },
   { key: 'merchandise', icon: TShirt, label: 'Merch' },
   { key: 'entertainment', icon: FilmSlate, label: 'Entreteni.' },
@@ -215,6 +215,110 @@ const REWARDS_CATALOG = [
   },
 ];
 
+function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
+  const isRedeemed = redeemed[reward.id];
+  const canAfford = currentMAIis >= reward.cost;
+
+  return (
+    <div className={`${styles.compactCard} ${isRedeemed ? styles.redeemed : ''}`}>
+      <div className={styles.compactLeft}>
+        <div className={styles.rewardIcon} style={{ fontSize: '1.6rem', padding: '6px', marginBottom: 0 }}>
+          {reward.icon}
+        </div>
+        <div className={styles.compactInfo}>
+          <h4 className={styles.rewardName} style={{ marginBottom: '4px' }}>{reward.name}</h4>
+          <div className={styles.rewardCost} style={{ padding: '2px 6px', display: 'inline-flex', width: 'fit-content' }}>
+            <Coin size={12} weight="fill" />
+            <span className={styles.costValue} style={{ fontSize: '0.75rem' }}>{reward.cost.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.compactRight}>
+        {isRedeemed ? (
+          <div className={styles.redeemedBadge} style={{ padding: '4px 8px', fontSize: '0.7rem' }}><Check size={14}/> Canjeado</div>
+        ) : (
+          <RippleButton
+            variant={canAfford ? 'gold' : ''}
+            className={!canAfford ? styles.missingBtn : ''}
+            size="sm"
+            onClick={() => onRedeem(reward)}
+            disabled={!canAfford}
+            style={canAfford 
+              ? { padding: '6px 14px', fontSize: '0.75rem', boxShadow: '0 2px 10px rgba(255, 215, 0, 0.2)' } 
+              : { padding: '6px 10px', fontSize: '0.72rem' }
+            }
+          >
+            {canAfford ? 'Canjear' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()}`}
+          </RippleButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommend }) {
+  const isRedeemed = redeemed[reward.id];
+  const canAfford = currentMAIis >= reward.cost;
+  const progressPercent = Math.min(100, Math.floor((currentMAIis / reward.cost) * 100));
+
+  return (
+    <div className={`${styles.rewardCard} ${isRedeemed ? styles.redeemed : ''} ${isAiRecommend ? styles.aiRewardCard : ''}`}>
+      {isAiRecommend && !isRedeemed && (
+        <motion.div
+          className={styles.aiTag}
+          animate={{ boxShadow: ['0 0 0px rgba(213,0,249,0)', '0 0 8px rgba(213,0,249,0.6)', '0 0 0px rgba(213,0,249,0)'] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Sparkle size={12} weight="fill" /> AIBank Match
+        </motion.div>
+      )}
+      {reward.popular && !isRedeemed && !isAiRecommend && (
+        <motion.div
+          className={styles.popularTag}
+          animate={{ scale: [1, 1.05, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Star size={14} /> Popular
+        </motion.div>
+      )}
+      
+      <div className={styles.rewardHeader}>
+        <span className={styles.rewardIcon}>{reward.icon}</span>
+        <div className={styles.rewardTitleArea}>
+          <h4 className={styles.rewardName}>{reward.name}</h4>
+          <div className={styles.rewardCost}>
+            <Coin size={14} />
+            <span className={styles.costValue}>{reward.cost.toLocaleString()} mAIis</span>
+          </div>
+        </div>
+      </div>
+      
+      <p className={styles.rewardDesc}>{reward.description}</p>
+      
+      <div className={styles.rewardActions}>
+        {isRedeemed ? (
+          <div className={styles.redeemedBadge}><Check size={16}/> Canjeado</div>
+        ) : (
+          <RippleButton
+            variant={canAfford ? (isAiRecommend ? 'purple' : 'gold') : ''}
+            size="sm"
+            onClick={() => onRedeem(reward)}
+            disabled={!canAfford}
+            fullWidth
+            className={!canAfford ? styles.missingBtn : ''}
+            style={canAfford ? {
+              boxShadow: isAiRecommend ? '0 4px 15px rgba(213, 0, 249, 0.35)' : '0 4px 15px rgba(255, 215, 0, 0.25)'
+            } : {}}
+          >
+            {canAfford ? 'Canjear Ahora' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()} mAIis`}
+          </RippleButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Rewards() {
   const { theme } = useTheme();
   const { user } = useAuth();
@@ -254,6 +358,7 @@ export default function Rewards() {
   const [answers, setAnswers] = useState({ competidor: 0, acumulador: 0, practico: 0 });
 
   const [activeCategory, setActiveCategory] = useState('all');
+  const [viewMode, setViewMode] = useState('list');
   const { currentMAIis, redeemedRewards: redeemed, redeemReward, predictions } = useMAIis();
   const [showFireworks, setShowFireworks] = useState(false);
   const [lastRedeemed, setLastRedeemed] = useState(null);
@@ -406,34 +511,39 @@ export default function Rewards() {
   // Preguntas del quiz
   const qData = [
     {
-      q: "¿Qué te motiva más a participar en los pronósticos?",
+      q: "¿Qué te motiva más a participar en los beneficios?",
       opts: [
-        { label: "Quedar arriba entre los participantes", val: 2, t: "competidor" },
-        { label: "Sumar puntos y acercarme a una meta grande", val: 2, t: "acumulador" },
-        { label: "Ganar algo útil de forma rápida", val: 2, t: "practico" },
+        { label: "Beneficios financieros a largo plazo", val: 2, t: "acumulador" },
+        { label: "Premios de alta gama y tecnología", val: 2, t: "competidor" },
+        { label: "Ganar algo práctico y de uso diario", val: 2, t: "practico" },
       ]
     },
     {
-      q: "Cuando vuelves a una app como esta, ¿qué te anima más?",
+      q: "Cuando usas tu banco, ¿qué te gusta más?",
       opts: [
-        { label: "Ver cómo voy frente a otros", val: 2, t: "competidor" },
-        { label: "Ver que mis puntos siguen creciendo", val: 2, t: "acumulador" },
-        { label: "Encontrar un beneficio claro y fácil de usar", val: 2, t: "practico" },
+        { label: "Reducir tasas o ahorrar en mi crédito", val: 2, t: "acumulador" },
+        { label: "Tener estatus VIP y los mejores seguros", val: 2, t: "competidor" },
+        { label: "Cashback directo por mis compras", val: 2, t: "practico" },
       ]
     },
     {
-      q: "Si entras hoy a la app, ¿qué te gustaría revisar primero?",
+      q: "Si tuvieras 5000 mAIis, ¿qué harías?",
       opts: [
-        { label: "Mi posición actual", val: 1, t: "competidor" },
-        { label: "Mis puntos acumulados", val: 1, t: "acumulador" },
-        { label: "Qué premio o beneficio puedo obtener hoy", val: 1, t: "practico" },
+        { label: "Rebajar mi porcentaje de préstamo", val: 1, t: "acumulador" },
+        { label: "Canjear la consola del momento", val: 1, t: "competidor" },
+        { label: "Canjear múltiples gift cards útiles", val: 1, t: "practico" },
       ]
     }
   ];
 
+  const archetypeExplanations = {
+    competidor: "Prefieres el reconocimiento, posición VIP y grandes premios aspiracionales (Tecnología y Exclusividad).",
+    acumulador: "Prefieres metas claras y beneficios financieros profundos (-Tasa, Hipoteca, Ahorro).",
+    practico: "Prefieres el beneficio inmediato que uses diariamente (Cashback, Supermercados, Cero Mantenimiento)."
+  };
   return (
     <div className={styles.page}>
-      {/* ONBOARDING MODAL OVERLAY */}
+      {/* ONBOARDING MODAL */}
       <AnimatePresence>
         {showOnboarding && (
           <motion.div
@@ -444,8 +554,8 @@ export default function Rewards() {
               className={styles.onboardingBox}
               initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }}
             >
-              <h3 className={styles.onboardingTitle}>Descubramos tu perfil 🧠</h3>
-              <p className={styles.onboardingSub}>Queremos recomendarte los premios que mejor conectan contigo. (Paso {step} de {step===3 ? '3' : '2'})</p>
+              <h3 className={styles.onboardingTitle}>Tu Identidad AIBank 🌟</h3>
+              <p className={styles.onboardingSub}>Queremos armar un portafolio de beneficios ideal para ti. (Paso {step} de {step===3 ? '3' : '2'})</p>
               
               <h4 className={styles.onboardingQuestion}>{qData[step - 1].q}</h4>
               <div className={styles.onboardingOpts}>
@@ -463,7 +573,7 @@ export default function Rewards() {
           </motion.div>
         )}
       </AnimatePresence>
-      {/* Fireworks Effect on Redeem! */}
+      {/* Fireworks Effect */}
       <AnimatePresence>
         {showFireworks && (
           <motion.div
@@ -487,7 +597,7 @@ export default function Rewards() {
                 transition={{ type: 'spring', stiffness: 300, delay: 0.3 }}
               >
                 <span className={styles.celebIcon}>{lastRedeemed.icon}</span>
-                <span className={styles.celebText}>¡Canjeado!</span>
+                <span className={styles.celebText}>¡Aprobado!</span>
                 <span className={styles.celebName}>{lastRedeemed.name}</span>
               </motion.div>
             )}
@@ -501,7 +611,33 @@ export default function Rewards() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h2 className={styles.title}><Gift size={24} /> Beneficios AIBank</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAIis por recompensas exclusivas.</p>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAIis por recompensas y mejoras financieras.</p>
+      </motion.div>
+
+      {/* Balance Card */}
+      <motion.div
+        className={styles.balance}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+      >
+        <div className={styles.balanceInfo}>
+          <span className={styles.balanceLabel}>Tu capital en mAIis</span>
+          <div className={styles.balanceValue}>
+            <Coin size={20} />
+            <AnimatedCounter
+              value={currentMAIis.toLocaleString()}
+              className={styles.balanceNum}
+            />
+          </div>
+        </div>
+        <motion.div
+          className={styles.vipTag}
+          whileTap={{ scale: 0.95 }}
+        >
+          <Crown size={16} />
+          <span>{tier}</span>
+        </motion.div>
       </motion.div>
 
       {/* Recommended Section */}
@@ -598,70 +734,17 @@ export default function Rewards() {
 
         {showAiResult ? (
           <>
-            <h3 className={styles.sectionTitle}><Star size={18} /> Recomendados exclusivamente para ti</h3>
-            <motion.div className={styles.recommendedGrid} variants={staggerContainer} initial="hidden" animate="show">
+            <h3 className={styles.sectionTitle} style={{ marginTop: '24px' }}>Recomendados exclusivamente para ti</h3>
+            <motion.div className={styles.recommendedScroll} variants={staggerContainer} initial="hidden" animate="show">
               {recommended.map((reward) => (
-                <motion.div key={reward.id} variants={staggerItem}>
-                  <FlipCard
-                    front={
-                      <div className={styles.rewardCard}>
-                        <span className={styles.rewardIcon}>{reward.icon}</span>
-                        <h4 className={styles.rewardName}>{reward.name}</h4>
-                        <p className={styles.rewardDesc}>{reward.description}</p>
-                        <div className={styles.rewardCost}>
-                          <AnimatedCounter value={reward.cost} />
-                          <span className={styles.pointsLabel}>mAIis</span>
-                        </div>
-                      </div>
-                    }
-                    back={
-                      <div className={styles.rewardBack}>
-                        <p>¿Canjear este premio?</p>
-                        <RippleButton
-                          onClick={() => handleRedeem(reward)}
-                          disabled={currentMAIis < reward.cost || redeemed[reward.id]}
-                          className={redeemed[reward.id] ? styles.redeemedBtn : ''}
-                        >
-                          {redeemed[reward.id] ? <>Canjeado <Check size={14} /></> : 'Canjear'}
-                        </RippleButton>
-                      </div>
-                    }
-                  />
+                <motion.div key={`rec-${reward.id}`} variants={staggerItem}>
+                  <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} isAiRecommend={true} />
                 </motion.div>
               ))}
             </motion.div>
           </>
         ) : null}
       </motion.section>
-
-      {/* Balance Card */}
-      <motion.div
-        className={styles.balance}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-      >
-        <div className={styles.balanceInfo}>
-          <span className={styles.balanceLabel}>Tu saldo disponible</span>
-          <div className={styles.balanceValue}>
-            <Coin size={20} />
-            <AnimatedCounter
-              value={currentMAIis.toLocaleString()}
-              className={styles.balanceNum}
-            />
-            <span className={styles.balanceCurrency}>mAIis</span>
-          </div>
-        </div>
-        <motion.div
-          className={styles.vipTag}
-          whileTap={{ scale: 0.95 }}
-          animate={{ boxShadow: ['0 0 0px rgba(255,215,0,0)', '0 0 12px rgba(255,215,0,0.3)', '0 0 0px rgba(255,215,0,0)'] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <Crown size={16} />
-          <span>{tier}</span>
-        </motion.div>
-      </motion.div>
 
       {/* Categories */}
       <div className={styles.categories}>
@@ -674,88 +757,37 @@ export default function Rewards() {
             layout
           >
             <cat.icon size={16} /> {cat.label}
-            {activeCategory === cat.key && (
-              <motion.div
-                className={styles.catIndicator}
-                layoutId="catIndicator"
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              />
-            )}
           </motion.button>
         ))}
       </div>
 
-      {/* Rewards Grid with FlipCards */}
+      <div className={styles.catalogHeader}>
+         <h3 className={styles.catalogTitle}>Catálogo</h3>
+         <div className={styles.viewToggle}>
+            <button className={`${styles.viewBtn} ${viewMode === 'list' ? styles.activeView : ''}`} onClick={() => setViewMode('list')}><List size={18}/></button>
+            <button className={`${styles.viewBtn} ${viewMode === 'grid' ? styles.activeView : ''}`} onClick={() => setViewMode('grid')}><SquaresFour size={18}/></button>
+         </div>
+      </div>
+
+      {/* Main Catalog */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={activeCategory}
-          className={styles.grid}
+          key={`${activeCategory}-${viewMode}`}
+          className={viewMode === 'list' ? styles.compactList : styles.grid}
           variants={staggerContainer}
           initial="hidden"
           animate="show"
           exit={{ opacity: 0, y: -10 }}
         >
-          {filtered.map((reward, index) => {
-            const canAfford = currentMAIis >= reward.cost;
-            const isRedeemed = redeemed[reward.id];
-
-            return (
-              <motion.div key={reward.id} variants={staggerItem}>
-                <FlipCard
-                  front={
-                    <div className={`${styles.rewardCard} ${isRedeemed ? styles.redeemed : ''}`}>
-                      {reward.popular && !isRedeemed && (
-                        <motion.div
-                          className={styles.popularTag}
-                          animate={{ scale: [1, 1.05, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <Star size={14} /> Popular
-                        </motion.div>
-                      )}
-                      <motion.span
-                        className={styles.rewardIcon}
-                        animate={{ y: [0, -3, 0] }}
-                        transition={{ duration: 2, repeat: Infinity, delay: index * 0.08 }}
-                      >
-                        {reward.icon}
-                      </motion.span>
-                      <h4 className={styles.rewardName}>{reward.name}</h4>
-                      <p className={styles.rewardDesc}>{reward.description}</p>
-                      <div className={styles.rewardFooter}>
-                        <div className={styles.rewardCost}>
-                          <Coin size={16} />
-                          <span className={styles.costValue}>{reward.cost.toLocaleString()}</span>
-                        </div>
-                      </div>
-                      <div className={styles.flipHint}>Toca para más</div>
-                    </div>
-                  }
-                  back={
-                    <div className={`${styles.rewardCard} ${styles.rewardCardBack}`}>
-                      <span className={styles.rewardIcon}>{reward.icon}</span>
-                      <h4 className={styles.rewardName}>{reward.name}</h4>
-                      <div className={styles.rewardFooter} style={{ marginTop: 12 }}>
-                        {isRedeemed ? (
-                          <div className={styles.redeemedBadge}>✅ Canjeado</div>
-                        ) : (
-                          <RippleButton
-                            variant={canAfford ? 'gold' : 'outline'}
-                            size="sm"
-                            onClick={(e) => { e.stopPropagation(); handleRedeem(reward); }}
-                            disabled={!canAfford}
-                            fullWidth
-                          >
-                            {canAfford ? <><Coin size={14} /> Canjear Ahora</> : 'Puntos Insuficientes'}
-                          </RippleButton>
-                        )}
-                      </div>
-                    </div>
-                  }
-                />
-              </motion.div>
-            );
-          })}
+          {filtered.map((reward) => (
+            <motion.div key={reward.id} variants={staggerItem}>
+                {viewMode === 'list' ? (
+                  <RewardCompactCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
+                ) : (
+                  <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
+                )}
+            </motion.div>
+          ))}
         </motion.div>
       </AnimatePresence>
     </div>

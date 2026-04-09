@@ -120,24 +120,18 @@
   font-size: 0.82rem;
   color: var(--text-primary);
 }
-.teamCode {
+.aiProbBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(213, 0, 249, 0.12);
+  color: #d500f9;
+  border-radius: 12px;
+  padding: 3px 8px;
   font-family: var(--font-display);
-  font-size: 0.55rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 1px;
-  opacity: 0.5;
-}
-.aiProbability {
-  font-family: var(--font-display);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: var(--accent-green);
-  background: rgba(var(--accent-green-rgba), 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-top: 4px;
-  letter-spacing: 0.5px;
+  margin-top: 2px;
 }
 
 .vsWrap {
@@ -148,22 +142,18 @@
   width: 48px;
   height: 48px;
 }
-.vsCircle {
-  position: absolute;
-  inset: 0;
-}
-.vsRing {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 1px dashed rgba(var(--gold-primary-rgba), 0.15);
+.vsWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 48px;
+  height: 48px;
 }
 .vs {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  color: var(--text-muted);
-  position: relative;
-  z-index: 1;
+  color: rgba(255,255,255,0.15);
   letter-spacing: 1px;
 }
 
@@ -210,35 +200,36 @@
   border-color: var(--accent-green);
   background: rgba(var(--accent-green-rgba), 0.06);
 }
-.oddLabel {
-  font-weight: 600;
-  font-size: 0.72rem;
-  color: var(--text-secondary);
+.btnContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
   z-index: 1;
+  gap: 2px;
 }
-.oddSelected .oddLabel {
+.btnLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btnPrize {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
   color: var(--gold-primary);
 }
-.oddValue {
+.btnPrizeAudaz {
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  position: relative;
-  z-index: 1;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #d500f9;
+  text-shadow: 0 0 10px rgba(213,0,249,0.3);
 }
-.aiMultiplier {
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #fbbf24;
-  position: relative;
-  z-index: 1;
-  background: rgba(251, 191, 36, 0.15);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-top: 2px;
-}
+
+
 
 
 /* Footer */

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { PaperPlaneRight, Receipt, CreditCard, Bank, CaretRight, X, Trophy } from '@phosphor-icons/react';
@@ -14,7 +14,7 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!amount || !account) return;
-    
+
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
@@ -27,7 +27,7 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
   return (
     <AnimatePresence>
       <div className={styles.modalOverlay}>
-        <motion.div 
+        <motion.div
           className={styles.modalContent}
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -36,13 +36,13 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
           <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
           <h2 className={styles.modalTitle}>Nueva Transferencia</h2>
           <p className={styles.modalDesc}>Transfiere a otras cuentas desde tu App AIBank.</p>
-          
+
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.inputGroup}>
               <label>Cuenta Destino</label>
-              <input 
-                type="text" 
-                placeholder="Ej. 2200334455" 
+              <input
+                type="text"
+                placeholder="Ej. 2200334455"
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
                 disabled={isProcessing}
@@ -50,9 +50,9 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
             </div>
             <div className={styles.inputGroup}>
               <label>Monto ($)</label>
-              <input 
-                type="number" 
-                placeholder="0.00" 
+              <input
+                type="number"
+                placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 disabled={isProcessing}
@@ -60,14 +60,59 @@ function TransactionModal({ isOpen, onClose, onSuccess }) {
                 step="0.01"
               />
             </div>
-            <button 
-              type="submit" 
-              className={styles.submitBtn} 
+            <button
+              type="submit"
+              className={styles.submitBtn}
               disabled={isProcessing || !amount || !account}
             >
               {isProcessing ? 'Procesando...' : 'Transferir'}
             </button>
           </form>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+}
+
+function FeatureAnnouncementModal({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  if (!isOpen) return null;
+
+  const handleClose = () => {
+    localStorage.setItem('aiFeatureDismissed', 'true');
+    onClose();
+  };
+
+  const handlePlayNow = () => {
+    localStorage.setItem('aiFeatureDismissed', 'true');
+    navigate('/season');
+  };
+
+  return (
+    <AnimatePresence>
+      <div className={styles.modalOverlay}>
+        <motion.div 
+          className={styles.modalContent}
+          style={{ background: 'linear-gradient(135deg, #1a1a2e, #3a1c71)', border: '1px solid rgba(213,0,249,0.3)', textAlign: 'center' }}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        >
+          <button className={styles.closeBtn} onClick={handleClose}><X size={20} /></button>
+          <div style={{ background: 'rgba(213,0,249,0.2)', padding: '16px', borderRadius: '50%', color: '#d500f9', display: 'inline-flex', marginBottom: '16px' }}>
+            <Trophy size={40} weight="fill" />
+          </div>
+          <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px' }}>Nueva Función IA Activada</h2>
+          <p className={styles.modalDesc} style={{ color: '#cbd5e1', lineHeight: '1.5' }}>
+            Tu AIBank App ahora incluye predicciones deportivas impulsadas por Inteligencia Artificial. <br/><br/>
+            Desafía los pronósticos y gana mAIis canjeables.
+          </p>
+          <button 
+             onClick={handlePlayNow}
+             style={{ background: '#d500f9', color: 'white', padding: '12px 24px', borderRadius: '24px', fontWeight: 'bold', border: 'none', cursor: 'pointer', width: '100%', marginTop: '16px', fontSize: '1rem', boxShadow: '0 4px 15px rgba(213,0,249,0.4)' }}
+          >
+             Jugar Ahora
+          </button>
         </motion.div>
       </div>
     </AnimatePresence>
@@ -80,6 +125,15 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [showFeaturePopup, setShowFeaturePopup] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('aiFeatureDismissed');
+    if (!hasSeen) {
+      const timer = setTimeout(() => setShowFeaturePopup(true), 800);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleTransactionSuccess = (earnedPts) => {
     setIsModalOpen(false);
@@ -95,7 +149,7 @@ export default function Home() {
   return (
     <div className={styles.dashboardContainer}>
       {showConfetti && <Confetti recycle={false} numberOfPieces={300} />}
-      
+
       {/* Saludo */}
       <header className={styles.header}>
         <h1 className={styles.greeting}>Mis Finanzas</h1>
@@ -104,7 +158,7 @@ export default function Home() {
 
       {/* Cuentas y Tarjetas - Scroll Horizontal */}
       <section className={styles.accountsScroll}>
-        <motion.div 
+        <motion.div
           className={styles.accountCard}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -120,7 +174,7 @@ export default function Home() {
           </div>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className={`${styles.accountCard} ${styles.creditCard}`}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -174,7 +228,7 @@ export default function Home() {
       <h3 className={styles.sectionTitle}>Beneficios y Misiones</h3>
 
       {/* Banner Temporada Mundial */}
-      <motion.section 
+      <motion.section
         className={styles.seasonBanner}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -232,7 +286,7 @@ export default function Home() {
       {/* Floating Notification */}
       <AnimatePresence>
         {successMessage && (
-          <motion.div 
+          <motion.div
             className={styles.floatingToast}
             initial={{ opacity: 0, y: -50, scale: 0.8 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -245,10 +299,14 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <TransactionModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={handleTransactionSuccess} 
+      <TransactionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleTransactionSuccess}
+      />
+      <FeatureAnnouncementModal 
+        isOpen={showFeaturePopup} 
+        onClose={() => setShowFeaturePopup(false)} 
       />
     </div>
   );

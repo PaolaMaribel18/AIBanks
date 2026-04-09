@@ -58,12 +58,7 @@ export default function WorldCupSeason() {
         : 'Empate'
   );
 
-  const quickActions = [
-    { icon: Target, label: 'Predecir', color: '#ffd700', bg: 'rgba(255,215,0,0.12)', path: '/predictions' },
-    { icon: Gift, label: 'Premios', color: '#d500f9', bg: 'rgba(213,0,249,0.12)', path: '/rewards' },
-    { icon: Trophy, label: 'Ranking', color: '#00e676', bg: 'rgba(0,230,118,0.12)', path: '/leaderboard' },
-    { icon: Fire, label: 'Racha', color: '#ff6b35', bg: 'rgba(255,107,53,0.12)', path: '/profile' },
-  ];
+  const [activeTab, setActiveTab] = useState('Desafios');
 
   return (
     <div className={styles.page}>
@@ -175,229 +170,202 @@ export default function WorldCupSeason() {
         </div>
       </motion.section>
 
-      {/* Quick Actions - Staggered entrance */}
-      <motion.section
-        className={styles.quickActions}
-        variants={staggerContainer}
-        initial="hidden"
-        animate="show"
-      >
-        {quickActions.map(({ icon: Icon, label, color, bg, path }) => (
-          <motion.button
-            key={label}
-            className={styles.quickBtn}
-            onClick={() => navigate(path)}
-            variants={staggerItem}
-            whileTap={{ scale: 0.88 }}
-            whileHover={{ y: -3 }}
+      {/* Tab Navigation */}
+      <div className={styles.tabsMain}>
+        {['Desafios', 'Pronosticos', 'En Vivo'].map((tab) => (
+          <button
+            key={tab}
+            className={`${styles.tabMainBtn} ${activeTab === tab ? styles.tabMainActive : ''}`}
+            onClick={() => setActiveTab(tab)}
           >
-            <motion.div
-              className={styles.quickIcon}
-              style={{ background: bg, color }}
-              whileHover={{
-                boxShadow: `0 0 20px ${color}40`,
-                scale: 1.08,
-              }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            >
-              <Icon size={22} weight="bold" />
-            </motion.div>
-            <span className={styles.quickLabel}>{label}</span>
-          </motion.button>
-        ))}
-      </motion.section>
-
-      {/* Daily Bonus with pulse animation */}
-      <motion.section
-        className={styles.bonus}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.35, type: 'spring', stiffness: 300 }}
-      >
-        <div className={styles.bonusLeft}>
-          <motion.span
-            className={styles.bonusIcon}
-            animate={{
-              y: [0, -4, 0],
-              rotate: [0, -5, 5, 0],
-            }}
-            transition={{ repeat: Infinity, duration: 2.5 }}
-          >
-            <Gift size={24} weight="bold" />
-          </motion.span>
-          <div>
-            <div className={styles.bonusLabel}>BONO DIARIO</div>
-            <div className={styles.bonusValue}>+50 puntos gratis</div>
-          </div>
-        </div>
-        <RippleButton variant="green" size="sm" onClick={() => {
-          const today = new Date().toISOString().slice(0, 10);
-          localStorage.setItem('dailyBonusClaimed', today);
-          setClaimedBonus(true);
-        }} disabled={claimedBonus}>
-          {claimedBonus ? 'Reclamado' : 'Reclamar'}
-        </RippleButton>
-      </motion.section>
-      {claimedBonus && <Confetti recycle={false} numberOfPieces={200} />}
-
-      {/* ═══ FIFA World Cup 2026 — Live Section ═══ */}
-      <FifaLive />
-
-      {/* Mis Predicciones — staggered list */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Mis Predicciones</h3>
-          <motion.button
-            className={styles.seeAll}
-            onClick={() => navigate('/profile')}
-            whileHover={{ x: 3 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <ArrowRight size={18} weight="bold" />
-          </motion.button>
-        </div>
-        <motion.div
-          className={styles.activityList}
-          variants={staggerContainer}
-          initial="hidden"
-          animate="show"
-        >
-          {predictionHistory.length > 0 ? (
-            predictionHistory.slice(0, 3).map((match, i) => (
+            {tab}
+            {activeTab === tab && (
               <motion.div
-                key={match.id}
-                className={styles.actItem}
-                variants={staggerItem}
-                whileTap={{ scale: 0.98, backgroundColor: 'rgba(255,255,255,0.03)' }}
-                whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,215,0,0.05)' }}
+                className={styles.tabMainIndicator}
+                layoutId="mainTabIndicator"
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.tabContent}>
+        <AnimatePresence mode="wait">
+          {activeTab === 'Desafios' && (
+            <motion.div
+              key="desafios"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Daily Bonus */}
+              <motion.section
+                className={styles.bonus}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
               >
-                <div className={styles.actLeft}>
-                  <motion.div
-                    className={styles.actAvatar}
-                    style={{
-                      background: 'rgba(0, 230, 118, 0.12)',
-                      color: '#00e676',
-                    }}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.4 + i * 0.1, type: 'spring', stiffness: 400 }}
+                <div className={styles.bonusLeft}>
+                  <motion.span
+                    className={styles.bonusIcon}
+                    animate={{ y: [0, -4, 0], rotate: [0, -5, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 2.5 }}
                   >
-                    <Check size={16} weight="bold" />
-                  </motion.div>
+                    <Gift size={24} weight="bold" />
+                  </motion.span>
                   <div>
-                    <div className={styles.actMatch}>{match.home.name} vs {match.away.name}</div>
-                    <div className={styles.actPred}>Tu pronóstico: {getPredictionLabel(match)}</div>
+                    <div className={styles.bonusLabel}>BONO DIARIO</div>
+                    <div className={styles.bonusValue}>+50 mAIis gratis</div>
                   </div>
                 </div>
-                <div className={styles.actRight}>
-                  <motion.span
-                    className={styles.actPoints}
-                    style={{ color: '#00e676' }}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + i * 0.1 }}
-                  >
-                    +{match.points}
-                  </motion.span>
-                  <span className={styles.actBalance}>guardada</span>
+                <RippleButton
+                  variant="green"
+                  size="sm"
+                  onClick={() => {
+                    const today = new Date().toISOString().slice(0, 10);
+                    localStorage.setItem('dailyBonusClaimed', today);
+                    setClaimedBonus(true);
+                  }}
+                  disabled={claimedBonus}
+                >
+                  {claimedBonus ? 'Reclamado' : 'Reclamar'}
+                </RippleButton>
+              </motion.section>
+              {claimedBonus && <Confetti recycle={false} numberOfPieces={200} />}
+
+              {/* Info Banner */}
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                style={{
+                  margin: '16px',
+                  padding: '16px',
+                  background: 'linear-gradient(135deg, rgba(213,0,249,0.1), rgba(0,230,118,0.05))',
+                  border: '1px solid rgba(213,0,249,0.2)',
+                  borderRadius: '16px',
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'flex-start'
+                }}
+              >
+                <div style={{ background: 'rgba(213,0,249,0.2)', padding: '8px', borderRadius: '50%', color: '#d500f9', flexShrink: 0 }}>
+                   <Lightning size={20} weight="fill" />
+                </div>
+                <div>
+                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#fff', fontWeight: '800' }}>¿Cómo ganar más mAIis?</h4>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.5 }}>
+                    Nuestra IA analiza los datos para predecir al favorito de cada partido. Elige <strong>"Seguir a la IA"</strong> para ganancias conservadoras, o atrévete a <strong>"Desafiar a la IA"</strong> para llevarte una recompensa masiva.
+                  </p>
                 </div>
               </motion.div>
-            ))
-          ) : (
-            <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
-              Aún no has guardado predicciones.
-            </div>
-          )}
-        </motion.div>
-      </section>
 
-      {/* Hot Matches */}
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sectionTitle}>Partidos 🔥</h3>
-          <motion.button
-            className={styles.seeAll}
-            onClick={() => navigate('/predictions')}
-            whileHover={{ x: 3 }}
-          >
-            Ver todos <ArrowRight size={14} weight="bold" />
-          </motion.button>
-        </div>
-        <div className={styles.matchList}>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
-              Cargando partidos... ⚽
-            </div>
-          ) : matchesToShow.length > 0 ? (
-            matchesToShow.map((match, i) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                delay={0.1 * i}
-                onPredict={handlePredict}
-                predictedChoice={predictions[match.id]}
-              />
-            ))
-          ) : (
-            <div style={{ padding: '1rem', color: '#888' }}>No hay partidos destacados por ahora.</div>
-          )}
-        </div>
-      </section>
-
-      {/* Promos - Horizontal scroll with snap */}
-      <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>Mis Promociones</h3>
-        <motion.div
-          className={styles.promoScroll}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainer}
-        >
-          {[
-            {
-              title: 'Doble Puntos',
-              desc: 'Duplica tus puntos en partidos de Ecuador',
-              icon: Star,
-              gradient: 'linear-gradient(135deg, #1a1a2e, #2d1b69)',
-              border: 'rgba(213, 0, 249, 0.2)',
-            },
-            {
-              title: 'Refiere y Gana',
-              desc: 'Invita amigos y gana 500 puntos cada uno',
-              icon: Handshake,
-              gradient: 'linear-gradient(135deg, #1a1a2e, #1b3a2d)',
-              border: 'rgba(0, 230, 118, 0.2)',
-            },
-            {
-              title: 'Mundial 2026',
-              desc: 'Predice el campeón y gana 10,000 pts',
-              icon: Trophy,
-              gradient: 'linear-gradient(135deg, #1a1a2e, #3a2d1b)',
-              border: 'rgba(255, 215, 0, 0.2)',
-            },
-          ].map((promo, i) => (
-            <motion.div
-              key={i}
-              className={styles.promoCard}
-              style={{ background: promo.gradient, borderColor: promo.border }}
-              variants={staggerItem}
-              whileTap={{ scale: 0.96 }}
-              whileHover={{ y: -4, boxShadow: `0 8px 30px ${promo.border}`, filter: 'brightness(1.1)' }}
-            >
-              <h4 className={styles.promoTitle}>{promo.title}</h4>
-              <p className={styles.promoDesc}>{promo.desc}</p>
-              <motion.div
-                className={styles.promoIconWrap}
-                animate={{ y: [0, -3, 0], rotate: [0, 2, -2, 0] }}
-                transition={{ repeat: Infinity, duration: 3, delay: i * 0.5 }}
-              >
-                <promo.icon size={24} weight="bold" />
-              </motion.div>
+              {/* Hot Matches */}
+              <section className={styles.section} style={{ marginTop: '16px' }}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Partidos para ti 🔥</h3>
+                  <motion.button
+                    className={styles.seeAll}
+                    onClick={() => navigate('/predictions')}
+                    whileHover={{ x: 3 }}
+                  >
+                    Ver todos <ArrowRight size={14} weight="bold" />
+                  </motion.button>
+                </div>
+                <div className={styles.matchList}>
+                  {loading ? (
+                    <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
+                      Cargando partidos... ⚽
+                    </div>
+                  ) : matchesToShow.length > 0 ? (
+                    matchesToShow.map((match, i) => (
+                      <MatchCard
+                        key={match.id}
+                        match={match}
+                        delay={0.1 * i}
+                        onPredict={handlePredict}
+                        predictedChoice={predictions[match.id]}
+                      />
+                    ))
+                  ) : (
+                    <div style={{ padding: '1rem', color: '#888', textAlign: 'center' }}>
+                      Ya completaste todos los partidos recientes.
+                    </div>
+                  )}
+                </div>
+              </section>
             </motion.div>
-          ))}
-        </motion.div>
-      </section>
+          )}
+
+          {activeTab === 'Pronosticos' && (
+            <motion.div
+              key="pronosticos"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <section className={styles.section}>
+                <div className={styles.sectionHeader}>
+                  <h3 className={styles.sectionTitle}>Mi Portafolio</h3>
+                </div>
+                <motion.div
+                  className={styles.activityList}
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="show"
+                >
+                  {predictionHistory.length > 0 ? (
+                    predictionHistory.map((match, i) => (
+                      <motion.div
+                        key={match.id}
+                        className={styles.actItem}
+                        variants={staggerItem}
+                      >
+                        <div className={styles.actLeft}>
+                          <motion.div
+                            className={styles.actAvatar}
+                            style={{ background: 'rgba(0, 230, 118, 0.12)', color: '#00e676' }}
+                          >
+                            <Check size={16} weight="bold" />
+                          </motion.div>
+                          <div>
+                            <div className={styles.actMatch}>{match.home.name} vs {match.away.name}</div>
+                            <div className={styles.actPred}>Elegiste: {getPredictionLabel(match)}</div>
+                          </div>
+                        </div>
+                        <div className={styles.actRight}>
+                          <span className={styles.actPoints} style={{ color: '#00e676' }}>
+                            +{match.points} mAIis
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
+                      Aún no has guardado predicciones. <br/> ¡Ve a Desafíos!
+                    </div>
+                  )}
+                </motion.div>
+              </section>
+            </motion.div>
+          )}
+
+          {activeTab === 'En Vivo' && (
+            <motion.div
+              key="envivo"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FifaLive />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* TCS Powered */}
       <motion.div

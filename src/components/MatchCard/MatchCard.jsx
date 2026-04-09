@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Fire, Coin, Check } from '@phosphor-icons/react';
+import { Fire, Coin, Check, Sparkle } from '@phosphor-icons/react';
 import styles from './MatchCard.module.css';
 
 export default function MatchCard({ match, delay = 0, onPredict, predictedChoice }) {
@@ -9,6 +9,12 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
 
   const selected = predictedChoice ?? pendingChoice;
   const confirmed = Boolean(predictedChoice);
+
+  // Determinar el favorito para asignar etiquetas
+  const homeMult = aiData?.gamificacion?.multiplicadores?.[match.home.name] ? parseFloat(aiData.gamificacion.multiplicadores[match.home.name]) : 1.5;
+  const awayMult = aiData?.gamificacion?.multiplicadores?.[match.away.name] ? parseFloat(aiData.gamificacion.multiplicadores[match.away.name]) : 1.5;
+  const isHomeFavorite = homeMult <= awayMult;
+  const isAwayFavorite = awayMult < homeMult;
 
   useEffect(() => {
     async function fetchAI() {
@@ -103,11 +109,11 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
             {match.home.flag}
           </motion.span>
           <span className={styles.teamName}>{match.home.name}</span>
-          <span className={styles.teamCode}>{match.home.code}</span>
           {aiData && aiData.probabilidades_victoria && (
-            <motion.span className={styles.aiProbability} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-              {aiData.probabilidades_victoria[match.home.name]}%
-            </motion.span>
+            <div className={styles.aiProbBadge}>
+              <Sparkle size={12} weight="fill" />
+              <span>{Math.round(aiData.probabilidades_victoria[match.home.name])}%</span>
+            </div>
           )}
           <motion.button
             className={`${styles.oddBtn} ${selected === 'home' ? styles.oddSelected : ''} ${confirmed && selected === 'home' ? styles.oddConfirmed : ''}`}
@@ -123,21 +129,16 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <span className={styles.oddLabel} style={{ width: '100%', textAlign: 'center' }}>Votar</span>
-            {aiData?.gamificacion?.multiplicadores?.[match.home.name] && (
-               <span className={styles.aiMultiplier}>{aiData.gamificacion.multiplicadores[match.home.name]}x</span>
-            )}
+            <div className={styles.btnContent}>
+              <span className={styles.btnLabel}>{isHomeFavorite ? 'Seguir a la IA' : 'Desafiar a la IA'}</span>
+              <span className={isHomeFavorite ? styles.btnPrize : styles.btnPrizeAudaz}>
+                +{(match.points * homeMult).toLocaleString()} mAIis
+              </span>
+            </div>
           </motion.button>
         </motion.div>
         
         <div className={styles.vsWrap}>
-          <motion.div
-            className={styles.vsCircle}
-            animate={{ rotate: [0, 360] }}
-            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-          >
-            <div className={styles.vsRing} />
-          </motion.div>
           <span className={styles.vs}>VS</span>
         </div>
 
@@ -153,11 +154,11 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
             {match.away.flag}
           </motion.span>
           <span className={styles.teamName}>{match.away.name}</span>
-          <span className={styles.teamCode}>{match.away.code}</span>
           {aiData && aiData.probabilidades_victoria && (
-            <motion.span className={styles.aiProbability} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}>
-              {aiData.probabilidades_victoria[match.away.name]}%
-            </motion.span>
+            <div className={styles.aiProbBadge}>
+              <Sparkle size={12} weight="fill" />
+              <span>{Math.round(aiData.probabilidades_victoria[match.away.name])}%</span>
+            </div>
           )}
           <motion.button
             className={`${styles.oddBtn} ${selected === 'away' ? styles.oddSelected : ''} ${confirmed && selected === 'away' ? styles.oddConfirmed : ''}`}
@@ -173,10 +174,12 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}
-            <span className={styles.oddLabel} style={{ width: '100%', textAlign: 'center' }}>Votar</span>
-            {aiData?.gamificacion?.multiplicadores?.[match.away.name] && (
-               <span className={styles.aiMultiplier}>{aiData.gamificacion.multiplicadores[match.away.name]}x</span>
-            )}
+            <div className={styles.btnContent}>
+              <span className={styles.btnLabel}>{isAwayFavorite ? 'Seguir a la IA' : 'Desafiar a la IA'}</span>
+              <span className={isAwayFavorite ? styles.btnPrize : styles.btnPrizeAudaz}>
+                +{(match.points * awayMult).toLocaleString()} mAIis
+              </span>
+            </div>
           </motion.button>
         </motion.div>
       </div>
@@ -187,10 +190,8 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
       <div className={styles.footer}>
         <motion.div
           className={styles.pointsBadge}
-          animate={{ scale: [1, 1.02, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
         >
-          <Coin size={16} /> <span>{match.points} pts</span>
+          <Coin size={16} /> <span>300 pts entrada</span>
         </motion.div>
         <AnimatePresence>
           {selected && !confirmed && (
