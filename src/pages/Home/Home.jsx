@@ -79,12 +79,12 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const handleClose = () => {
-    localStorage.setItem('aiFeatureDismissed', 'true');
+    localStorage.setItem('aiFeatureDismissed_v2', 'true');
     onClose();
   };
 
   const handlePlayNow = () => {
-    localStorage.setItem('aiFeatureDismissed', 'true');
+    localStorage.setItem('aiFeatureDismissed_v2', 'true');
     navigate('/season');
   };
 
@@ -128,7 +128,7 @@ export default function Home() {
   const [showFeaturePopup, setShowFeaturePopup] = useState(false);
 
   useEffect(() => {
-    const hasSeen = localStorage.getItem('aiFeatureDismissed');
+    const hasSeen = localStorage.getItem('aiFeatureDismissed_v2');
     if (!hasSeen) {
       const timer = setTimeout(() => setShowFeaturePopup(true), 800);
       return () => clearTimeout(timer);
