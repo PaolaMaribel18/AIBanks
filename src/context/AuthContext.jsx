@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabaseClient';
 
 import { AuthContext } from './AuthContextBase';
@@ -21,19 +21,21 @@ const translateAuthError = (errorCode, errorDescription) => {
 
 const syncUserFromSession = (session, setUser, setHasCompletedOnboarding) => {
   if (session?.user) {
-    setUser({
+    const baseUser = {
       id: session.user.id,
       email: session.user.email,
       name: session.user.user_metadata?.name || session.user.email.split('@')[0],
-    });
+    };
+    setUser(baseUser);
     if (localStorage.getItem('hasCompletedOnboarding') === 'true') {
        setHasCompletedOnboarding(true);
     }
-    return;
+    return baseUser;
   }
 
   setUser(null);
   setHasCompletedOnboarding(false);
+  return null;
 };
 
 export function AuthProvider({ children }) {
@@ -43,6 +45,36 @@ export function AuthProvider({ children }) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const hydrateUserProfile = useCallback(async (baseUserOrId) => {
+    const userId = typeof baseUserOrId === 'string' ? baseUserOrId : baseUserOrId?.id;
+    if (!userId) return;
+    try {
+      const { data, error: profileError } = await supabase
+        .from('profiles')
+        .select('name, email, points, tier, archetype, balance')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !data) return;
+
+      setUser((prev) => {
+        const baseUser =
+          typeof baseUserOrId === 'object' && baseUserOrId
+            ? baseUserOrId
+            : prev && prev.id === userId
+              ? prev
+              : { id: userId };
+
+        // No pisar si ya cambió a otro usuario
+        if (prev && prev.id && prev.id !== userId) return prev;
+
+        return { ...baseUser, ...data };
+      });
+    } catch {
+      // no-op
+    }
+  }, []);
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
@@ -64,7 +96,10 @@ export function AuthProvider({ children }) {
 
         if (sessionError) throw sessionError;
 
-        syncUserFromSession(session, setUser, setHasCompletedOnboarding);
+        const baseUser = syncUserFromSession(session, setUser, setHasCompletedOnboarding);
+        if (baseUser?.id) {
+          await hydrateUserProfile(baseUser);
+        }
       } catch (err) {
         setUser(null);
         setHasCompletedOnboarding(false);
@@ -79,7 +114,10 @@ export function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      syncUserFromSession(session, setUser, setHasCompletedOnboarding);
+      const baseUser = syncUserFromSession(session, setUser, setHasCompletedOnboarding);
+      if (baseUser?.id) {
+        hydrateUserProfile(baseUser);
+      }
       setLoading(false);
     });
 
@@ -89,6 +127,12 @@ export function AuthProvider({ children }) {
   const clearError = () => {
     setError(null);
   };
+
+  const refreshProfile = useCallback(async () => {
+    if (!user?.id) return null;
+    await hydrateUserProfile(user.id);
+    return true;
+  }, [user?.id, hydrateUserProfile]);
 
   const register = async (email, password, name) => {
     try {
@@ -216,6 +260,7 @@ export function AuthProvider({ children }) {
     logout,
     completeOnboarding,
     clearError,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

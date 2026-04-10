@@ -7,7 +7,7 @@ import {
 } from '../services/notificationService';
 
 export function NotificationProvider({ children }) {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [notifications, setNotifications] = useState([]);
 
   // Suscribirse al canal personal del usuario
@@ -20,6 +20,10 @@ export function NotificationProvider({ children }) {
         ...payload,
       };
       setNotifications((prev) => [notification, ...prev]);
+      // Actualizar balance en UI al recibir transferencia
+      if (typeof refreshProfile === 'function') {
+        void refreshProfile();
+      }
     });
 
     return () => unsubscribe();

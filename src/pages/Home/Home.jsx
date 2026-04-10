@@ -28,6 +28,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [error, setError] = useState('');
   const { sendTransferNotification } = useNotifications();
+  const { refreshProfile } = useAuth();
 
   const [recentRecipients] = useState([
     { id: '1', name: 'Carlos Mendoza', account: '2200334455', color: '#0ea5e9' },
@@ -82,49 +83,58 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
     setError('');
 
     const transferAmount = parseFloat(amount);
+    if (!Number.isFinite(transferAmount) || transferAmount <= 0) {
+      setError('Ingresa un monto válido mayor a 0.');
+      setIsProcessing(false);
+      setStep('form');
+      return;
+    }
     
     try {
-      // 1. Verificar saldo del remitente
-      const { data: senderProfile, error: senderError } = await supabase
-        .from('profiles')
-        .select('balance')
-        .eq('id', currentUser.id)
-        .single();
+      // 1. Transferencia ATÓMICA vía RPC (debit + credit en una transacción)
+      const { error: rpcError } = await supabase.rpc('transfer_balance', {
+        p_sender_id: currentUser.id,
+        p_recipient_id: selectedUserId,
+        p_amount: transferAmount,
+      });
 
-      if (senderError) throw senderError;
+      if (rpcError) {
+        const msg = (rpcError.message || '').toLowerCase();
 
-      const currentBalance = parseFloat(senderProfile.balance);
-      if (currentBalance < transferAmount) {
-        setError(`Saldo insuficiente. Tu saldo es $${currentBalance.toFixed(2)}`);
-        setIsProcessing(false);
-        setStep('form');
-        return;
+        if (msg.includes('insufficient balance')) {
+          setError('Saldo insuficiente para completar la transferencia.');
+          setIsProcessing(false);
+          setStep('form');
+          return;
+        }
+
+        if (msg.includes('could not find the function') || msg.includes('transfer_balance')) {
+          setError('Falta configurar la función de transferencia en Supabase (RPC transfer_balance).');
+          setIsProcessing(false);
+          setStep('form');
+          return;
+        }
+
+        throw rpcError;
       }
 
-      // 2. Restar del remitente
-      const { error: deductError } = await supabase
-        .from('profiles')
-        .update({ balance: currentBalance - transferAmount })
-        .eq('id', currentUser.id);
-
-      if (deductError) throw deductError;
-
-      // 3. Sumar al destinatario
+      // 2. Traer info del destinatario (para notificación/email)
       const { data: recipientProfile, error: recipientFetchError } = await supabase
         .from('profiles')
-        .select('balance, name, email')
+        .select('name, email')
         .eq('id', selectedUserId)
         .single();
 
       if (recipientFetchError) throw recipientFetchError;
 
-      const recipientBalance = parseFloat(recipientProfile.balance);
-      const { error: addError } = await supabase
-        .from('profiles')
-        .update({ balance: recipientBalance + transferAmount })
-        .eq('id', selectedUserId);
-
-      if (addError) throw addError;
+      // 3. Refrescar balance local del remitente (si falla, seguimos con éxito)
+      try {
+        if (typeof refreshProfile === 'function') {
+          await refreshProfile();
+        }
+      } catch {
+        // no-op
+      }
 
       // 4. Enviar notificación in-app al destinatario
       await sendTransferNotification(selectedUserId, {
@@ -823,7 +833,7 @@ export default function Home() {
           </div>
           <div className={styles.cardBalance}>
             <span className={styles.currency}>$</span>
-            <span className={styles.amount}>{user?.balance || '4,250'}</span>
+            <span className={styles.amount}>{user?.balance ?? '4,250'}</span>
             <span className={styles.decimals}>.00</span>
           </div>
         </motion.div>

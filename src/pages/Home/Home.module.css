@@ -464,6 +464,14 @@
   transition: all 0.2s;
 }
 
+@media (max-width: 640px) {
+  .submitBtn {
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+}
+
 .submitBtn:hover {
   filter: brightness(1.1);
 }

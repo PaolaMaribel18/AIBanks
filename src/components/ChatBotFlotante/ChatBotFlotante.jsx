@@ -6,12 +6,94 @@ import './ChatBotFlotante.css';
 
 export default function ChatBotFlotante() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'model', parts: [{ text: '¡Hola! Soy AI-AGENT, tu asistente inteligente. ¿En qué puedo ayudarte hoy?' }] }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    const TOOLTIP_KEY = 'aibanks_chatbot_tooltip_seen_v1';
+    const TOOLTIP_LAST_KEY = 'aibanks_chatbot_tooltip_last_shown_ms_v1';
+    const hasSeen = localStorage.getItem(TOOLTIP_KEY) === 'true';
+    if (hasSeen) return;
+
+    setShowTooltip(true);
+    localStorage.setItem(TOOLTIP_KEY, 'true');
+    localStorage.setItem(TOOLTIP_LAST_KEY, String(Date.now()));
+
+    const timer = setTimeout(() => setShowTooltip(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Mostrar el tooltip ocasionalmente para que el usuario recuerde que existe el chat.
+  // (Cooldown largo para no ser molesto.)
+  useEffect(() => {
+    const TOOLTIP_LAST_KEY = 'aibanks_chatbot_tooltip_last_shown_ms_v1';
+    const SHOW_DURATION_MS = 4000;
+
+    // "De vez en cuando": entre 90s y 180s (aleatorio) entre apariciones.
+    const MIN_INTERVAL_MS = 90_000;
+    const MAX_INTERVAL_MS = 180_000;
+
+    let showTimer;
+    let hideTimer;
+    let rescheduleTimer;
+    let cancelled = false;
+
+    const scheduleNext = () => {
+      if (cancelled) return;
+
+      // Si el chat está abierto, no mostramos el tooltip.
+      if (isOpen) {
+        showTimer = setTimeout(scheduleNext, MIN_INTERVAL_MS);
+        return;
+      }
+
+      const now = Date.now();
+      const lastShown = Number(localStorage.getItem(TOOLTIP_LAST_KEY) || '0');
+      const sinceLast = now - lastShown;
+      const randomDelay = Math.floor(
+        MIN_INTERVAL_MS + Math.random() * (MAX_INTERVAL_MS - MIN_INTERVAL_MS)
+      );
+
+      // Respetar cooldown incluso si se recargó la página.
+      const delay = sinceLast >= MIN_INTERVAL_MS ? randomDelay : (MIN_INTERVAL_MS - sinceLast) + randomDelay;
+
+      showTimer = setTimeout(() => {
+        if (cancelled) return;
+        if (isOpen) {
+          scheduleNext();
+          return;
+        }
+
+        setShowTooltip(true);
+        localStorage.setItem(TOOLTIP_LAST_KEY, String(Date.now()));
+
+        hideTimer = setTimeout(() => {
+          setShowTooltip(false);
+        }, SHOW_DURATION_MS);
+
+        // Reprogramar después de ocultarlo.
+        rescheduleTimer = setTimeout(scheduleNext, SHOW_DURATION_MS + 500);
+      }, delay);
+    };
+
+    scheduleNext();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+      clearTimeout(rescheduleTimer);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) setShowTooltip(false);
+  }, [isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -32,7 +114,12 @@ export default function ChatBotFlotante() {
 
     try {
       // Preparamos el historial para Gemini
-      const history = messages.concat(userMessage);
+      const MAX_HISTORY_ITEMS = 14; // ~7 turnos (user+model). Ajusta si lo necesitas.
+      const combined = messages.concat(userMessage);
+      const history =
+        combined.length <= MAX_HISTORY_ITEMS
+          ? combined
+          : [combined[0], ...combined.slice(-(MAX_HISTORY_ITEMS - 1))];
       const responseText = await getChatResponse(history);
       
       setMessages(prev => [...prev, { role: 'model', parts: [{ text: responseText }] }]);
@@ -125,13 +212,13 @@ export default function ChatBotFlotante() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {!isOpen && (
+        {!isOpen && showTooltip && (
           <motion.div 
             className="chatbot-tooltip"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            transition={{ delay: 1 }}
+            transition={{ delay: 0.2 }}
           >
             ¡Hola! 
           </motion.div>
