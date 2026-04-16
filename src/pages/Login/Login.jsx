@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContextBase';
 import { useTheme } from '../../context/ThemeContextBase';
 import GlowButton from '../../components/GlowButton/GlowButton';
 import useGameSounds from '../../hooks/useGameSounds';
+import { useTranslation } from '../../i18n';
 import styles from './Login.module.css';
 
 import aguilaImg from '../../assets/images/aguila.drawio.png';
@@ -17,6 +18,7 @@ const INTRO_DURATION = 3400; // ms
 
 function MascotIntro({ onComplete }) {
   const { playWhoosh, playBell } = useGameSounds();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Whoosh for each mascot crossing
@@ -101,7 +103,7 @@ function MascotIntro({ onComplete }) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.5 }}
       >
-        Las mascotas oficiales te dan la bienvenida
+        {t('login.mascotWelcome')}
       </motion.p>
     </motion.div>
   );
@@ -113,6 +115,7 @@ export default function Login() {
   const { login, error: authError, clearError } = useAuth();
   const { theme } = useTheme();
   const { playLoginLong, playError } = useGameSounds();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -155,7 +158,7 @@ export default function Login() {
       // Navigation will be handled by AppContent
     } catch (err) {
       playError();
-      setError(err.message || 'Error al iniciar sesión');
+      setError(err.message || t('login.errorDefault'));
     } finally {
       setLoading(false);
     }
@@ -189,7 +192,7 @@ export default function Login() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <h1 className={styles.title}>Iniciar Sesión</h1>
+              <h1 className={styles.title}>{t('login.title')}</h1>
               <SignIn size={32} weight="bold" className={styles.loginIcon} />
             </motion.div>
             <motion.form
@@ -200,7 +203,7 @@ export default function Login() {
               transition={{ delay: 0.4, duration: 0.5 }}
             >
               <div className={styles.inputGroup}>
-                <label htmlFor="email" className={styles.label}>Correo Electrónico</label>
+                <label htmlFor="email" className={styles.label}>{t('login.email')}</label>
                 <input
                   type="email"
                   id="email"
@@ -212,7 +215,7 @@ export default function Login() {
                 />
               </div>
               <div className={styles.inputGroup}>
-                <label htmlFor="password" className={styles.label}>Contraseña</label>
+                <label htmlFor="password" className={styles.label}>{t('login.password')}</label>
                 <input
                   type="password"
                   id="password"
@@ -247,7 +250,7 @@ export default function Login() {
                 </motion.div>
               )}
               <GlowButton type="submit" variant="gold" fullWidth disabled={loading}>
-                {loading ? 'Cargando...' : 'Iniciar Sesión'}
+                {loading ? t('common.loading') : t('login.submit')}
               </GlowButton>
             </motion.form>
             <motion.p
@@ -256,7 +259,7 @@ export default function Login() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.5 }}
             >
-              ¿No tienes cuenta?{' '}
+              {t('login.noAccount')}{' '}
               <button
                 type="button"
                 className={styles.link}
@@ -265,7 +268,7 @@ export default function Login() {
                   navigate('/register');
                 }}
               >
-                Regístrate
+                {t('login.register')}
               </button>
             </motion.p>
 

@@ -10,6 +10,7 @@ import {
   inferArchetypeWithGemini,
   isGeminiConfigured,
 } from '../../services/gemini';
+import { useTranslation } from '../../i18n';
 import styles from './Questionnaire.module.css';
 
 const questions = [
@@ -101,6 +102,7 @@ export default function Questionnaire() {
   const navigate = useNavigate();
   const { completeOnboarding, user } = useAuth();
   const { playClick, playSuccess, playCoin, playError } = useGameSounds();
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selections, setSelections] = useState([]);
@@ -256,7 +258,7 @@ export default function Questionnaire() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          Personaliza tus recomendaciones
+          {t('questionnaire.title')}
         </motion.h1>
         {status === 'quiz' && (
           <motion.p
@@ -265,7 +267,7 @@ export default function Questionnaire() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            Pregunta {currentQuestion + 1} de {questions.length}
+            {t('questionnaire.questionOf', { current: currentQuestion + 1, total: questions.length })}
           </motion.p>
         )}
         <AnimatePresence mode="wait">
@@ -279,11 +281,11 @@ export default function Questionnaire() {
               transition={{ duration: 0.4 }}
             >
               <div className={styles.spinner} />
-              <h3 className={styles.statusTitle}>Analizando tu perfil con IA…</h3>
+              <h3 className={styles.statusTitle}>{t('questionnaire.analyzingProfile')}</h3>
               <p className={styles.statusText}>
                 {isGeminiConfigured()
-                  ? 'Generando recomendaciones personalizadas con Gemini.'
-                  : 'No detectamos API Key de Gemini. Usaremos una recomendación estándar.'}
+                  ? t('questionnaire.geminiConfigured')
+                  : t('questionnaire.geminiNotConfigured')}
               </p>
             </motion.div>
           ) : status === 'result' ? (
@@ -303,14 +305,14 @@ export default function Questionnaire() {
                   }
                   navigate('/');
                 }}
-                aria-label="Cerrar e ir al banco"
+                aria-label={t('questionnaire.closeAndGoBank')}
               >
                 <X size={20} weight="bold" />
               </button>
 
               <div className={styles.resultHeader}>
                 <div className={styles.checkIcon}>✅</div>
-                <h3 className={styles.resultDisplayTitle}>¡Perfil IA listo!</h3>
+                <h3 className={styles.resultDisplayTitle}>{t('questionnaire.profileReady')}</h3>
               </div>
 
               <div className={styles.archetypePreview}>
@@ -318,15 +320,15 @@ export default function Questionnaire() {
                   {aiRecommendation?.arquetipo === 'practico' ? '🎁' : aiRecommendation?.arquetipo === 'acumulador' ? '📈' : '🏆'}
                 </div>
                 <div className={styles.archetypeInfoMain}>
-                  <div className={styles.archetypeLabelMain}>Arquetipo AIBank</div>
+                  <div className={styles.archetypeLabelMain}>{t('questionnaire.archetypeLabel')}</div>
                   <div className={styles.archetypeNameMain}>
-                    {aiRecommendation?.arquetipo === 'practico' ? 'Práctico' : aiRecommendation?.arquetipo === 'acumulador' ? 'Acumulador' : 'Competidor'}
+                    {aiRecommendation?.arquetipo === 'practico' ? t('profile.archetypes.practico') : aiRecommendation?.arquetipo === 'acumulador' ? t('profile.archetypes.acumulador') : t('profile.archetypes.competidor')}
                   </div>
                 </div>
               </div>
 
               <p className={styles.resultTextCohesive}>
-                ¿Quieres descubrir los beneficios exclusivos que nuestro <strong>AI-Agent</strong> preparó para tu perfil?
+                {t('questionnaire.discoverBenefits')}
               </p>
 
               <div className={styles.ctaRow}>
@@ -340,7 +342,7 @@ export default function Questionnaire() {
                     navigate('/rewards');
                   }}
                 >
-                  Ver beneficios
+                  {t('questionnaire.seeBenefits')}
                 </GlowButton>
                 <button
                   className={styles.secondaryBtn}
@@ -351,7 +353,7 @@ export default function Questionnaire() {
                     navigate('/');
                   }}
                 >
-                  Ir al Banco
+                  {t('questionnaire.goToBank')}
                 </button>
               </div>
             </motion.div>

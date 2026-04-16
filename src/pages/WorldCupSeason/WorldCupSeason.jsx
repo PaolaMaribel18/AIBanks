@@ -15,6 +15,7 @@ import { useTier } from '../../hooks/useTier';
 import { useMAIis } from '../../hooks/useMAIis';
 import { useTheme } from '../../context/ThemeContextBase';
 import { useTour } from '../../context/TourContextBase';
+import { useTranslation } from '../../i18n';
 import styles from './WorldCupSeason.module.css';
 
 // Staggered children animation
@@ -28,6 +29,7 @@ const staggerItem = {
 };
 
 function SeasonAnnouncementModal({ isOpen, onClose }) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const handlePlayNow = () => {
@@ -62,12 +64,12 @@ function SeasonAnnouncementModal({ isOpen, onClose }) {
             <Trophy size={40} weight="fill" />
           </div>
           <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px', fontFamily: 'var(--font-display)' }}>
-            ¡Temporada Mundial IA Activa!
+            {t('season.announcement.title')}
           </h2>
           <p className={styles.modalDesc} style={{ color: '#cbd5e1', lineHeight: '1.5', fontSize: '0.95rem' }}>
-            Bienvenido al centro de predicciones. Usa tus mAIles para desafiar a la IA, completa desafíos diarios y escala en el ranking global.
+            {t('season.announcement.desc')}
             <br /><br />
-            <strong>¡Tu bono diario de 50 mAIles te espera!</strong>
+            <strong>{t('season.announcement.bonusWaiting')}</strong>
           </p>
           <button
             onClick={handlePlayNow}
@@ -87,7 +89,7 @@ function SeasonAnnouncementModal({ isOpen, onClose }) {
               letterSpacing: '1px'
             }}
           >
-            Empezar Desafío
+            {t('season.announcement.startChallenge')}
           </button>
           <button
             onClick={onClose}
@@ -104,7 +106,7 @@ function SeasonAnnouncementModal({ isOpen, onClose }) {
               fontSize: '0.85rem' 
             }}
           >
-            Omitir por ahora
+            {t('common.skipForNow')}
           </button>
         </motion.div>
       </div>
@@ -118,6 +120,7 @@ export default function WorldCupSeason() {
   const tier = useTier();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { t } = useTranslation();
   const [showBalance, setShowBalance] = useState(true);
   const [claimedBonus, setClaimedBonus] = useState(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -167,10 +170,11 @@ export default function WorldCupSeason() {
       ? match.home.name
       : match.prediction === 'away'
         ? match.away.name
-        : 'Empate'
+        : t('common.draw')
   );
 
-  const [activeTab, setActiveTab] = useState('Desafios');
+  const tabKeys = ['challenges', 'predictions', 'live'];
+  const [activeTab, setActiveTab] = useState('challenges');
 
   return (
     <div className={styles.page}>
@@ -185,7 +189,7 @@ export default function WorldCupSeason() {
         <StarsBackground count={25} />
         <div className={styles.balanceContent}>
           <div className={styles.balanceTop}>
-            <span className={styles.balanceLabel}>Mis mAIles Temporada Mundial</span>
+            <span className={styles.balanceLabel}>{t('season.balanceLabel')}</span>
             <motion.button
               className={styles.eyeBtn}
               onClick={() => {
@@ -193,7 +197,7 @@ export default function WorldCupSeason() {
                 setPopEye(true);
                 setTimeout(() => setPopEye(false), 200);
               }}
-              aria-label="Mostrar/ocultar saldo"
+              aria-label={t('season.showHideBalance')}
               whileTap={{ scale: 0.85 }}
               animate={{ scale: popEye ? 1.2 : 1 }}
               transition={{ duration: 0.2 }}
@@ -260,9 +264,9 @@ export default function WorldCupSeason() {
             <Crown size={16} weight="bold" />
             <span>{USER_PROFILE.tier}</span>
             <span className={styles.badgeDot}>•</span>
-            <span>+{earnedPredictionMAIis} por predicciones</span>
+            <span>{t('season.byPredictions', { amount: earnedPredictionMAIis })}</span>
             <span className={styles.badgeDot}>•</span>
-            <span>Racha {USER_PROFILE.streak}</span>
+            <span>{t('season.streak', { count: USER_PROFILE.streak })}</span>
             {USER_PROFILE.streak > 5 && (
               <motion.span
                 animate={{ scale: [1, 1.2, 1], opacity: [1, 0.8, 1] }}
@@ -278,14 +282,16 @@ export default function WorldCupSeason() {
 
       {/* Tab Navigation */}
       <div className={`${styles.tabsMain} tour-step-tabs`}>
-        {['Desafios', 'Pronosticos', 'En Vivo'].map((tab) => (
+        {tabKeys.map((tabKey) => {
+          const tab = t(`season.tabs.${tabKey}`);
+          return (
           <button
-            key={tab}
-            className={`${styles.tabMainBtn} ${activeTab === tab ? styles.tabMainActive : ''}`}
-            onClick={() => setActiveTab(tab)}
+            key={tabKey}
+            className={`${styles.tabMainBtn} ${activeTab === tabKey ? styles.tabMainActive : ''}`}
+            onClick={() => setActiveTab(tabKey)}
           >
             {tab}
-            {activeTab === tab && (
+            {activeTab === tabKey && (
               <motion.div
                 className={styles.tabMainIndicator}
                 layoutId="mainTabIndicator"
@@ -293,12 +299,13 @@ export default function WorldCupSeason() {
               />
             )}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <div className={styles.tabContent}>
         <AnimatePresence mode="wait">
-          {activeTab === 'Desafios' && (
+          {activeTab === 'challenges' && (
             <motion.div
               key="desafios"
               initial={{ opacity: 0, x: -10 }}
@@ -322,8 +329,8 @@ export default function WorldCupSeason() {
                     <Gift size={24} weight="bold" />
                   </motion.span>
                   <div>
-                    <div className={styles.bonusLabel}>BONO DIARIO</div>
-                    <div className={styles.bonusValue}>+50 mAIles gratis</div>
+                    <div className={styles.bonusLabel}>{t('season.dailyBonus')}</div>
+                    <div className={styles.bonusValue}>{t('season.dailyBonusValue')}</div>
                   </div>
                 </div>
                 <RippleButton
@@ -337,7 +344,7 @@ export default function WorldCupSeason() {
                   }}
                   disabled={claimedBonus}
                 >
-                  {claimedBonus ? 'Reclamado' : 'Reclamar'}
+                  {claimedBonus ? t('season.claimed') : t('season.claim')}
                 </RippleButton>
               </motion.section>
               {claimedBonus && <Confetti recycle={false} numberOfPieces={200} />}
@@ -362,9 +369,9 @@ export default function WorldCupSeason() {
                   <Lightning size={20} weight="fill" />
                 </div>
                 <div>
-                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '800' }}>¿Cómo ganar más mAIles?</h4>
+                  <h4 style={{ margin: '0 0 6px', fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '800' }}>{t('season.howToEarn')}</h4>
                   <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                    Nuestra IA analiza los datos para predecir al favorito de cada partido. Al <strong>consultar a AI-Gents</strong>, obtendrás ganancias conservadoras o te llevarás una recompensa masiva según el riesgo.
+                    {t('season.howToEarnDesc')}
                   </p>
                 </div>
               </motion.div>
@@ -372,19 +379,19 @@ export default function WorldCupSeason() {
               {/* Hot Matches */}
               <section className={`${styles.section} tour-step-matches`} style={{ marginTop: '16px' }}>
                 <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>Partidos para ti 🔥</h3>
+                  <h3 className={styles.sectionTitle}>{t('season.matchesForYou')}</h3>
                   <motion.button
                     className={styles.seeAll}
                     onClick={() => navigate('/predictions')}
                     whileHover={{ x: 3 }}
                   >
-                    Ver todos <ArrowRight size={14} weight="bold" />
+                    {t('season.seeAll')} <ArrowRight size={14} weight="bold" />
                   </motion.button>
                 </div>
                 <div className={styles.matchList}>
                   {loading ? (
                     <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
-                      Cargando partidos... ⚽
+                      {t('season.loadingMatches')}
                     </div>
                   ) : matchesToShow.length > 0 ? (
                     matchesToShow.map((match, i) => (
@@ -398,7 +405,7 @@ export default function WorldCupSeason() {
                     ))
                   ) : (
                     <div style={{ padding: '1rem', color: '#888', textAlign: 'center' }}>
-                      Ya completaste todos los partidos recientes.
+                      {t('season.allCompleted')}
                     </div>
                   )}
                 </div>
@@ -406,7 +413,7 @@ export default function WorldCupSeason() {
             </motion.div>
           )}
 
-          {activeTab === 'Pronosticos' && (
+          {activeTab === 'predictions' && (
             <motion.div
               key="pronosticos"
               initial={{ opacity: 0, x: -10 }}
@@ -416,7 +423,7 @@ export default function WorldCupSeason() {
             >
               <section className={styles.section}>
                 <div className={styles.sectionHeader}>
-                  <h3 className={styles.sectionTitle}>Mi Portafolio</h3>
+                  <h3 className={styles.sectionTitle}>{t('season.myPortfolio')}</h3>
                 </div>
                 <motion.div
                   className={styles.activityList}
@@ -440,7 +447,7 @@ export default function WorldCupSeason() {
                           </motion.div>
                           <div>
                             <div className={styles.actMatch}>{match.home.name} vs {match.away.name}</div>
-                            <div className={styles.actPred}>Elegiste: {getPredictionLabel(match)}</div>
+                            <div className={styles.actPred}>{t('season.chose')} {getPredictionLabel(match)}</div>
                           </div>
                         </div>
                         <div className={styles.actRight}>
@@ -452,7 +459,7 @@ export default function WorldCupSeason() {
                     ))
                   ) : (
                     <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
-                      Aún no has guardado predicciones. <br /> ¡Ve a Desafíos!
+                      {t('season.noPredictions')} <br /> {t('season.goToChallenges')}
                     </div>
                   )}
                 </motion.div>
@@ -460,7 +467,7 @@ export default function WorldCupSeason() {
             </motion.div>
           )}
 
-          {activeTab === 'En Vivo' && (
+          {activeTab === 'live' && (
             <motion.div
               key="envivo"
               initial={{ opacity: 0, x: -10 }}

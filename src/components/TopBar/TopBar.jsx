@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContextBase';
 import { useAuth } from '../../context/AuthContextBase';
 import { useTour } from '../../context/TourContextBase';
 import { useTier } from '../../hooks/useTier';
+import { useTranslation } from '../../i18n';
 import styles from './TopBar.module.css';
 
 export default function TopBar() {
@@ -15,6 +16,7 @@ export default function TopBar() {
   const tier = useTier();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const handleHelpClick = () => {
     // Determine flow based on route
@@ -39,7 +41,7 @@ export default function TopBar() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <span className={styles.hello}>Hola, {user?.name || USER_PROFILE.name}</span>
+          <span className={styles.hello}>{t('topbar.hello', { name: user?.name || USER_PROFILE.name })}</span>
           <span className={styles.tier}>{tier}</span>
         </motion.div>
       </motion.div>
@@ -52,16 +54,16 @@ export default function TopBar() {
         <motion.button
           className={styles.iconBtn}
           onClick={handleHelpClick}
-          aria-label="Ver tour guiado"
+          aria-label={t('topbar.tourLabel')}
           whileTap={{ scale: 0.9 }}
-          title="Ver tour"
+          title={t('topbar.tourLabel')}
         >
           <Question size={20} weight="bold" />
         </motion.button>
         <motion.button
           className={styles.iconBtn}
           onClick={toggleTheme}
-          aria-label={`Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'}`}
+          aria-label={t('topbar.themeToggle', { theme: theme === 'dark' ? t('topbar.themeLight') : t('topbar.themeDark') })}
           whileTap={{ scale: 0.9 }}
         >
           {theme === 'dark' ? <Sun size={20} weight="bold" /> : <Moon size={20} weight="bold" />}

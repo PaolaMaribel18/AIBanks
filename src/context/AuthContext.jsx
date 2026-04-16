@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
     try {
       const { data, error: profileError } = await supabase
         .from('profiles')
-        .select('name, email, points, tier, archetype, balance')
+        .select('name, email, points, tier, archetype, balance, referral_code, referred_by, referral_used_at')
         .eq('id', userId)
         .single();
 
@@ -133,6 +133,36 @@ export function AuthProvider({ children }) {
     await hydrateUserProfile(user.id);
     return true;
   }, [user?.id, hydrateUserProfile]);
+
+  // Escuchar cambios en tiempo real (Realtime) para la tabla profiles
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`profile-updates-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new) {
+            setUser((prev) => {
+              if (!prev || prev.id !== payload.new.id) return prev;
+              return { ...prev, ...payload.new }; // Actualiza los puntos y otros datos instantáneamente
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   const register = async (email, password, name) => {
     try {

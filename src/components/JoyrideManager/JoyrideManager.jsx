@@ -1,12 +1,12 @@
-import React from 'react';
-import * as reactJoyride from 'react-joyride';
-const Joyride = (reactJoyride.default ? reactJoyride.default : reactJoyride.Joyride) || reactJoyride;
+import { Joyride } from 'react-joyride';
 import { useTour } from '../../context/TourContextBase';
 import { useTheme } from '../../context/ThemeContextBase';
+import { useTranslation } from '../../i18n';
 
 export default function JoyrideManager() {
   const { run, tourKey, steps, handleJoyrideCallback } = useTour();
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   const primaryColor = theme === 'dark' ? '#00e676' : '#2563eb';
 
@@ -25,11 +25,11 @@ export default function JoyrideManager() {
       disableScrolling={false}
       callback={handleJoyrideCallback}
       locale={{
-        back: 'Atrás',
-        close: 'Cerrar',
-        last: 'Finalizar',
-        next: 'Siguiente',
-        skip: 'Saltar tour'
+        back: t('tour.back'),
+        close: t('tour.close'),
+        last: t('tour.last'),
+        next: t('tour.next'),
+        skip: t('tour.skip')
       }}
       styles={{
         options: {

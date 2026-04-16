@@ -11,6 +11,7 @@ import Leaderboard from '../Leaderboard/Leaderboard';
 import { useTier } from '../../hooks/useTier';
 import { useMAIis } from '../../hooks/useMAIis';
 import { inferArchetypeWithGemini, isGeminiConfigured } from '../../services/gemini';
+import { useTranslation } from '../../i18n';
 import styles from './Rewards.module.css';
 
 const CATEGORIES = [
@@ -31,10 +32,10 @@ const staggerItem = {
   show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 22 } },
 };
 
-const ARCHETYPE_LABEL = {
-  competidor: 'Competidor',
-  acumulador: 'Acumulador',
-  practico: 'Práctico',
+const ARCHETYPE_LABEL_KEY = {
+  competidor: 'profile.archetypes.competidor',
+  acumulador: 'profile.archetypes.acumulador',
+  practico: 'profile.archetypes.practico',
 };
 
 const VALID_ARCHETYPES = new Set(['competidor', 'acumulador', 'practico']);
@@ -217,7 +218,7 @@ const REWARDS_CATALOG = [
   },
 ];
 
-function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
+function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem, t }) {
   const isRedeemed = redeemed[reward.id];
   const canAfford = currentMAIis >= reward.cost;
 
@@ -228,7 +229,7 @@ function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
           {reward.icon}
         </div>
         <div className={styles.compactInfo}>
-          <h4 className={styles.rewardName} style={{ marginBottom: '4px' }}>{reward.name}</h4>
+          <h4 className={styles.rewardName} style={{ marginBottom: '4px' }}>{t(`rewards.catalog.${reward.id}.name`) !== `rewards.catalog.${reward.id}.name` ? t(`rewards.catalog.${reward.id}.name`) : reward.name}</h4>
           <div className={styles.rewardCost} style={{ padding: '2px 6px', display: 'inline-flex', width: 'fit-content' }}>
             <Coin size={12} weight="fill" />
             <span className={styles.costValue} style={{ fontSize: '0.75rem' }}>{reward.cost.toLocaleString()}</span>
@@ -238,7 +239,7 @@ function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
 
       <div className={styles.compactRight}>
         {isRedeemed ? (
-          <div className={styles.redeemedBadge} style={{ padding: '4px 8px', fontSize: '0.7rem' }}><Check size={14} /> Canjeado</div>
+          <div className={styles.redeemedBadge} style={{ padding: '4px 8px', fontSize: '0.7rem' }}><Check size={14} /> {t('rewards.redeemed')}</div>
         ) : (
           <RippleButton
             variant={canAfford ? 'gold' : ''}
@@ -251,7 +252,7 @@ function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
               : { padding: '6px 10px', fontSize: '0.72rem' }
             }
           >
-            {canAfford ? 'Canjear' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()}`}
+            {canAfford ? t('rewards.redeem') : t('rewards.missing', { amount: (reward.cost - currentMAIis).toLocaleString() })}
           </RippleButton>
         )}
       </div>
@@ -259,7 +260,7 @@ function RewardCompactCard({ reward, currentMAIis, redeemed, onRedeem }) {
   );
 }
 
-function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommend }) {
+function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommend, t }) {
   const isRedeemed = redeemed[reward.id];
   const canAfford = currentMAIis >= reward.cost;
   const progressPercent = Math.min(100, Math.floor((currentMAIis / reward.cost) * 100));
@@ -281,14 +282,14 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <Star size={14} /> Popular
+          <Star size={14} /> {t('rewards.popular')}
         </motion.div>
       )}
 
       <div className={styles.rewardHeader}>
         <span className={styles.rewardIcon}>{reward.icon}</span>
         <div className={styles.rewardTitleArea}>
-          <h4 className={styles.rewardName}>{reward.name}</h4>
+          <h4 className={styles.rewardName}>{t(`rewards.catalog.${reward.id}.name`) !== `rewards.catalog.${reward.id}.name` ? t(`rewards.catalog.${reward.id}.name`) : reward.name}</h4>
           <div className={styles.rewardCost}>
             <Coin size={14} />
             <span className={styles.costValue}>{reward.cost.toLocaleString()} mAiles</span>
@@ -296,11 +297,11 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
         </div>
       </div>
 
-      <p className={styles.rewardDesc}>{reward.description}</p>
+      <p className={styles.rewardDesc}>{t(`rewards.catalog.${reward.id}.description`) !== `rewards.catalog.${reward.id}.description` ? t(`rewards.catalog.${reward.id}.description`) : reward.description}</p>
 
       <div className={styles.rewardActions}>
         {isRedeemed ? (
-          <div className={styles.redeemedBadge}><Check size={16} /> Canjeado</div>
+          <div className={styles.redeemedBadge}><Check size={16} /> {t('rewards.redeemed')}</div>
         ) : (
           <RippleButton
             variant={canAfford ? (isAiRecommend ? 'purple' : 'gold') : ''}
@@ -313,7 +314,7 @@ function RewardFlatCard({ reward, currentMAIis, redeemed, onRedeem, isAiRecommen
               boxShadow: isAiRecommend ? '0 4px 15px rgba(213, 0, 249, 0.35)' : '0 4px 15px rgba(255, 215, 0, 0.25)'
             } : {}}
           >
-            {canAfford ? 'Canjear Ahora' : `Faltan ${(reward.cost - currentMAIis).toLocaleString()} mAiles`}
+            {canAfford ? t('rewards.redeemNow') : t('rewards.missingMiles', { amount: (reward.cost - currentMAIis).toLocaleString() })}
           </RippleButton>
         )}
       </div>
@@ -362,6 +363,7 @@ export default function Rewards() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [viewMode, setViewMode] = useState('list');
   const { currentMAIis, redeemedRewards: redeemed, redeemReward, predictions } = useMAIis();
+  const { t } = useTranslation();
   const [showFireworks, setShowFireworks] = useState(false);
   const [lastRedeemed, setLastRedeemed] = useState(null);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -519,35 +521,35 @@ export default function Rewards() {
   // Preguntas del quiz
   const qData = [
     {
-      q: "¿Qué te motiva más a participar en los beneficios?",
+      q: t('rewards.onboarding.q1'),
       opts: [
-        { label: "Beneficios financieros a largo plazo", val: 2, t: "acumulador" },
-        { label: "Premios de alta gama y tecnología", val: 2, t: "competidor" },
-        { label: "Ganar algo práctico y de uso diario", val: 2, t: "practico" },
+        { label: t('rewards.onboarding.q1opt1'), val: 2, t: "acumulador" },
+        { label: t('rewards.onboarding.q1opt2'), val: 2, t: "competidor" },
+        { label: t('rewards.onboarding.q1opt3'), val: 2, t: "practico" },
       ]
     },
     {
-      q: "Cuando usas tu banco, ¿qué te gusta más?",
+      q: t('rewards.onboarding.q2'),
       opts: [
-        { label: "Reducir tasas o ahorrar en mi crédito", val: 2, t: "acumulador" },
-        { label: "Tener estatus VIP y los mejores seguros", val: 2, t: "competidor" },
-        { label: "Cashback directo por mis compras", val: 2, t: "practico" },
+        { label: t('rewards.onboarding.q2opt1'), val: 2, t: "acumulador" },
+        { label: t('rewards.onboarding.q2opt2'), val: 2, t: "competidor" },
+        { label: t('rewards.onboarding.q2opt3'), val: 2, t: "practico" },
       ]
     },
     {
-      q: "Si tuvieras 5000 mAiles, ¿qué harías?",
+      q: t('rewards.onboarding.q3'),
       opts: [
-        { label: "Rebajar mi porcentaje de préstamo", val: 1, t: "acumulador" },
-        { label: "Canjear la consola del momento", val: 1, t: "competidor" },
-        { label: "Canjear múltiples gift cards útiles", val: 1, t: "practico" },
+        { label: t('rewards.onboarding.q3opt1'), val: 1, t: "acumulador" },
+        { label: t('rewards.onboarding.q3opt2'), val: 1, t: "competidor" },
+        { label: t('rewards.onboarding.q3opt3'), val: 1, t: "practico" },
       ]
     }
   ];
 
   const archetypeExplanations = {
-    competidor: "Prefieres el reconocimiento, posición VIP y grandes premios aspiracionales (Tecnología y Exclusividad).",
-    acumulador: "Prefieres metas claras y beneficios financieros profundos (-Tasa, Hipoteca, Ahorro).",
-    practico: "Prefieres el beneficio inmediato que uses diariamente (Cashback, Supermercados, Cero Mantenimiento)."
+    competidor: t('rewards.archetypeExplanations.competidor'),
+    acumulador: t('rewards.archetypeExplanations.acumulador'),
+    practico: t('rewards.archetypeExplanations.practico'),
   };
   return (
     <div className={styles.page}>
@@ -562,8 +564,8 @@ export default function Rewards() {
               className={styles.onboardingBox}
               initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }}
             >
-              <h3 className={styles.onboardingTitle}>Tu Identidad AIBank 🌟</h3>
-              <p className={styles.onboardingSub}>Queremos armar un portafolio de beneficios ideal para ti. (Paso {step} de {step === 3 ? '3' : '2'})</p>
+              <h3 className={styles.onboardingTitle}>{t('rewards.onboarding.title')}</h3>
+              <p className={styles.onboardingSub}>{t('rewards.onboarding.subtitle', { step, total: step === 3 ? '3' : '2' })}</p>
 
               <h4 className={styles.onboardingQuestion}>{qData[step - 1].q}</h4>
               <div className={styles.onboardingOpts}>
@@ -605,7 +607,7 @@ export default function Rewards() {
                 transition={{ type: 'spring', stiffness: 300, delay: 0.3 }}
               >
                 <span className={styles.celebIcon}>{lastRedeemed.icon}</span>
-                <span className={styles.celebText}>¡Aprobado!</span>
+                <span className={styles.celebText}>{t('rewards.approved')}</span>
                 <span className={styles.celebName}>{lastRedeemed.name}</span>
               </motion.div>
             )}
@@ -624,8 +626,8 @@ export default function Rewards() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className={styles.title}><Gift size={24} /> Beneficios AIBank</h2>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>Canjea tus mAiles por recompensas y mejoras financieras.</p>
+        <h2 className={styles.title}><Gift size={24} /> {t('rewards.title')}</h2>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '4px' }}>{t('rewards.subtitle')}</p>
       </motion.div>
 
       {/* Balance Card */}
@@ -636,7 +638,7 @@ export default function Rewards() {
         transition={{ delay: 0.05 }}
       >
         <div className={styles.balanceInfo}>
-          <span className={styles.balanceLabel}>Tu capital en mAiles</span>
+          <span className={styles.balanceLabel}>{t('rewards.capitalLabel')}</span>
           <div className={styles.balanceValue}>
             <Coin size={20} />
             <AnimatedCounter
@@ -680,8 +682,8 @@ export default function Rewards() {
             <Trophy size={20} weight="fill" />
           </div>
           <div>
-            <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '0.95rem' }}>Ver Ranking Global</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Compara tu racha y puntaje</div>
+            <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '0.95rem' }}>{t('rewards.viewRanking')}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t('rewards.compareStreak')}</div>
           </div>
         </div>
         <div style={{ color: 'var(--gold-primary)', fontSize: '1.5rem', fontWeight: 'bold' }}>›</div>
@@ -706,7 +708,7 @@ export default function Rewards() {
                 🤖
               </span>
               <div className={styles.aiTitle}>
-                {aiPanelState === 'shown' ? 'Recomendación para ti' : 'Recomendación con IA'}
+                {aiPanelState === 'shown' ? t('rewards.ai.recommendationTitle') : t('rewards.ai.recommendationWithAI')}
               </div>
             </div>
 
@@ -716,11 +718,11 @@ export default function Rewards() {
           {aiPanelState === 'teaser' ? (
             <>
               <p className={styles.aiMessage}>
-                ¿Quieres descubrir lo que nuestro AI-Agent preparó para ti? Revisa nuestros beneficios.
+                {t('rewards.ai.teaser')}
               </p>
               <div className={styles.aiCtaRow}>
                 <RippleButton size="sm" fullWidth onClick={handleAnalyze}>
-                  Analizar premios
+                  {t('rewards.ai.analyzeRewards')}
                 </RippleButton>
               </div>
             </>
@@ -729,19 +731,19 @@ export default function Rewards() {
           {aiPanelState === 'thinking' ? (
             <div className={styles.aiThinking} aria-live="polite">
               <div className={styles.aiSpinner} aria-hidden />
-              <div className={styles.aiThinkingTitle}>Analizando tus beneficios…</div>
+              <div className={styles.aiThinkingTitle}>{t('rewards.ai.analyzing')}</div>
               <div className={styles.aiThinkingSteps}>
                 <div className={`${styles.aiThinkingStep} ${aiThinkingStep >= 0 ? styles.aiStepActive : ''}`}>
                   <span className={styles.aiStepDot} aria-hidden />
-                  <span>Leyendo tu perfil</span>
+                  <span>{t('rewards.ai.readingProfile')}</span>
                 </div>
                 <div className={`${styles.aiThinkingStep} ${aiThinkingStep >= 1 ? styles.aiStepActive : ''}`}>
                   <span className={styles.aiStepDot} aria-hidden />
-                  <span>Comparando beneficios disponibles</span>
+                  <span>{t('rewards.ai.comparingBenefits')}</span>
                 </div>
                 <div className={`${styles.aiThinkingStep} ${aiThinkingStep >= 2 ? styles.aiStepActive : ''}`}>
                   <span className={styles.aiStepDot} aria-hidden />
-                  <span>Personalizando recomendaciones</span>
+                  <span>{t('rewards.ai.personalizing')}</span>
                 </div>
               </div>
             </div>
@@ -750,7 +752,7 @@ export default function Rewards() {
           {aiPanelState === 'shown' ? (
             <>
               <div className={styles.aiProfileLine}>
-                Perfil detectado: <strong>{ARCHETYPE_LABEL[effectiveArchetype] || effectiveArchetype || '—'}</strong>
+                {t('rewards.ai.detectedProfile')} <strong>{t(ARCHETYPE_LABEL_KEY[effectiveArchetype]) || effectiveArchetype || '—'}</strong>
               </div>
 
               {aiRecommendationMessage ? (
@@ -760,7 +762,7 @@ export default function Rewards() {
               {aiMotivationMessage ? (
                 <p className={styles.aiMessageMuted}>{aiMotivationMessage}</p>
               ) : (
-                <p className={styles.aiMessage}>Listo. Ya personalizamos tus beneficios.</p>
+                <p className={styles.aiMessage}>{t('rewards.ai.readyMessage')}</p>
               )}
 
 
@@ -772,11 +774,11 @@ export default function Rewards() {
 
         {showAiResult ? (
           <>
-            <h3 className={styles.sectionTitle} style={{ marginTop: '24px' }}>Recomendados exclusivamente para ti</h3>
+            <h3 className={styles.sectionTitle} style={{ marginTop: '24px' }}>{t('rewards.recommendedForYou')}</h3>
             <motion.div className={styles.recommendedScroll} variants={staggerContainer} initial="hidden" animate="show">
               {recommended.map((reward) => (
                 <motion.div key={`rec-${reward.id}`} variants={staggerItem}>
-                  <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} isAiRecommend={true} />
+                  <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} isAiRecommend={true} t={t} />
                 </motion.div>
               ))}
             </motion.div>
@@ -794,13 +796,13 @@ export default function Rewards() {
             whileTap={{ scale: 0.93 }}
             layout
           >
-            <cat.icon size={16} /> {cat.label}
+            <cat.icon size={16} /> {t(`rewards.categories.${cat.key}`)}
           </motion.button>
         ))}
       </div>
 
       <div className={styles.catalogHeader}>
-        <h3 className={styles.catalogTitle}>Catálogo</h3>
+        <h3 className={styles.catalogTitle}>{t('rewards.catalog_title')}</h3>
         <div className={styles.viewToggle}>
           <button className={`${styles.viewBtn} ${viewMode === 'list' ? styles.activeView : ''}`} onClick={() => setViewMode('list')}><List size={18} /></button>
           <button className={`${styles.viewBtn} ${viewMode === 'grid' ? styles.activeView : ''}`} onClick={() => setViewMode('grid')}><SquaresFour size={18} /></button>
@@ -820,9 +822,9 @@ export default function Rewards() {
           {filtered.map((reward) => (
             <motion.div key={reward.id} variants={staggerItem}>
               {viewMode === 'list' ? (
-                <RewardCompactCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
+                <RewardCompactCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} t={t} />
               ) : (
-                <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} />
+                <RewardFlatCard reward={reward} currentMAIis={currentMAIis} redeemed={redeemed} onRedeem={handleRedeem} t={t} />
               )}
             </motion.div>
           ))}

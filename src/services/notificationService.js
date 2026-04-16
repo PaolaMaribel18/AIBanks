@@ -49,11 +49,19 @@ export async function sendTransferNotification(recipientId, { fromName, amount }
   // Crear canal temporal para enviar el broadcast
   const tempChannel = supabase.channel(channelName);
 
-  // Esperar a que el canal esté suscrito antes de enviar
+  // Esperar a que el canal esté suscrito antes de enviar (o fallar por timeout)
   await new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      resolve(); // Resolver para no bloquear la app
+    }, 2000);
+
     tempChannel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
+        clearTimeout(timeout);
         resolve();
+      } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+        clearTimeout(timeout);
+        resolve(); // Continuar aunque falle para no romper la UI
       }
     });
   });

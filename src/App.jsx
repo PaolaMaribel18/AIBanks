@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContextBase';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './i18n';
 import { NotificationProvider } from './context/NotificationContext';
 import { TourProvider } from './context/TourContext';
 import JoyrideManager from './components/JoyrideManager/JoyrideManager';
@@ -88,16 +89,18 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <AnimatePresence mode="wait">
-              <AppContent />
-            </AnimatePresence>
-          </NotificationProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <ThemeProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <AnimatePresence mode="wait">
+                <AppContent />
+              </AnimatePresence>
+            </NotificationProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </LanguageProvider>
   );
 }

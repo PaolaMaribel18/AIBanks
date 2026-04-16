@@ -7,17 +7,19 @@ import {
   UserCircle,
 } from '@phosphor-icons/react';
 import useGameSounds from '../../hooks/useGameSounds';
+import { useTranslation } from '../../i18n';
 import styles from './BottomNav.module.css';
-
-const NAV_ITEMS = [
-  { to: '/', icon: House, label: 'Banco', tourClass: 'tour-step-banco' },
-  { to: '/season', icon: SoccerBall, label: 'Mundial', center: true, tourClass: 'tour-step-mundial' },
-  { to: '/rewards', icon: Gift, label: 'Beneficios', tourClass: 'tour-step-recompensas' }
-];
 
 export default function BottomNav() {
   const location = useLocation();
   const { playNav, playClick } = useGameSounds();
+  const { t } = useTranslation();
+
+  const NAV_ITEMS = [
+    { to: '/', icon: House, label: t('bottomNav.bank'), tourClass: 'tour-step-banco' },
+    { to: '/season', icon: SoccerBall, label: t('bottomNav.worldCup'), center: true, tourClass: 'tour-step-mundial' },
+    { to: '/rewards', icon: Gift, label: t('bottomNav.rewards'), tourClass: 'tour-step-recompensas' }
+  ];
 
   const handleNavClick = (to) => {
     if (location.pathname !== to) {

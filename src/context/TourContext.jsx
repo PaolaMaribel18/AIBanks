@@ -1,60 +1,68 @@
 import { useState, useCallback, useMemo } from 'react';
 import { TourContext } from './TourContextBase';
+import { useTranslation } from '../i18n';
 import * as reactJoyride from 'react-joyride';
 const { STATUS } = reactJoyride;
 
-const GLOBAL_STEPS = [
-  {
-    target: '.tour-step-banco',
-    content: 'Bienvenido a tu Banco. Aquí puedes gestionar tus cuentas, realizar transferencias y pagar tus servicios con facilidad.',
-    disableBeacons: true,
-    placement: 'top',
-  },
-  {
-    target: '.tour-step-mundial',
-    content: '¡Vive la emoción del Mundial! Participa en desafíos diarios, realiza tus pronósticos impulsados por IA y gana mAIles extra.',
-    placement: 'top',
-  },
-  {
-    target: '.tour-step-recompensas',
-    content: 'Explora tus Beneficios. Canjea tus mAIles acumulados por premios exclusivos y experiencias VIP.',
-    placement: 'top',
-  }
-];
+function useTourSteps() {
+  const { t } = useTranslation();
 
-const SEASON_STEPS = [
-  {
-    target: '.tour-step-balance',
-    content: 'Aquí verás tus mAIles exclusivos para la temporada del Mundial. ¡Úsalos para predecir y ganar!',
-    disableBeacons: true,
-    placement: 'bottom',
-  },
-  {
-    target: '.tour-step-tabs',
-    content: 'Cambia entre Desafíos (para ganar mAIles), Pronósticos (ver tus jugadas) y En Vivo (resultados reales).',
-    placement: 'bottom',
-  },
-  {
-    target: '.tour-step-bonus',
-    content: '¡No olvides reclamar tu bono diario! Te otorgamos 50 mAIles gratis cada día para que no dejes de jugar.',
-    placement: 'top',
-  },
-  {
-    target: '.tour-step-matches',
-    content: 'Estos son los partidos destacados. Haz clic para elegir quién ganará y multiplica tus mAIles con nuestra IA.',
-    placement: 'top',
-  }
-];
+  const GLOBAL_STEPS = useMemo(() => [
+    {
+      target: '.tour-step-banco',
+      content: t('tour.global.step1'),
+      disableBeacons: true,
+      placement: 'top',
+    },
+    {
+      target: '.tour-step-mundial',
+      content: t('tour.global.step2'),
+      placement: 'top',
+    },
+    {
+      target: '.tour-step-recompensas',
+      content: t('tour.global.step3'),
+      placement: 'top',
+    }
+  ], [t]);
+
+  const SEASON_STEPS = useMemo(() => [
+    {
+      target: '.tour-step-balance',
+      content: t('tour.season.step1'),
+      disableBeacons: true,
+      placement: 'bottom',
+    },
+    {
+      target: '.tour-step-tabs',
+      content: t('tour.season.step2'),
+      placement: 'bottom',
+    },
+    {
+      target: '.tour-step-bonus',
+      content: t('tour.season.step3'),
+      placement: 'top',
+    },
+    {
+      target: '.tour-step-matches',
+      content: t('tour.season.step4'),
+      placement: 'top',
+    }
+  ], [t]);
+
+  return { GLOBAL_STEPS, SEASON_STEPS };
+}
 
 export function TourProvider({ children }) {
   const [run, setRun] = useState(false);
   const [tourKey, setTourKey] = useState(0);
   const [stepIndex, setStepIndex] = useState(0);
   const [activeFlow, setActiveFlow] = useState('global'); // 'global' | 'season'
+  const { GLOBAL_STEPS, SEASON_STEPS } = useTourSteps();
 
   const steps = useMemo(() => {
     return activeFlow === 'season' ? SEASON_STEPS : GLOBAL_STEPS;
-  }, [activeFlow]);
+  }, [activeFlow, GLOBAL_STEPS, SEASON_STEPS]);
 
   const handleJoyrideCallback = useCallback((data) => {
     const { status, type } = data;

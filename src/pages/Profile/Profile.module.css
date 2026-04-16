@@ -432,51 +432,85 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
   display: flex;
+  /* Bottom sheet: sube desde abajo, sin alejar al usuario del scroll */
   align-items: flex-end;
   justify-content: center;
-  padding: 20px;
 }
+
+/* Bottom sheet container */
 .modalContent {
-  background: var(--bg-card);
-  border: 1px solid var(--border-gold);
-  border-radius: var(--radius-xl);
+  background: linear-gradient(160deg, var(--bg-card) 0%, var(--bg-surface) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+  /* Solo esquinas superiores redondeadas (bottom sheet nativo) */
+  border-radius: 24px 24px 0 0;
   width: 100%;
-  max-width: 440px;
-  max-height: 80vh;
+  max-width: 540px;
+  /* Altura máxima respetando el nav bar */
+  max-height: calc(100vh - var(--bottom-nav-height, 70px) - 40px);
+  /* Espacio extra en la base para el nav bar */
+  padding-bottom: var(--bottom-nav-height, 70px);
   overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow:
+    0 -8px 32px rgba(0, 0, 0, 0.4),
+    0 -1px 0 rgba(255, 215, 0, 0.1);
 }
 .modalHeader {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 20px 12px;
-  border-bottom: 1px solid var(--border-subtle);
+  flex-direction: column;
+  align-items: stretch;
+  padding: 10px 20px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   position: sticky;
   top: 0;
-  background: var(--bg-card);
+  background: linear-gradient(160deg, var(--bg-card) 0%, var(--bg-surface) 100%);
   z-index: 1;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  /* Esquinas superiores redondeadas del bottom sheet */
+  border-radius: 24px 24px 0 0;
+  backdrop-filter: blur(4px);
+}
+/* Handle pill decorativo (estilo bottom sheet iOS/Android) */
+.modalHandle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  margin: 0 auto 12px;
+  flex-shrink: 0;
+}
+.modalHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 .modalTitle {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 800;
   flex: 1;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
 }
 .modalClose {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-muted);
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.modalClose:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 .modalBody {
   padding: 16px 20px 24px;
@@ -531,4 +565,349 @@
   padding: 3px 12px;
   border-radius: 12px;
   border: 1px solid var(--border-subtle);
+}
+
+/* Language Modal */
+.langSubtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: -4px 0 4px;
+  line-height: 1.4;
+}
+
+.langGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.langOption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  cursor: pointer;
+  color: var(--text-primary);
+  text-align: left;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.langOption::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.04), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.langOption:hover::before {
+  opacity: 1;
+}
+
+.langOption:hover {
+  border-color: rgba(255, 215, 0, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.langOptionActive {
+  background: rgba(255, 215, 0, 0.07);
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.08), inset 0 1px 0 rgba(255, 215, 0, 0.1);
+}
+
+.langOptionActive::before {
+  opacity: 1;
+}
+
+.langFlag {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.langInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.langName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.langNative {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.langCheck {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.35);
+}
+
+/* ─── Referral Code System ─────────────────────────────────── */
+
+.referralCard {
+  background: linear-gradient(145deg, var(--bg-card), var(--bg-surface));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.referralCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+}
+
+.referralTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.referralTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.referralSubtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.referralRewardHint {
+  font-size: 0.75rem;
+  color: var(--gold-primary);
+  font-weight: 600;
+}
+
+.referralIcon {
+  color: var(--gold-primary);
+  opacity: 0.65;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.referralCodeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 215, 0, 0.12);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.referralCode {
+  font-family: var(--font-display, 'Courier New', monospace);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.referralCopyBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: rgba(255, 215, 0, 0.09);
+  border: 1px solid rgba(255, 215, 0, 0.22);
+  border-radius: 9px;
+  color: var(--gold-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.referralCopied {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.28);
+  color: #22c55e;
+}
+
+.referralUsedBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  color: #22c55e;
+  font-weight: 600;
+  padding: 4px 10px;
+  background: rgba(34, 197, 94, 0.07);
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 20px;
+  align-self: flex-start;
+}
+
+/* ─── Referral Modal ─── */
+
+.referralSuccess {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+
+.referralSuccessTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.referralSuccessDesc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.referralRewardsRow {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 215, 0, 0.04);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.referralRewardItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 14px 8px;
+}
+
+.referralRewardDivider {
+  width: 1px;
+  height: 44px;
+  background: rgba(255, 215, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.referralRewardPts {
+  font-family: var(--font-display, monospace);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--gold-primary);
+}
+
+.referralRewardLabel {
+  font-size: 0.63rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.referralInput {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-size: 1.15rem;
+  font-family: var(--font-display, 'Courier New', monospace);
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.referralInput:focus {
+  border-color: rgba(255, 215, 0, 0.5);
+}
+
+.referralInput::placeholder {
+  letter-spacing: 1px;
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  opacity: 0.45;
+}
+
+.referralInput:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.referralInputError {
+  border-color: rgba(244, 63, 94, 0.5);
+  background: rgba(244, 63, 94, 0.04);
+}
+
+.referralApplyBtn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--gold-primary) 0%, #c9a227 100%);
+  border: none;
+  border-radius: 14px;
+  color: #000;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.referralApplyBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.referralError {
+  font-size: 0.82rem;
+  color: var(--accent-red, #f43f5e);
+  text-align: center;
+  line-height: 1.4;
+  padding: 9px 12px;
+  background: rgba(244, 63, 94, 0.06);
+  border: 1px solid rgba(244, 63, 94, 0.14);
+  border-radius: 10px;
+}
+
+.referralAlreadyUsedNote {
+  font-size: 0.75rem;
+  color: #22c55e;
+  text-align: center;
+  line-height: 1.4;
 }

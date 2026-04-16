@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Fire, Coin, Check, Sparkle } from '@phosphor-icons/react';
+import { useTranslation } from '../../i18n';
 import styles from './MatchCard.module.css';
 
 export default function MatchCard({ match, delay = 0, onPredict, predictedChoice }) {
   const [pendingChoice, setPendingChoice] = useState(null);
   const [aiData, setAiData] = useState(null);
   const [aiViewState, setAiViewState] = useState('hidden'); // hidden, loading, revealed
+  const { t } = useTranslation();
 
   const selected = predictedChoice ?? pendingChoice;
   const confirmed = Boolean(predictedChoice);
@@ -78,7 +80,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <span className={styles.group}>Grupo {match.group}</span>
+          <span className={styles.group}>{t('matchCard.group', { group: match.group })}</span>
           {match.hot && (
             <motion.span
               className={styles.hotBadge}
@@ -116,12 +118,12 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
             {aiViewState === 'hidden' && (
               <button className={styles.aiConsultBtn} onClick={handleAiConsult}>
                 <Sparkle size={18} weight="fill" />
-                <span>Consultar a AI-Gents</span>
+                <span>{t('matchCard.consultAI')}</span>
               </button>
             )}
             {aiViewState === 'loading' && (
               <div className={styles.aiLoadingBar}>
-                <span className={styles.aiLoadingText}>AI-Gents está analizando el partido, espera...</span>
+                <span className={styles.aiLoadingText}>{t('matchCard.aiAnalyzing')}</span>
                 <div className={styles.progressTrack}>
                   <motion.div
                     className={styles.progressFill}
@@ -244,7 +246,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
         <motion.div
           className={styles.pointsBadge}
         >
-          <Coin size={16} /> <span>300 pts entrada</span>
+          <Coin size={16} /> <span>{t('matchCard.ptsEntry')}</span>
         </motion.div>
         <AnimatePresence>
           {selected && !confirmed && (
@@ -257,7 +259,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
               whileTap={{ scale: 0.93 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             >
-              <Check size={16} /> Confirmar
+              <Check size={16} /> {t('matchCard.confirm')}
             </motion.button>
           )}
           {confirmed && (
@@ -273,7 +275,7 @@ export default function MatchCard({ match, delay = 0, onPredict, predictedChoice
               >
                 ✅
               </motion.span>
-              Predicción enviada
+              {t('matchCard.predictionSent')}
             </motion.div>
           )}
         </AnimatePresence>

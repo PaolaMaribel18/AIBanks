@@ -276,3 +276,66 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
+
+/* ─── Hiding / Mini Mode CSS ─── */
+
+.chatbot-container.is-hidden {
+  transform: translateX(150%) !important; 
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.chatbot-container {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+.chatbot-revealer {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 30px);
+  right: -24px; /* Mitad de la bolita oculta (24px de 48px) */
+  height: 48px;
+  width: 48px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 2px solid #38bdf8;
+  border-radius: 50%;
+  z-index: 9999;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px 8px rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chatbot-revealer:hover {
+  right: -8px; /* Sobresale un poco más al pasar el mouse */
+  box-shadow: 0 0 30px 12px rgba(56, 189, 248, 0.6);
+}
+
+.revealer-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.9) 0%, rgba(56, 189, 248, 0) 70%);
+  border-radius: 50%;
+  animation: pulse-glow 2s infinite ease-in-out;
+  z-index: 1;
+}
+
+.revealer-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  z-index: 2;
+  position: relative;
+  opacity: 0.9;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 0.3; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+

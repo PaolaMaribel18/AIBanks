@@ -8,9 +8,10 @@ import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import StarsBackground from '../../components/StarsBackground/StarsBackground';
 import { useMAIis } from '../../hooks/useMAIis';
 import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
+import { useTranslation } from '../../i18n';
 import styles from './Leaderboard.module.css';
 
-const TABS = ['Semanal', 'Mensual', 'Global'];
+const TAB_KEYS = ['weekly', 'monthly', 'global'];
 
 const staggerContainer = {
   hidden: {},
@@ -22,10 +23,11 @@ const staggerItem = {
 };
 
 export default function Leaderboard({ onClose }) {
-  const [activeTab, setActiveTab] = useState('Semanal');
+  const [activeTab, setActiveTab] = useState('weekly');
   const { matches } = useWorldCupMatches();
   const { user } = useAuth();
   const { currentMAIis } = useMAIis();
+  const { t } = useTranslation();
 
   const [mounted, setMounted] = useState(false);
 
@@ -67,8 +69,8 @@ export default function Leaderboard({ onClose }) {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h2 className={styles.title}><Trophy size={24} /> Ranking AIBank</h2>
-            <p className={styles.subtitle}>Compite con tus amigos y otros clientes de AIBank.</p>
+            <h2 className={styles.title}><Trophy size={24} /> {t('leaderboard.title')}</h2>
+            <p className={styles.subtitle}>{t('leaderboard.subtitle')}</p>
           </motion.div>
 
 
@@ -187,8 +189,8 @@ export default function Leaderboard({ onClose }) {
               </motion.span>
               <span className={styles.yourAvatar}>{USER_PROFILE.avatar}</span>
               <div>
-                <div className={styles.yourName}>Tú ({user?.name || USER_PROFILE.name})</div>
-                <div className={styles.yourTier}><Fire size={16} /> Racha: {USER_PROFILE.streak}</div>
+                <div className={styles.yourName}>{t('leaderboard.you', { name: user?.name || USER_PROFILE.name })}</div>
+                <div className={styles.yourTier}><Fire size={16} /> {t('leaderboard.streakLabel')} {USER_PROFILE.streak}</div>
               </div>
             </div>
             <div className={styles.yourPoints}>

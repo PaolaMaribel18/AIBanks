@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CurrencyDollar, X } from '@phosphor-icons/react';
 import { useNotifications } from '../../context/NotificationContextBase';
+import { useTranslation } from '../../i18n';
 import styles from './NotificationToast.module.css';
 
 export default function NotificationToast() {
   const { notifications, dismissNotification } = useNotifications();
+  const { t } = useTranslation();
 
   // Auto-dismiss después de 6 segundos
   useEffect(() => {
@@ -35,10 +37,9 @@ export default function NotificationToast() {
               <CurrencyDollar size={22} weight="bold" />
             </div>
             <div className={styles.content}>
-              <span className={styles.title}>Transferencia Recibida</span>
+              <span className={styles.title}>{t('notifications.transferReceived')}</span>
               <span className={styles.message}>
-                <strong>{notification.fromName}</strong> te envió{' '}
-                <strong>${Number(notification.amount).toFixed(2)}</strong>
+                {t('notifications.sentYou', { name: notification.fromName, amount: Number(notification.amount).toFixed(2) })}
               </span>
             </div>
             <button

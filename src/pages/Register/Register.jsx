@@ -5,12 +5,14 @@ import { UserPlus } from '@phosphor-icons/react';
 import { useAuth } from '../../context/AuthContextBase';
 import GlowButton from '../../components/GlowButton/GlowButton';
 import useGameSounds from '../../hooks/useGameSounds';
+import { useTranslation } from '../../i18n';
 import styles from './Register.module.css';
 
 export default function Register() {
   const navigate = useNavigate();
   const { register, clearError } = useAuth();
   const { playSuccess, playError } = useGameSounds();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,11 +41,11 @@ export default function Register() {
 
     try {
       if (formData.password !== formData.confirmPassword) {
-        throw new Error('Las contraseñas no coinciden');
+        throw new Error(t('register.passwordsMismatch'));
       }
 
       if (!formData.acceptTerms || !formData.acceptDataPolicy) {
-        throw new Error('Debes aceptar los términos y la política de protección de datos');
+        throw new Error(t('register.mustAcceptTerms'));
       }
 
 
@@ -54,14 +56,14 @@ export default function Register() {
         navigate('/login', {
           replace: true,
           state: {
-            message: 'Revisa tu correo y confirma tu cuenta antes de iniciar sesión.',
+            message: t('register.confirmEmail'),
           },
         });
       }
       // Navigation will be handled by AppContent when a session exists
     } catch (err) {
       playError();
-      setError(err.message || 'Error al registrarse');
+      setError(err.message || t('register.errorDefault'));
     } finally {
       setLoading(false);
     }
@@ -81,7 +83,7 @@ export default function Register() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <h1 className={styles.title}>Registrarse</h1>
+          <h1 className={styles.title}>{t('register.title')}</h1>
           <UserPlus size={32} weight="bold" className={styles.registerIcon} />
         </motion.div>
         <motion.form
@@ -92,7 +94,7 @@ export default function Register() {
           transition={{ delay: 0.4, duration: 0.5 }}
         >
           <div className={styles.inputGroup}>
-            <label htmlFor="name" className={styles.label}>Nombre Completo</label>
+            <label htmlFor="name" className={styles.label}>{t('register.fullName')}</label>
             <input
               type="text"
               id="name"
@@ -104,7 +106,7 @@ export default function Register() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="email" className={styles.label}>Correo Electrónico</label>
+            <label htmlFor="email" className={styles.label}>{t('register.email')}</label>
             <input
               type="email"
               id="email"
@@ -116,7 +118,7 @@ export default function Register() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="password" className={styles.label}>Contraseña</label>
+            <label htmlFor="password" className={styles.label}>{t('register.password')}</label>
             <input
               type="password"
               id="password"
@@ -128,7 +130,7 @@ export default function Register() {
             />
           </div>
           <div className={styles.inputGroup}>
-            <label htmlFor="confirmPassword" className={styles.label}>Confirmar Contraseña</label>
+            <label htmlFor="confirmPassword" className={styles.label}>{t('register.confirmPassword')}</label>
             <input
               type="password"
               id="confirmPassword"
@@ -151,7 +153,7 @@ export default function Register() {
                 className={styles.checkbox}
               />
               <label htmlFor="acceptTerms" className={styles.checkboxLabel}>
-                Acepto los <button type="button" className={styles.inlineLink}>Términos y Condiciones</button>
+                {t('register.acceptTerms')} <button type="button" className={styles.inlineLink}>{t('register.termsAndConditions')}</button>
               </label>
             </div>
 
@@ -165,7 +167,7 @@ export default function Register() {
                 className={styles.checkbox}
               />
               <label htmlFor="acceptDataPolicy" className={styles.checkboxLabel}>
-                Acepto el tratamiento de mis datos de acuerdo a la <button type="button" className={styles.inlineLink}>Ley Orgánica de Protección de Datos Personales (Ecuador)</button>
+                {t('register.acceptDataPolicy')} <button type="button" className={styles.inlineLink}>{t('register.dataProtectionLaw')}</button>
               </label>
             </div>
           </div>
@@ -180,7 +182,7 @@ export default function Register() {
             </motion.div>
           )}
           <GlowButton type="submit" variant="gold" fullWidth disabled={loading}>
-            {loading ? 'Cargando...' : 'Registrarse'}
+            {loading ? t('common.loading') : t('register.submit')}
           </GlowButton>
         </motion.form>
         <motion.p
@@ -189,7 +191,7 @@ export default function Register() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
         >
-          ¿Ya tienes cuenta?{' '}
+          {t('register.hasAccount')}{' '}
           <button
             type="button"
             className={styles.link}
@@ -198,7 +200,7 @@ export default function Register() {
               navigate('/login');
             }}
           >
-            Inicia Sesión
+            {t('register.loginLink')}
           </button>
         </motion.p>
       </motion.div>

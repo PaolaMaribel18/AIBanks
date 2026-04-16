@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import MatchCard from '../../components/MatchCard/MatchCard';
 import AnimatedCounter from '../../components/AnimatedCounter/AnimatedCounter';
 import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
+import { useTranslation } from '../../i18n';
 import styles from './Predictions.module.css';
 
 const staggerContainer = {
@@ -19,7 +20,8 @@ const staggerItem = {
 export default function Predictions() {
   const navigate = useNavigate();
   const { matches, loading, error } = useWorldCupMatches();
-  const [activeGroup, setActiveGroup] = useState('Todos');
+  const { t } = useTranslation();
+  const [activeGroup, setActiveGroup] = useState('all');
   const [predictions, setPredictions] = useState(() => {
     try {
       const stored = localStorage.getItem('predictions');
@@ -40,15 +42,15 @@ export default function Predictions() {
   const predictedMatches = (matches ?? []).filter((match) => Boolean(predictions[match.id]));
   const pendingMatches = (matches ?? []).filter((match) => !predictions[match.id]);
   const groupOptions = [
-    'Todos',
-    'Pronosticados',
+    'all',
+    'predicted',
     ...new Set(pendingMatches.map((m) => m.group).filter(Boolean)),
   ];
 
   const filtered =
-    activeGroup === 'Pronosticados'
+    activeGroup === 'predicted'
       ? predictedMatches
-      : activeGroup === 'Todos'
+      : activeGroup === 'all'
         ? pendingMatches
         : pendingMatches.filter((m) => m.group === activeGroup);
 
@@ -72,9 +74,9 @@ export default function Predictions() {
           >
              <ArrowLeft size={20} weight="bold" />
           </button>
-          <h2 className={styles.title} style={{ margin: 0 }}>🎯 Predicciones</h2>
+          <h2 className={styles.title} style={{ margin: 0 }}>{t('predictions.title')}</h2>
         </div>
-        <p className={styles.subtitle} style={{ marginTop: '8px' }}>Elige el ganador y acumula puntos</p>
+        <p className={styles.subtitle} style={{ marginTop: '8px' }}>{t('predictions.subtitle')}</p>
       </motion.div>
 
       {/* Group Filter Tabs with animated indicator */}
@@ -87,11 +89,11 @@ export default function Predictions() {
             whileTap={{ scale: 0.93 }}
             style={{ position: 'relative' }}
           >
-            {g === 'Todos'
-              ? '🌎 Todos'
-              : g === 'Pronosticados'
-                ? '✅ Pronosticados'
-                : (g.length === 1 ? `Grupo ${g}` : g)}
+            {g === 'all'
+              ? t('predictions.allEmoji')
+              : g === 'predicted'
+                ? t('predictions.predictedEmoji')
+                : (g.length === 1 ? t('predictions.group', { group: g }) : g)}
             {activeGroup === g && (
               <motion.div
                 className={styles.filterIndicator}
@@ -105,12 +107,12 @@ export default function Predictions() {
 
       {loading && (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
-          Cargando partidos de la FIFA... ⚽
+          {t('predictions.loadingMatches')}
         </div>
       )}
       {error && (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#ff4444' }}>
-          Error al cargar: {error}
+          {t('predictions.loadError')} {error}
         </div>
       )}
 
@@ -132,17 +134,17 @@ export default function Predictions() {
           >
             {predictedMatches.length}
           </motion.span>
-          <span className={styles.statLabel}>Predicciones</span>
+          <span className={styles.statLabel}>{t('predictions.predictionsLabel')}</span>
         </div>
         <div className={styles.statDivider} />
         <div className={styles.stat}>
           <AnimatedCounter value={pendingMatches.length} className={styles.statValue} />
-          <span className={styles.statLabel}>Partidos</span>
+          <span className={styles.statLabel}>{t('predictions.matchesLabel')}</span>
         </div>
         <div className={styles.statDivider} />
         <div className={styles.stat}>
           <AnimatedCounter value={pointsInPlay.toLocaleString()} className={styles.statValueGold} />
-          <span className={styles.statLabel}>Pts en Juego</span>
+          <span className={styles.statLabel}>{t('predictions.ptsInPlay')}</span>
         </div>
       </motion.div>
 
@@ -158,9 +160,9 @@ export default function Predictions() {
         >
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem', color: '#888' }}>
-              {activeGroup === 'Pronosticados'
-                ? 'Aún no has enviado pronósticos.'
-                : 'No hay partidos pendientes en esta sección.'}
+              {activeGroup === 'predicted'
+                ? t('predictions.noPredictions')
+                : t('predictions.noMatchesPending')}
             </div>
           ) : filtered.map((match) => (
             <motion.div key={match.id} variants={staggerItem}>

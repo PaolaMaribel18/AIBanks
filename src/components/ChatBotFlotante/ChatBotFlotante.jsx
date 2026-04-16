@@ -1,14 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'framer-motion';
-import { Robot, PaperPlaneTilt, X, ChatCircleText } from '@phosphor-icons/react';
+import { Robot, PaperPlaneTilt, X, ChatCircleText, CaretRight, CaretLeft } from '@phosphor-icons/react';
 import { getChatResponse } from '../../services/gemini';
+import { useTranslation } from '../../i18n';
 import './ChatBotFlotante.css';
 
 export default function ChatBotFlotante() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'model', parts: [{ text: '¡Hola! Soy AI-AGENT, tu asistente inteligente. ¿En qué puedo ayudarte hoy?' }] }
+    { role: 'model', parts: [{ text: '' }], isGreeting: true }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -121,10 +124,17 @@ export default function ChatBotFlotante() {
       // Preparamos el historial para Gemini
       const MAX_HISTORY_ITEMS = 14; // ~7 turnos (user+model). Ajusta si lo necesitas.
       const combined = messages.concat(userMessage);
-      const history =
+      const trimmed =
         combined.length <= MAX_HISTORY_ITEMS
           ? combined
           : [combined[0], ...combined.slice(-(MAX_HISTORY_ITEMS - 1))];
+
+      // ⚠️ Limpiar campos de UI (isGreeting, etc.) antes de enviar a la API.
+      // Gemini solo acepta { role, parts } — cualquier campo extra causa HTTP 400.
+      const history = trimmed
+        .filter(msg => msg.parts?.[0]?.text?.trim()) // omitir mensajes vacíos (ej. saludo vacío)
+        .map(({ role, parts }) => ({ role, parts }));
+
       const responseText = await getChatResponse(history);
       
       setMessages(prev => [...prev, { role: 'model', parts: [{ text: responseText }] }]);
@@ -132,7 +142,7 @@ export default function ChatBotFlotante() {
       console.error('Error in ChatBot:', error);
       setMessages(prev => [...prev, { 
         role: 'model', 
-        parts: [{ text: 'Ups, parece que tengo un problema de conexión. Inténtalo de nuevo más tarde.' }] 
+        parts: [{ text: t('chatbot.errorMessage') }] 
       }]);
     } finally {
       setIsLoading(false);
@@ -140,13 +150,37 @@ export default function ChatBotFlotante() {
   };
 
   return (
-    <motion.div 
-      className="chatbot-container"
-      drag
+    <>
+      <AnimatePresence>
+        {isHidden && (
+          <motion.div
+            className="chatbot-revealer"
+            initial={{ opacity: 0, scale: 0.5, x: 50 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.5, x: 50 }}
+            onClick={() => setIsHidden(false)}
+            title={t('chatbot.showAgent') || 'Mostrar agente IA'}
+          >
+            <div className="revealer-glow"></div>
+            <img src="/mi-robot.jpeg" alt="AI Agent" className="revealer-img" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div 
+        className={`chatbot-container ${isHidden ? 'is-hidden' : ''}`}
+        drag
       animate={controls}
       dragConstraints={{ left: -window.innerWidth + 80, right: 0, top: -window.innerHeight + 160, bottom: 0 }}
-      dragElastic={0.1}
+      dragElastic={0.4}
       dragMomentum={false}
+      onDragEnd={(e, info) => {
+        // Ocultar si se arrastra hacia el extremo derecho de la pantalla
+        if (info.point.x > window.innerWidth - 60 || info.offset.x > 80) {
+          setIsHidden(true);
+          setShowTooltip(false);
+        }
+      }}
       style={{ touchAction: 'none' }}
     >
       <AnimatePresence>
@@ -161,13 +195,13 @@ export default function ChatBotFlotante() {
           >
             <div className="chatbot-header">
               <div className="robot-avatar">
-                <img src="/ai-agent.png" alt="AI-Agent" className="avatar-img" />
+                <img src="/mi-robot.jpeg" alt="AI-Agent" className="avatar-img" />
               </div>
               <div className="chatbot-info">
                 <h3>AI-AGENT</h3>
                 <div className="chatbot-status">
                   <span className="status-dot"></span>
-                  En línea
+                  {t('chatbot.online')}
                 </div>
               </div>
               <button 
@@ -182,7 +216,7 @@ export default function ChatBotFlotante() {
             <div className="chatbot-messages" onPointerDown={(e) => e.stopPropagation()}>
               {messages.map((msg, idx) => (
                 <div key={idx} className={`message ${msg.role === 'user' ? 'user' : 'bot'}`}>
-                  {msg.parts[0].text}
+                  {msg.isGreeting ? t('chatbot.greeting') : msg.parts[0].text}
                 </div>
               ))}
               {isLoading && (
@@ -200,7 +234,7 @@ export default function ChatBotFlotante() {
             <form className="chatbot-input-area" onSubmit={handleSend} onPointerDown={(e) => e.stopPropagation()}>
               <input 
                 type="text" 
-                placeholder="Escribe un mensaje..." 
+                placeholder={t('chatbot.placeholder')}
                 className="chatbot-input"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -226,7 +260,7 @@ export default function ChatBotFlotante() {
             exit={{ opacity: 0, x: 20 }}
             transition={{ delay: 0.2 }}
           >
-            ¡Hola! 
+            {t('chatbot.tooltipHello')}
           </motion.div>
         )}
       </AnimatePresence>
@@ -255,11 +289,12 @@ export default function ChatBotFlotante() {
               exit={{ rotate: -90, opacity: 0 }}
               className="button-icon-wrapper"
             >
-              <img src="/ai-agent.png" alt="AI-Agent" className="button-img" />
+              <img src="/mi-robot.jpeg" alt="AI-Agent" className="button-img" />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.button>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }

@@ -2,10 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useCallback } from 'react';
 import FootballMeteors from '../FootballMeteors/FootballMeteors';
 import useGameSounds, { unlockAudio } from '../../hooks/useGameSounds';
+import { useTranslation } from '../../i18n';
 
 const POWERED_BY_DURATION = 2200; // ms to show "powered by TCS"
 
 function PoweredByScreen({ onTap }) {
+  const { t } = useTranslation();
   return (
     <motion.div
       key="powered-by"
@@ -90,13 +92,14 @@ function PoweredByScreen({ onTap }) {
         animate={{ opacity: [0, 0.6, 0.3, 0.6] }}
         transition={{ delay: 1.2, duration: 2, repeat: Infinity }}
       >
-        Toca para comenzar
+        {t('splash.tapToStart')}
       </motion.p>
     </motion.div>
   );
 }
 
 export default function SplashScreen() {
+  const { t } = useTranslation();
   const { playSwoosh, playCoin, playElegant } = useGameSounds();
   const [phase, setPhase] = useState('powered'); // 'powered' | 'main'
   const [tapped, setTapped] = useState(false);
@@ -308,7 +311,7 @@ export default function SplashScreen() {
               style={{ color: 'var(--text-secondary)' }}
               variants={itemVariants}
             >
-              Disfruta del Mundial 2026
+              {t('splash.subtitle')}
             </motion.p>
 
             {/* Modern loading bar */}
@@ -341,7 +344,7 @@ export default function SplashScreen() {
               style={{ color: 'var(--text-muted)' }}
               variants={itemVariants}
             >
-              Cargando tu experiencia...
+              {t('splash.loadingExperience')}
             </motion.p>
           </motion.div>
 

@@ -6,6 +6,7 @@ import { useGroupStandings } from '../../hooks/useGroupStandings';
 import { useWorldCupMatches } from '../../hooks/useWorldCupMatches';
 import { TOURNAMENT_INFO, FIFA_LINKS } from '../../data/fifaData';
 import { getFlagByFifaCode } from '../../utils/countryFlags';
+import { useTranslation } from '../../i18n';
 import styles from './FifaLive.module.css';
 
 // ─── Animation variants ────────────────────────────────────────
@@ -43,45 +44,46 @@ function timeAgo(date) {
 // ─── Countdown Sub-component ────────────────────────────────────
 function Countdown() {
   const { days, hours, minutes, seconds, isPast } = useCountdown(TOURNAMENT_INFO.startDate);
+  const { t } = useTranslation();
 
   return (
     <motion.div className={styles.countdown} variants={fadeUp}>
       <div className={styles.countdownLabel}>⚽ {TOURNAMENT_INFO.name}</div>
       <div className={styles.countdownTitle}>
         {isPast
-          ? '¡El Mundial ha comenzado!'
-          : `Faltan para ${TOURNAMENT_INFO.openingMatch.match}`}
+          ? t('fifaLive.worldCupStarted')
+          : t('fifaLive.countdown', { match: TOURNAMENT_INFO.openingMatch.match })}
       </div>
       {isPast ? (
-        <div className={styles.countdownStarted}>🏟️ EN VIVO AHORA</div>
+        <div className={styles.countdownStarted}>{t('fifaLive.liveNow')}</div>
       ) : (
         <div className={styles.countdownGrid}>
           <div className={styles.countdownUnit}>
             <motion.span className={styles.countdownNum} key={days} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(days).padStart(2, '0')}
             </motion.span>
-            <span className={styles.countdownUnitLabel}>Días</span>
+            <span className={styles.countdownUnitLabel}>{t('fifaLive.days')}</span>
           </div>
           <span className={styles.countdownSep}>:</span>
           <div className={styles.countdownUnit}>
             <motion.span className={styles.countdownNum} key={hours} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(hours).padStart(2, '0')}
             </motion.span>
-            <span className={styles.countdownUnitLabel}>Horas</span>
+            <span className={styles.countdownUnitLabel}>{t('fifaLive.hours')}</span>
           </div>
           <span className={styles.countdownSep}>:</span>
           <div className={styles.countdownUnit}>
             <motion.span className={styles.countdownNum} key={minutes} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(minutes).padStart(2, '0')}
             </motion.span>
-            <span className={styles.countdownUnitLabel}>Min</span>
+            <span className={styles.countdownUnitLabel}>{t('fifaLive.min')}</span>
           </div>
           <span className={styles.countdownSep}>:</span>
           <div className={styles.countdownUnit}>
             <motion.span className={styles.countdownNum} key={seconds} initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
               {String(seconds).padStart(2, '0')}
             </motion.span>
-            <span className={styles.countdownUnitLabel}>Seg</span>
+            <span className={styles.countdownUnitLabel}>{t('fifaLive.sec')}</span>
           </div>
         </div>
       )}
@@ -97,13 +99,14 @@ function Countdown() {
 
 // ─── Ecuador Schedule ───────────────────────────────────────────
 function EcuadorSchedule({ matches }) {
+  const { t } = useTranslation();
   if (!matches || matches.length === 0) return null;
   
   return (
     <motion.div variants={fadeUp} initial="hidden" animate="show">
       <div className={styles.scheduleTitle}>
         <Clock size={16} weight="bold" color="var(--gold-primary)" />
-        <span>Calendario Ecuador 🇪🇨</span>
+        <span>{t('fifaLive.ecuadorSchedule')}</span>
       </div>
       <motion.div className={styles.matchList} variants={stagger} initial="hidden" animate="show">
         {matches.map((match) => (
@@ -145,12 +148,13 @@ function EcuadorSchedule({ matches }) {
 
 // ─── Featured Matches ───────────────────────────────────────────
 function FeaturedMatches({ matches }) {
+  const { t } = useTranslation();
   if (!matches || matches.length === 0) return null;
   return (
     <motion.div variants={fadeUp} initial="hidden" animate="show">
       <div className={styles.scheduleTitle}>
         <span>🔥</span>
-        <span>Partidos Destacados</span>
+        <span>{t('fifaLive.featuredMatches')}</span>
       </div>
       <div className={styles.featuredScroll}>
         {matches.map((match, i) => (
@@ -185,6 +189,7 @@ function FeaturedMatches({ matches }) {
 
 // ─── Group Standings (Replaces Conmebol) ────────────────────────
 function GroupStandings({ standingsByGroup }) {
+  const { t } = useTranslation();
   const groupsToSelect = Object.keys(standingsByGroup).sort();
   const [activeGroup, setActiveGroup] = useState('E'); // Ecuador por defecto
   
@@ -199,7 +204,7 @@ function GroupStandings({ standingsByGroup }) {
       <div className={styles.standingsHeader}>
         <div className={styles.standingsTitle}>
           <Trophy size={14} weight="bold" style={{ marginRight: 6, verticalAlign: 'middle' }} />
-          Tabla de Grupos
+          {t('fifaLive.groupTable')}
         </div>
       </div>
       
@@ -228,14 +233,14 @@ function GroupStandings({ standingsByGroup }) {
       <table className={styles.standingsTable}>
         <thead>
           <tr>
-            <th>Pos</th>
-            <th>Selección</th>
-            <th>PJ</th>
-            <th>PG</th>
-            <th>PE</th>
-            <th>PP</th>
-            <th>DG</th>
-            <th>Pts</th>
+            <th>{t('fifaLive.tableHeaders.pos')}</th>
+            <th>{t('fifaLive.tableHeaders.team')}</th>
+            <th>{t('fifaLive.tableHeaders.played')}</th>
+            <th>{t('fifaLive.tableHeaders.won')}</th>
+            <th>{t('fifaLive.tableHeaders.drawn')}</th>
+            <th>{t('fifaLive.tableHeaders.lost')}</th>
+            <th>{t('fifaLive.tableHeaders.goalDiff')}</th>
+            <th>{t('fifaLive.tableHeaders.pts')}</th>
           </tr>
         </thead>
         <tbody>
@@ -269,7 +274,7 @@ function GroupStandings({ standingsByGroup }) {
       </table>
       
       <div className={styles.sourceInfo}>
-        <span>Fuente:</span>
+        <span>{t('fifaLive.source')}</span>
         <a href={FIFA_LINKS.standings} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
           FIFA.com
         </a>
@@ -282,6 +287,7 @@ function GroupStandings({ standingsByGroup }) {
 // Main Component
 // ═══════════════════════════════════════════════════════════════
 export default function FifaLive() {
+  const { t } = useTranslation();
   const { matches, loading: matchesLoading, error: matchesError } = useWorldCupMatches();
   const { standingsByGroup, lastUpdated, error: standingError } = useGroupStandings();
   
@@ -306,7 +312,7 @@ export default function FifaLive() {
           <h3 className={styles.fifaTitle}>FIFA World Cup 2026</h3>
           <div className={styles.liveBadge} title="Sincronizado silenciosamente cada 60s">
             <span className={styles.liveDot} />
-            <span>EN VIVO</span>
+            <span>{t('fifaLive.live')}</span>
           </div>
         </div>
         <span className={styles.updatedAt}>
@@ -319,13 +325,13 @@ export default function FifaLive() {
 
       {error ? (
         <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255,0,0,0.1)', color: '#ff6b6b', borderRadius: '12px', marginTop: '20px' }}>
-          <strong>Error de Conexión FIFA API</strong>
+          <strong>{t('fifaLive.connectionError')}</strong>
           <p>{error}</p>
-          <small>Revisa que el script de Vite esté corriendo y recarga la página.</small>
+          <small>{t('fifaLive.checkScript')}</small>
         </div>
       ) : loading ? (
         <div style={{ padding: '3rem', textAlign: 'center', color: '#888' }}>
-          Conectando con servidores de la FIFA...
+          {t('fifaLive.connecting')}
         </div>
       ) : (
         <>
@@ -357,7 +363,7 @@ export default function FifaLive() {
         whileHover={{ scale: 1.01 }}
       >
         <SoccerBall size={18} weight="bold" />
-        <span>Abrir FIFA Match Centre</span>
+        <span>{t('fifaLive.openMatchCentre')}</span>
         <ArrowSquareOut size={14} weight="bold" />
       </motion.a>
 

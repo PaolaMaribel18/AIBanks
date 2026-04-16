@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { USER_PROFILE, UPCOMING_MATCHES } from '../data/mockData';
 import { useWorldCupMatches } from './useWorldCupMatches';
+import { useAuth } from '../context/AuthContextBase';
 
 export function useMAIis() {
   const { matches } = useWorldCupMatches();
+  const { user } = useAuth();
   const allMatches = matches?.length ? matches : UPCOMING_MATCHES;
 
   const [predictions, setPredictionsState] = useState(() => {
@@ -46,8 +48,9 @@ export function useMAIis() {
     return acc + (reward.cost || 0);
   }, 0);
 
-  // mAIis netos (perfil + predicciones + transacciones banco - gastados)
-  const currentMAIis = USER_PROFILE.points + earnedPredictionMAIis + earnedBankMAIis - spentMAIis;
+  // mAIis netos (perfil en Base de Datos + predicciones + transacciones banco - gastados)
+  const basePoints = user?.points ?? USER_PROFILE.points;
+  const currentMAIis = basePoints + earnedPredictionMAIis + earnedBankMAIis - spentMAIis;
 
   const redeemReward = useCallback((reward) => {
     if (currentMAIis >= reward.cost && !redeemedRewards[reward.id]) {

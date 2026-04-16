@@ -14,6 +14,7 @@ import { useAuth } from '../../context/AuthContextBase';
 import { useNotifications } from '../../context/NotificationContextBase';
 import { supabase } from '../../services/supabaseClient';
 import { sendSenderEmail, sendRecipientEmail } from '../../services/emailService';
+import { useTranslation } from '../../i18n';
 import styles from './Home.module.css';
 import { useTour } from '../../context/TourContextBase';
 
@@ -29,6 +30,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
   const [error, setError] = useState('');
   const { sendTransferNotification } = useNotifications();
   const { refreshProfile } = useAuth();
+  const { t } = useTranslation();
 
   const [recentRecipients] = useState([
     { id: '1', name: 'Carlos Mendoza', account: '2200334455', color: '#0ea5e9' },
@@ -53,7 +55,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
         setUsers(data || []);
       } catch (err) {
         console.error('Error cargando usuarios:', err);
-        setError('No se pudieron cargar los destinatarios.');
+        setError(t('home.modal.transfer.recipientsError'));
       } finally {
         setLoadingUsers(false);
       }
@@ -84,7 +86,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
 
     const transferAmount = parseFloat(amount);
     if (!Number.isFinite(transferAmount) || transferAmount <= 0) {
-      setError('Ingresa un monto válido mayor a 0.');
+      setError(t('home.modal.transfer.invalidAmount'));
       setIsProcessing(false);
       setStep('form');
       return;
@@ -102,14 +104,14 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
         const msg = (rpcError.message || '').toLowerCase();
 
         if (msg.includes('insufficient balance')) {
-          setError('Saldo insuficiente para completar la transferencia.');
+          setError(t('home.modal.transfer.insufficientBalance'));
           setIsProcessing(false);
           setStep('form');
           return;
         }
 
         if (msg.includes('could not find the function') || msg.includes('transfer_balance')) {
-          setError('Falta configurar la función de transferencia en Supabase (RPC transfer_balance).');
+          setError(t('home.modal.transfer.rpcMissing'));
           setIsProcessing(false);
           setStep('form');
           return;
@@ -164,7 +166,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
       onSuccess(earnedMAIles);
     } catch (err) {
       console.error('Error en transferencia:', err);
-      setError('Ocurrió un error al procesar la transferencia.');
+      setError(t('home.modal.transfer.transferError'));
       setIsProcessing(false);
     }
   };
@@ -187,13 +189,13 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
           <AnimatePresence mode="wait">
             {step === 'form' && (
               <motion.div key="form" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className={styles.modalTitle}>Nueva Transferencia</h2>
-                <p className={styles.modalDesc}>Transfiere a otros usuarios de AIBank.</p>
+                <h2 className={styles.modalTitle}>{t('home.modal.transfer.title')}</h2>
+                <p className={styles.modalDesc}>{t('home.modal.transfer.desc')}</p>
 
                 {error && <div className={styles.errorBanner}>{error}</div>}
 
                 <div className={styles.recipientsSection}>
-                  <p className={styles.labelSmall}>Recientes</p>
+                  <p className={styles.labelSmall}>{t('home.modal.transfer.recent')}</p>
                   <div className={styles.recipientsGrid}>
                     {recentRecipients.map(r => (
                       <button 
@@ -216,11 +218,11 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
 
                 <form onSubmit={handleNext} className={styles.form}>
                   <div className={styles.inputGroup}>
-                    <label>Destinatario</label>
+                    <label>{t('home.modal.transfer.recipient')}</label>
                     {loadingUsers ? (
                       <div className={styles.loadingUsers}>
                         <SpinnerGap size={20} className={styles.spinner} />
-                        <span>Cargando usuarios...</span>
+                        <span>{t('home.modal.transfer.loadingUsers')}</span>
                       </div>
                     ) : (
                       <select
@@ -229,7 +231,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
                         onChange={(e) => setSelectedUserId(e.target.value)}
                         disabled={isProcessing}
                       >
-                        <option value="">Selecciona un destinatario</option>
+                        <option value="">{t('home.modal.transfer.selectRecipient')}</option>
                         {users.map((u) => (
                           <option key={u.id} value={u.id}>
                             {u.name} ({u.email})
@@ -252,7 +254,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
                   )}
 
                   <div className={styles.inputGroup}>
-                    <label>Monto ($)</label>
+                    <label>{t('home.modal.transfer.amount')}</label>
                     <input
                       type="number"
                       placeholder="0.00"
@@ -264,7 +266,7 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
                     />
                   </div>
                   <button type="submit" className={styles.submitBtn} disabled={isProcessing || !amount || !selectedUserId}>
-                    Continuar
+                    {t('common.continue')}
                   </button>
                 </form>
               </motion.div>
@@ -272,18 +274,18 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
 
             {step === 'confirm' && (
               <motion.div key="confirm" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className={styles.modalTitle}>Confirmar Envío</h2>
+                <h2 className={styles.modalTitle}>{t('home.modal.transfer.confirmTitle')}</h2>
                 <div className={styles.confirmBox}>
                   <div className={styles.confirmRow}>
-                    <span>Destinatario:</span>
+                    <span>{t('home.modal.transfer.recipientLabel')}</span>
                     <strong>{selectedUser?.name}</strong>
                   </div>
                   <div className={styles.confirmRow}>
-                    <span>Monto:</span>
+                    <span>{t('home.modal.transfer.amountLabel')}</span>
                     <strong className={styles.confirmAmount}>${amount}</strong>
                   </div>
                   <div className={styles.confirmRow}>
-                    <span>Comisión:</span>
+                    <span>{t('home.modal.transfer.commission')}</span>
                     <strong>$0.00</strong>
                   </div>
                 </div>
@@ -294,9 +296,9 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
                   disabled={isProcessing}
                   style={{ background: 'var(--accent-blue)' }}
                 >
-                  {isProcessing ? 'Procesando...' : 'Confirmar y Enviar'}
+                  {isProcessing ? t('common.processing') : t('home.modal.transfer.confirmAndSend')}
                 </button>
-                <button className={styles.backBtn} onClick={() => setStep('form')} disabled={isProcessing}>Atrás</button>
+                <button className={styles.backBtn} onClick={() => setStep('form')} disabled={isProcessing}>{t('common.back')}</button>
               </motion.div>
             )}
 
@@ -305,15 +307,15 @@ function TransactionModal({ isOpen, onClose, onSuccess, currentUser }) {
                 <div className={styles.successIconWrapper}>
                   <Trophy size={60} weight="fill" color="#ffd700" />
                 </div>
-                <h2 className={styles.modalTitle}>¡Transferencia Exitosa!</h2>
+                <h2 className={styles.modalTitle}>{t('home.modal.transfer.successTitle')}</h2>
                 <p className={styles.modalDesc}>
-                  ¡Felicidades! Has enviado <strong>${amount}</strong> a <strong>{selectedUser?.name || 'la cuenta destino'}</strong>.
+                  {t('home.modal.transfer.successDesc', { amount, name: selectedUser?.name || 'la cuenta destino' })}
                 </p>
                 <div className={styles.rewardBanner}>
                   <Sparkle size={20} weight="fill" />
-                  <span>Ganaste <strong>+250 mAIles</strong></span>
+                  <span>{t('home.modal.transfer.earnedMiles', { miles: 250 })}</span>
                 </div>
-                <button className={styles.submitBtn} onClick={onClose}>Entendido</button>
+                <button className={styles.submitBtn} onClick={onClose}>{t('common.understood')}</button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -329,12 +331,13 @@ function ServicesModal({ isOpen, onClose, onSuccess }) {
   const [selectedService, setSelectedService] = useState(null);
   const [refNumber, setRefNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { t } = useTranslation();
 
   const categories = [
-    { id: 'elec', name: 'Electricidad', icon: Lightning, color: '#f59e0b' },
-    { id: 'water', name: 'Agua Potable', icon: Drop, color: '#3b82f6' },
-    { id: 'internet', name: 'Internet / Wifi', icon: WifiHigh, color: '#6366f1' },
-    { id: 'tv', name: 'Streaming / TV', icon: Television, color: '#ec4899' },
+    { id: 'elec', name: t('home.modal.services.electricity'), icon: Lightning, color: '#f59e0b' },
+    { id: 'water', name: t('home.modal.services.water'), icon: Drop, color: '#3b82f6' },
+    { id: 'internet', name: t('home.modal.services.internet'), icon: WifiHigh, color: '#6366f1' },
+    { id: 'tv', name: t('home.modal.services.streaming'), icon: Television, color: '#ec4899' },
   ];
 
   const handlePay = () => {
@@ -370,8 +373,8 @@ function ServicesModal({ isOpen, onClose, onSuccess }) {
           <AnimatePresence mode="wait">
             {step === 'categories' && (
               <motion.div key="categories" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-                <h2 className={styles.modalTitle}>Pago de Servicios</h2>
-                <p className={styles.modalDesc}>Selecciona el servicio que deseas pagar.</p>
+                <h2 className={styles.modalTitle}>{t('home.modal.services.title')}</h2>
+                <p className={styles.modalDesc}>{t('home.modal.services.desc')}</p>
                 <div className={styles.servicesGrid}>
                   {categories.map(cat => (
                     <button 
@@ -397,27 +400,27 @@ function ServicesModal({ isOpen, onClose, onSuccess }) {
                    </div>
                    <h2 className={styles.modalTitle} style={{ marginBottom: 0 }}>{selectedService.name}</h2>
                 </div>
-                <p className={styles.modalDesc}>Ingresa el número de referencia de tu factura.</p>
+                <p className={styles.modalDesc}>{t('home.modal.services.invoiceDesc')}</p>
                 <div className={styles.form}>
                   <div className={styles.inputGroup}>
-                    <label>Número de Suministro / Referencia</label>
+                    <label>{t('home.modal.services.refNumber')}</label>
                     <input 
                       type="text" 
-                      placeholder="Ej. 123456789" 
+                      placeholder={t('home.modal.services.refPlaceholder')} 
                       value={refNumber}
                       onChange={(e) => setRefNumber(e.target.value)}
                     />
                   </div>
                   <div className={styles.paymentInfo}>
                     <div className={styles.paymentRow}>
-                      <span>Monto Estimado</span>
+                      <span>{t('home.modal.services.estimatedAmount')}</span>
                       <strong>$24.50</strong>
                     </div>
                   </div>
                   <button className={styles.submitBtn} onClick={handlePay} disabled={isProcessing || !refNumber}>
-                    {isProcessing ? 'Procesando...' : 'Pagar Ahora'}
+                    {isProcessing ? t('common.processing') : t('home.modal.services.payNow')}
                   </button>
-                  <button className={styles.backBtn} onClick={() => setStep('categories')} disabled={isProcessing}>Atrás</button>
+                  <button className={styles.backBtn} onClick={() => setStep('categories')} disabled={isProcessing}>{t('common.back')}</button>
                 </div>
               </motion.div>
             )}
@@ -427,13 +430,13 @@ function ServicesModal({ isOpen, onClose, onSuccess }) {
                 <div className={styles.successIconWrapper}>
                   <Trophy size={60} weight="fill" color="#ffd700" />
                 </div>
-                <h2 className={styles.modalTitle}>¡Pago Exitoso!</h2>
-                <p className={styles.modalDesc}>Tu pago de <strong>{selectedService.name}</strong> ha sido procesado correctamente.</p>
+                <h2 className={styles.modalTitle}>{t('home.modal.services.successTitle')}</h2>
+                <p className={styles.modalDesc}>{t('home.modal.services.successDesc', { service: selectedService.name })}</p>
                 <div className={styles.rewardBanner}>
                   <Sparkle size={20} weight="fill" />
-                  <span>Ganaste <strong>+150 mAIles</strong></span>
+                  <span>{t('home.modal.services.earnedMiles', { miles: 150 })}</span>
                 </div>
-                <button className={styles.submitBtn} onClick={resetAndClose}>Siguiente</button>
+                <button className={styles.submitBtn} onClick={resetAndClose}>{t('common.next')}</button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -447,10 +450,11 @@ function ServicesModal({ isOpen, onClose, onSuccess }) {
 function CardsModal({ isOpen, onClose }) {
   const [showCvv, setShowCvv] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
+  const { t } = useTranslation();
 
   const transactions = [
-    { id: 1, title: 'Netflix Subscription', date: 'Hoy, 10:20 AM', amount: -15.99, icon: Television },
-    { id: 2, title: 'Starbucks Coffee', date: 'Ayer, 4:15 PM', amount: -6.50, icon: Coffee },
+    { id: 1, title: 'Netflix Subscription', date: t('home.modal.cards.today') + ', 10:20 AM', amount: -15.99, icon: Television },
+    { id: 2, title: 'Starbucks Coffee', date: t('home.modal.cards.yesterday') + ', 4:15 PM', amount: -6.50, icon: Coffee },
     { id: 3, title: 'AIBank Deposit', date: '08 Abr, 2026', amount: 500.00, icon: Bank },
   ];
 
@@ -468,8 +472,8 @@ function CardsModal({ isOpen, onClose }) {
         >
           <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
           
-          <h2 className={styles.modalTitle}>Gestión de Tarjetas</h2>
-          <p className={styles.modalDesc}>Seguridad y datos de tu Tarjeta de Crédito AIBank.</p>
+          <h2 className={styles.modalTitle}>{t('home.modal.cards.title')}</h2>
+          <p className={styles.modalDesc}>{t('home.modal.cards.desc')}</p>
 
           <div className={`${styles.digitalCard} ${isLocked ? styles.cardLocked : ''}`} style={{ background: 'linear-gradient(135deg, #0f172a, #334155)' }}>
             <div className={styles.cardGlass} />
@@ -480,7 +484,7 @@ function CardsModal({ isOpen, onClose }) {
             <div className={styles.cardNumber}>•••• •••• •••• 4567</div>
             <div className={styles.cardBottom}>
               <div className={styles.cardInfo}>
-                <span className={styles.cardLabel}>VENCE</span>
+                <span className={styles.cardLabel}>{t('home.modal.cards.expires')}</span>
                 <span className={styles.cardValue}>12/28</span>
               </div>
               <div className={styles.cardInfo}>
@@ -491,7 +495,7 @@ function CardsModal({ isOpen, onClose }) {
             {isLocked && (
               <div className={styles.lockedOverlay}>
                 <Lock size={40} weight="fill" />
-                <span>Tarjeta Congelada</span>
+                <span>{t('home.modal.cards.frozen')}</span>
               </div>
             )}
           </div>
@@ -499,28 +503,28 @@ function CardsModal({ isOpen, onClose }) {
           <div className={styles.cardActionsGrid}>
             <button className={styles.cardActionItem} onClick={() => setShowCvv(!showCvv)}>
               {showCvv ? <EyeSlash size={22} /> : <Eye size={22} />}
-              <span>{showCvv ? 'Ocultar' : 'Ver datos'}</span>
+              <span>{showCvv ? t('home.modal.cards.hideData') : t('home.modal.cards.showData')}</span>
             </button>
             <button className={styles.cardActionItem} onClick={() => setIsLocked(!isLocked)}>
               <Lock size={22} color={isLocked ? 'var(--accent-red)' : 'inherit'} />
-              <span>{isLocked ? 'Desbloquear' : 'Congelar'}</span>
+              <span>{isLocked ? t('home.modal.cards.unfreeze') : t('home.modal.cards.freeze')}</span>
             </button>
           </div>
 
           <div className={styles.transactionsSection}>
-            <h3 className={styles.sectionTitleSmall}>Actividad Reciente</h3>
+            <h3 className={styles.sectionTitleSmall}>{t('home.modal.cards.recentActivity')}</h3>
             <div className={styles.transList}>
-              {transactions.map(t => (
-                <div key={t.id} className={styles.transItem}>
+              {transactions.map(tx => (
+                <div key={tx.id} className={styles.transItem}>
                   <div className={styles.transIcon}>
-                    <t.icon size={20} />
+                    <tx.icon size={20} />
                   </div>
                   <div className={styles.transDetails}>
-                    <p className={styles.transTitle}>{t.title}</p>
-                    <p className={styles.transDate}>{t.date}</p>
+                    <p className={styles.transTitle}>{tx.title}</p>
+                    <p className={styles.transDate}>{tx.date}</p>
                   </div>
-                  <div className={`${styles.transAmount} ${t.amount > 0 ? styles.pos : ''}`}>
-                    {t.amount > 0 ? `+$${t.amount}` : `-$${Math.abs(t.amount)}`}
+                  <div className={`${styles.transAmount} ${tx.amount > 0 ? styles.pos : ''}`}>
+                    {tx.amount > 0 ? `+$${tx.amount}` : `-$${Math.abs(tx.amount)}`}
                   </div>
                 </div>
               ))}
@@ -534,6 +538,7 @@ function CardsModal({ isOpen, onClose }) {
 }
 
 function BankingHubModal({ isOpen, onClose }) {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return createPortal(
@@ -548,8 +553,8 @@ function BankingHubModal({ isOpen, onClose }) {
         >
           <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
           
-          <h2 className={styles.modalTitle}>Mi Banco AIBank</h2>
-          <p className={styles.modalDesc}>Tu centro de relación y beneficios exclusivos.</p>
+          <h2 className={styles.modalTitle}>{t('home.modal.hub.title')}</h2>
+          <p className={styles.modalDesc}>{t('home.modal.hub.desc')}</p>
 
           <div className={styles.hubGrid}>
             <div className={styles.hubItem}>
@@ -557,7 +562,7 @@ function BankingHubModal({ isOpen, onClose }) {
                 <Trophy size={22} weight="fill" />
               </div>
               <div className={styles.hubInfo}>
-                <p className={styles.hubLabel}>Nivel de Cliente</p>
+                <p className={styles.hubLabel}>{t('home.modal.hub.clientLevel')}</p>
                 <p className={styles.hubValue}>Gold Member</p>
               </div>
             </div>
@@ -566,8 +571,8 @@ function BankingHubModal({ isOpen, onClose }) {
                 <MapPin size={22} weight="fill" />
               </div>
               <div className={styles.hubInfo}>
-                <p className={styles.hubLabel}>Sucursales</p>
-                <p className={styles.hubValue}>Cercanas a ti</p>
+                <p className={styles.hubLabel}>{t('home.modal.hub.branches')}</p>
+                <p className={styles.hubValue}>{t('home.modal.hub.nearYou')}</p>
               </div>
             </div>
           </div>
@@ -575,7 +580,7 @@ function BankingHubModal({ isOpen, onClose }) {
           <div className={styles.supportContact}>
              <button className={styles.supportBtn}>
                <ChatCircleDots size={20} />
-               <span>Hablar con Soporte Humano</span>
+               <span>{t('home.modal.hub.humanSupport')}</span>
              </button>
           </div>
         </motion.div>
@@ -587,6 +592,7 @@ function BankingHubModal({ isOpen, onClose }) {
 
 function FeatureAnnouncementModal({ isOpen, onClose }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const handlePlayNow = () => {
@@ -608,16 +614,16 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
           <div style={{ background: 'rgba(213,0,249,0.2)', padding: '16px', borderRadius: '50%', color: '#d500f9', display: 'inline-flex', marginBottom: '16px' }}>
             <Trophy size={40} weight="fill" />
           </div>
-          <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px' }}>Temporada Mundial con IA</h2>
+          <h2 className={styles.modalTitle} style={{ color: '#fff', fontSize: '1.4rem', marginBottom: '12px' }}>{t('home.modal.feature.title')}</h2>
           <p className={styles.modalDesc} style={{ color: '#cbd5e1', lineHeight: '1.5' }}>
-            Nuestra campaña de temporada ya está aquí, ahora <strong>impulsada por Inteligencia Artificial</strong>. <br /><br />
-            Obtén predicciones exclusivas, desafía los pronósticos y gana mAIles canjeables.
+            {t('home.modal.feature.desc')} <br /><br />
+            {t('home.modal.feature.descDetail')}
           </p>
           <button
             onClick={handlePlayNow}
             style={{ background: '#d500f9', color: 'white', padding: '12px 24px', borderRadius: '24px', fontWeight: 'bold', border: 'none', cursor: 'pointer', width: '100%', marginTop: '20px', fontSize: '1rem', boxShadow: '0 4px 15px rgba(213,0,249,0.4)' }}
           >
-            Jugar Ahora
+            {t('home.modal.feature.playNow')}
           </button>
           <button
             onClick={onClose}
@@ -625,7 +631,7 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
             onMouseOver={(e) => e.currentTarget.style.color = '#fff'}
             onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
           >
-            Omitir por ahora
+            {t('common.skipForNow')}
           </button>
         </motion.div>
       </div>
@@ -635,7 +641,8 @@ function FeatureAnnouncementModal({ isOpen, onClose }) {
 }
 
 function CardActivationModal({ isOpen, onClose, onActivate }) {
-  const [step, setStep] = useState('terms'); // terms | success
+  const [step, setStep] = useState('terms');
+  const { t } = useTranslation();
   
   if (!isOpen) return null;
 
@@ -667,30 +674,30 @@ function CardActivationModal({ isOpen, onClose, onActivate }) {
                 <div style={{ background: 'rgba(56, 189, 248, 0.1)', padding: '16px', borderRadius: '50%', color: '#38bdf8', display: 'inline-flex', marginBottom: '16px' }}>
                   <CreditCard size={32} weight="fill" />
                 </div>
-                <h2 className={styles.modalTitle}>Activa tu Tarjeta Digital</h2>
-                <p className={styles.modalDesc}>Disfruta de beneficios exclusivos al activar tu tarjeta Platinum hoy.</p>
+                <h2 className={styles.modalTitle}>{t('home.modal.activation.title')}</h2>
+                <p className={styles.modalDesc}>{t('home.modal.activation.desc')}</p>
                 
                 <div style={{ textAlign: 'left', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
                     <CheckCircle size={18} color="#00e676" style={{ marginTop: '2px' }} />
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>0% de comisión</strong> en todas tus compras online de temporada.</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('home.modal.activation.benefit1')}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
                     <CheckCircle size={18} color="#00e676" style={{ marginTop: '2px' }} />
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>Ganancia masiva</strong> de mAIles por tus predicciones del Mundial.</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('home.modal.activation.benefit2')}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <CheckCircle size={18} color="#00e676" style={{ marginTop: '2px' }} />
-                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}><strong>Protección IA</strong> activa contra cualquier intento de fraude.</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('home.modal.activation.benefit3')}</span>
                   </div>
                 </div>
 
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1.5rem', fontStyle: 'italic' }}>
-                  Al activar, aceptas el contrato de emisión de tarjeta digital AIBank v1.02.
+                  {t('home.modal.activation.termsNotice')}
                 </p>
 
-                <button className={styles.submitBtn} onClick={handleAccept}>Aceptar y Activar</button>
-                <button className={styles.backBtn} onClick={resetAndClose}>Quizás más tarde</button>
+                <button className={styles.submitBtn} onClick={handleAccept}>{t('home.modal.activation.acceptAndActivate')}</button>
+                <button className={styles.backBtn} onClick={resetAndClose}>{t('home.modal.activation.maybeLater')}</button>
               </motion.div>
             )}
 
@@ -699,13 +706,13 @@ function CardActivationModal({ isOpen, onClose, onActivate }) {
                 <div className={styles.successIconWrapper}>
                   <Trophy size={60} weight="fill" color="#ffd700" />
                 </div>
-                <h2 className={styles.modalTitle}>¡Tarjeta Activada!</h2>
-                <p className={styles.modalDesc}>¡Felicidades! Disfruta de tu nueva tarjeta Platinum. <br /> Has ganado <strong>+450 mAIles</strong>.</p>
+                <h2 className={styles.modalTitle}>{t('home.modal.activation.successTitle')}</h2>
+                <p className={styles.modalDesc}>{t('home.modal.activation.successDesc')} <br /> {t('home.modal.activation.successMiles', { miles: 450 })}</p>
                 <div className={styles.rewardBanner}>
                   <Sparkle size={20} weight="fill" />
-                  <span>Nuevos Beneficios Disponibles</span>
+                  <span>{t('home.modal.activation.newBenefits')}</span>
                 </div>
-                <button className={styles.submitBtn} onClick={resetAndClose}>Entendido</button>
+                <button className={styles.submitBtn} onClick={resetAndClose}>{t('common.understood')}</button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -721,6 +728,7 @@ export default function Home() {
   const { user } = useAuth();
   const { startTour } = useTour();
   const { currentMAIis, addBankMAIis } = useMAIis();
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isServicesModalOpen, setIsServicesModalOpen] = useState(false);
   const [isCardsModalOpen, setIsCardsModalOpen] = useState(false);
@@ -769,21 +777,21 @@ export default function Home() {
   const LOYALTY_MISSIONS = [
     {
       id: 'digital_card',
-      title: 'Tarjeta Digital AIBank',
-      description: 'Activa tu tarjeta digital y úsala en tus compras online.',
+      title: t('home.missions.digitalCard'),
+      description: t('home.missions.digitalCardDesc'),
       reward: 450,
       icon: CreditCard,
-      actionLabel: isCardActivated ? 'Gestionar' : 'Activar',
+      actionLabel: isCardActivated ? t('home.missions.manage') : t('home.missions.activate'),
       action: isCardActivated ? () => setIsCardsModalOpen(true) : () => setIsActivationModalOpen(true),
       isExclusive: true,
     },
     {
       id: 'ai_savings',
-      title: 'Cuenta Ahorro AIBank',
-      description: 'Inicia un plan de ahorro Mundial en tu Cuenta Ahorro.',
+      title: t('home.missions.savingsAccount'),
+      description: t('home.missions.savingsAccountDesc'),
       reward: 600,
       icon: Bank,
-      actionLabel: 'Ahorrar',
+      actionLabel: t('home.missions.save'),
       action: () => {
         handleTransactionSuccess(600);
       },
@@ -791,20 +799,20 @@ export default function Home() {
     },
     {
       id: 'ai_qr',
-      title: 'Paga con QR AIBank',
-      description: 'Escanea y paga en comercios con QR AIBank.',
+      title: t('home.missions.qrPay'),
+      description: t('home.missions.qrPayDesc'),
       reward: 200,
       icon: QrCode,
-      actionLabel: 'Escanear',
+      actionLabel: t('home.missions.scan'),
       action: () => handleTransactionSuccess(200),
     },
     {
       id: 'ai_salary',
-      title: 'Nómina AIBank',
-      description: 'Recibe tu sueldo en AIBank y recibe un bono VIP.',
+      title: t('home.missions.payroll'),
+      description: t('home.missions.payrollDesc'),
       reward: 1200,
       icon: HandCoins,
-      actionLabel: 'Vincular',
+      actionLabel: t('home.missions.link'),
       action: () => handleTransactionSuccess(1200),
       isExclusive: true,
     },
@@ -816,8 +824,8 @@ export default function Home() {
 
       {/* Saludo */}
       <header className={styles.header}>
-        <h1 className={styles.greeting}>Mis Finanzas</h1>
-        <p className={styles.subtitle}>AIBank Móvil</p>
+        <h1 className={styles.greeting}>{t('home.greeting')}</h1>
+        <p className={styles.subtitle}>{t('home.subtitle')}</p>
       </header>
 
       {/* Cuentas y Tarjetas - Scroll Horizontal */}
@@ -828,7 +836,7 @@ export default function Home() {
           animate={{ opacity: 1, x: 0 }}
         >
           <div className={styles.cardHeader}>
-            <span className={styles.accountType}>Cuenta de Ahorros</span>
+            <span className={styles.accountType}>{t('home.savingsAccount')}</span>
             <span className={styles.accountNumber}>**** 8901</span>
           </div>
           <div className={styles.cardBalance}>
@@ -846,11 +854,11 @@ export default function Home() {
             transition={{ delay: 0.1 }}
           >
             <div className={styles.cardHeader}>
-              <span className={styles.accountType}>Tarjeta de Crédito</span>
+              <span className={styles.accountType}>{t('home.creditCard')}</span>
               <span className={styles.accountNumber}>**** 4567</span>
             </div>
             <div className={styles.cardBalance}>
-              <span className={styles.label}>Cupo Disponible</span>
+              <span className={styles.label}>{t('home.availableCredit')}</span>
               <div>
                 <span className={styles.currency}>$</span>
                 <span className={styles.amount}>1,850</span>
@@ -868,32 +876,32 @@ export default function Home() {
             <div className={styles.actionIconWrapper} style={{ background: 'rgba(2, 132, 199, 0.1)', color: '#0284c7' }}>
               <PaperPlaneRight size={24} weight="fill" />
             </div>
-            <span>Transferir</span>
+            <span>{t('home.transfer')}</span>
           </button>
           <button className={styles.actionBtn} onClick={() => setIsServicesModalOpen(true)}>
             <div className={styles.actionIconWrapper} style={{ background: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}>
               <Receipt size={24} weight="fill" />
             </div>
-            <span>Servicios</span>
+            <span>{t('home.services')}</span>
           </button>
           {isCardActivated && (
             <button className={styles.actionBtn} onClick={() => setIsCardsModalOpen(true)}>
               <div className={styles.actionIconWrapper} style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
                 <CreditCard size={24} weight="fill" />
               </div>
-              <span>Tarjetas</span>
+              <span>{t('home.cards')}</span>
             </button>
           )}
           <button className={styles.actionBtn} onClick={() => setIsHubModalOpen(true)}>
             <div className={styles.actionIconWrapper} style={{ background: 'rgba(124, 58, 237, 0.1)', color: '#7c3aed' }}>
               <Bank size={24} weight="fill" />
             </div>
-            <span>Mi Banco</span>
+            <span>{t('home.myBank')}</span>
           </button>
         </div>
       </section>
 
-      <h3 className={styles.sectionTitle}>Beneficios y Misiones</h3>
+      <h3 className={styles.sectionTitle}>{t('home.benefitsAndMissions')}</h3>
 
       {/* Banner Temporada Mundial */}
       <motion.section
@@ -906,9 +914,9 @@ export default function Home() {
       >
         <div className={styles.bannerContent}>
           <div className={styles.bannerTitles}>
-            <span className={styles.seasonTag}>MÓDULO EXCLUSIVO</span>
-            <h3 className={styles.bannerTitle}>Temporada Mundial 2026</h3>
-            <p className={styles.bannerDesc}>Tienes <strong>{currentMAIis} mAIles</strong> disponibles.</p>
+            <span className={styles.seasonTag}>{t('home.exclusiveModule')}</span>
+            <h3 className={styles.bannerTitle}>{t('home.worldCupSeason')}</h3>
+            <p className={styles.bannerDesc}>{t('home.availableMiles', { miles: currentMAIis })} </p>
           </div>
           <div className={styles.bannerIcon}>
             <Trophy size={32} weight="fill" />
@@ -924,7 +932,7 @@ export default function Home() {
             <div className={styles.missionInfo}>
               <div className={styles.missionHeaderRow}>
                 <mission.icon size={20} weight="fill" className={styles.missionTypeIcon} />
-                {mission.isExclusive && <span className={styles.exclusiveTag}>EXCLUSIVO</span>}
+                {mission.isExclusive && <span className={styles.exclusiveTag}>{t('home.missions.exclusive')}</span>}
               </div>
               <h4>{mission.title}</h4>
               <p>{mission.description}</p>
@@ -948,7 +956,7 @@ export default function Home() {
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
             <Trophy size={24} weight="fill" color="var(--gold-primary)" />
-            <span className={styles.toastText}>¡Misión Completada! <strong>+{successMessage} mAIles</strong></span>
+            <span className={styles.toastText}>{t('home.missionComplete', { miles: successMessage })}</span>
           </motion.div>,
           document.body
         )}
